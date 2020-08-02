@@ -44,15 +44,12 @@ contract MainAccessControl is Owned {
 
   bool public getMaintenanceFlagFunction1 = true;
   bool public getMaintenanceFlagFunction2 = true;
-  bool public setMaintenanceFlagFunction1 = true;
   bool public getDataValue1 = true;
   bool public getDataValue2 = true;
   bool public getDataArray1 = true;
   bool public getDataArray2 = true;
   bool public insert1 = true;
   bool public insert2 = true;
-  bool public insert3 = true;
-  bool public insert4 = true;
 
   function flipGetMaintenanceFlagFunction1() public isOwner returns(bool success) {
     getMaintenanceFlagFunction1 = !getMaintenanceFlagFunction1;
@@ -61,11 +58,6 @@ contract MainAccessControl is Owned {
 
   function flipGetMaintenanceFlagFunction2() public isOwner returns(bool success) {
     getMaintenanceFlagFunction2 = !getMaintenanceFlagFunction2;
-    return true;
-  }
-
-  function flipSetMaintenanceFlagFunction1() public isOwner returns(bool success) {
-    setMaintenanceFlagFunction1 = !setMaintenanceFlagFunction1;
     return true;
   }
 
@@ -99,16 +91,6 @@ contract MainAccessControl is Owned {
     return true;
   }
 
-  function flipInsert3() public isOwner returns(bool success) {
-    insert3 = !insert3;
-    return true;
-  }
-
-  function flipInsert4() public isOwner returns(bool success) {
-    insert4 = !insert4;
-    return true;
-  }
-
 }
 
 contract Database is Maintained, MainAccessControl {
@@ -128,7 +110,6 @@ contract Database is Maintained, MainAccessControl {
   }
 
   function setMaintenanceFlag(address account, uint flag) isOwner public returns(bool success) {
-    require(setMaintenanceFlagFunction1 || msg.sender==owner);
     maintenance[account] = flag;
     return true;
   }
@@ -170,13 +151,11 @@ contract Database is Maintained, MainAccessControl {
   }
 
   function insert(address account, uint id, !@#$%[] memory data) isOwner public returns(bool success) {
-    require(insert3 || msg.sender==owner);
     dataArray[account][id] = data;
     return true;
   }
 
   function insert(address account, uint id, uint location, !@#$% data) isOwner public returns(bool success) {
-    require(insert4 || msg.sender==owner);
     dataArray[account][id][location] = data;
     return true;
   }
