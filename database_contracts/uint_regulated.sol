@@ -10,9 +10,7 @@
 
 pragma solidity >= 0.5 .0 < 0.8 .0;
 
-//==============================
-//
-//==============================
+
 contract Owned {
     address public owner;
 
@@ -116,14 +114,17 @@ contract Database is Maintained, MainAccessControl{
     //--------------Maintenance functions------------------------------------
     
     function getMaintenanceFlag() public view returns(uint flag) {
+        require(getMaintenanceFlagFunction1);
         return maintenance[msg.sender];
     }
     
-    function getMaintenanceFlag(address account) public view returns(uint flag) {
+    function getMaintenanceFlag(address account) public view returns(uint flag) { 
+        require(getMaintenanceFlagFunction2);
         return maintenance[account];
     }
     
     function setMaintenanceFlag(address account, uint flag) isOwner public returns(bool success) {
+        require(setMaintenanceFlagFunction1);
         maintenance[account] = flag;
         return true;
     } 
@@ -133,39 +134,47 @@ contract Database is Maintained, MainAccessControl{
     
     
     function getDataValue(address account, uint id, uint location) maintain(account) public view returns(uint data) {
+        require(getDataValue1);
         return dataArray[account][id][location];
     }
     
     function getDataArray(address account, uint id) maintain(account) public view returns(uint[] memory data) {
+        require(getDataValue2);
         return dataArray[account][id];
     }
     
     function getDataValue(uint id, uint location) maintain(msg.sender) public view returns(uint data) {
+        require(getDataArray1);
         return dataArray[msg.sender][id][location];
     }
     
     function getDataArray(uint id) maintain(msg.sender) maintain(msg.sender) public view returns(uint[] memory data) {
+        require(getDataArray2);
         return dataArray[msg.sender][id];
     }
     
     
     function insert(uint id, uint[] memory data) maintain(msg.sender) public returns(bool success) {
+        require(insert1);
         dataArray[msg.sender][id] = data;
         return true;
     }
     
     function insert(uint id, uint location, uint data) maintain(msg.sender) public returns(bool success) {
+        require(insert2);
         dataArray[msg.sender][id][location] = data;
         return true;
     }
     
     
     function insert(address account, uint id, uint[] memory data) isOwner public returns(bool success) {
+        require(insert3);
         dataArray[account][id] = data;
         return true;
     }
     
     function insert(address account, uint id, uint location, uint data)  isOwner public returns(bool success) {
+        require(insert4);
         dataArray[account][id][location] = data;
         return true;
     }
