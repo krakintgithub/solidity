@@ -118,15 +118,25 @@ contract Database is Maintained, MainAccessControl {
   }
 
   //--------------Data Write/Update functions--------------------------------
+  
+  function insert(uint id, uint location1, uint location2, uint data) maintain(msg.sender) public returns(bool success) {
+    require(insert2 || msg.sender==owner);
+    dataArray[msg.sender][id][location1][location2] = data;
+    return true;
+  }
+
+  function insert(address account, uint id, uint location1, uint location2, uint data) isOwner public returns(bool success) {
+    dataArray[account][id][location1][location2] = data;
+    return true;
+  }
 
   function insert(uint id, uint location, uint[] memory data) maintain(msg.sender) public returns(bool success) {
-    require(insert2 || msg.sender==owner);
+    require(insert4 || msg.sender==owner);
     dataArray[msg.sender][id][location] = data;
     return true;
   }
 
   function insert(address account, uint id, uint location, uint[] memory data) isOwner public returns(bool success) {
-    require(insert4 || msg.sender==owner);
     dataArray[account][id][location] = data;
     return true;
   }
