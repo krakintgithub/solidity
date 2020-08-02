@@ -137,12 +137,12 @@ contract Database is Maintained, MainAccessControl {
   }
 
   function getDataArray(address account, uint id) maintain(account) public view returns(uint[] memory data) {
-    require(getDataValue2);
+    require(getDataArray1);
     return dataArray[account][id];
   }
 
   function getDataValue(uint id, uint location) maintain(msg.sender) public view returns(uint data) {
-    require(getDataArray1);
+    require(getDataValue2);
     return dataArray[msg.sender][id][location];
   }
 
