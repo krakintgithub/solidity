@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 
-//The Krakin't token decentralized database for uint data-type.
-
-//The account looses all rights when the maintenance flag is set to 1.
-//Any other maintenance value is not internal to the contract.
-//This database is controllable, and we can restrict any data that violates the rules and regulations.
-//Furthermore, we can also restrict the contract to be owner-only, using the MainAccessControl, if necessary.
 
 pragma solidity >= 0.5 .0 < 0.8 .0;
 
@@ -47,17 +41,17 @@ mapping(address => uint) maintenance;
 
 contract MainAccessControl is Owned{
     
-    bool public getMaintenanceFlagFunction1 = true; //function getMaintenanceFlag() public view returns(uint flag)
-    bool public getMaintenanceFlagFunction2 = true; //function getMaintenanceFlag(address account) public view returns(uint flag)
-    bool public setMaintenanceFlagFunction1 = true; //function setMaintenanceFlag(address account, uint flag) isOwner public returns(bool success)
-    bool public getDataValue1 = true; //function getDataValue(address account, uint id, uint location) maintain(account) public view returns(uint data)
-    bool public getDataValue2 = true; //function getDataValue(uint id, uint location) maintain(msg.sender) public view returns(uint data)
-    bool public getDataArray1 = true; //function getDataArray(address account, uint id) maintain(account) public view returns(uint[] memory data)
-    bool public getDataArray2 = true; //function getDataArray(uint id) maintain(msg.sender) maintain(msg.sender) public view returns(uint[] memory data)
-    bool public insert1 = true; //function insert(uint id, uint[] memory data) maintain(msg.sender) public returns(bool success)
-    bool public insert2 = true; //function insert(uint id, uint location, uint data) maintain(msg.sender) public returns(bool success)
-    bool public insert3 = true; //function insert(address account, uint id, uint[] memory data) isOwner public returns(bool success)
-    bool public insert4 = true; //function insert(address account, uint id, uint location, uint data) isOwner public returns(bool success)
+    bool public getMaintenanceFlagFunction1 = true;
+    bool public getMaintenanceFlagFunction2 = true;
+    bool public setMaintenanceFlagFunction1 = true;
+    bool public getDataValue1 = true;
+    bool public getDataValue2 = true;
+    bool public getDataArray1 = true;
+    bool public getDataArray2 = true;
+    bool public insert1 = true;
+    bool public insert2 = true;
+    bool public insert3 = true;
+    bool public insert4 = true;
     
     
     function flipGetMaintenanceFlagFunction1() public isOwner returns (bool success){
@@ -111,7 +105,7 @@ contract Database is Maintained, MainAccessControl{
 
     mapping(address => mapping(uint => uint[])) dataArray;
 
-    //--------------Maintenance functions------------------------------------
+    //--------------Maintenance functions--------------------------------------
     
     function getMaintenanceFlag() public view returns(uint flag) {
         require(getMaintenanceFlagFunction1);
@@ -130,8 +124,7 @@ contract Database is Maintained, MainAccessControl{
     } 
 
     
-    //------------------Data Read/Write functions----------------------------
-    
+    //--------------Data Read functions----------------------------------------
     
     function getDataValue(address account, uint id, uint location) maintain(account) public view returns(uint data) {
         require(getDataValue1);
@@ -153,6 +146,7 @@ contract Database is Maintained, MainAccessControl{
         return dataArray[msg.sender][id];
     }
     
+    //--------------Data Write/Update functions--------------------------------
     
     function insert(uint id, uint[] memory data) maintain(msg.sender) public returns(bool success) {
         require(insert1);
