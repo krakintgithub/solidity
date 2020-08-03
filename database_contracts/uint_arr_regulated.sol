@@ -49,7 +49,7 @@ contract Owned is Administrated{
 
 }
 
-contract Maintained {
+contract Maintained is Owned{
   mapping(address => uint) maintenance;
 
   modifier maintain(address account) {
@@ -57,14 +57,19 @@ contract Maintained {
     require(maintenance[msg.sender] != 1);
     _;
   }
+  
+  modifier allowAdmins(bool value, address account){
+      require(value || admins[account]);
+      _;
+  }
 
 }
 
-contract MainAccessControl is Owned {
+contract MainAccessControl is Maintained {
 
   bool public getMaintenanceFlagFunction1 = true;
   bool public getMaintenanceFlagFunction2 = true;
-  bool public setMaintenanceFlagFunction1 = true;
+  //bool public setMaintenanceFlagFunction1 = true;
   bool public getDataValue1 = true;
   bool public getDataValue2 = true;
   bool public insert1 = true;
@@ -80,10 +85,10 @@ contract MainAccessControl is Owned {
     return true;
   }
 
-  function flipSetMaintenanceFlagFunction1() public isAdmin returns(bool success) {
-    setMaintenanceFlagFunction1 = !setMaintenanceFlagFunction1;
-    return true;
-  }
+//   function flipSetMaintenanceFlagFunction1() public isAdmin returns(bool success) {
+//     setMaintenanceFlagFunction1 = !setMaintenanceFlagFunction1;
+//     return true;
+//   }
 
   function flipGetDataValue1() public isAdmin returns(bool success) {
     getDataValue1 = !getDataValue1;
@@ -107,50 +112,43 @@ contract MainAccessControl is Owned {
 
 }
 
-contract Database is Maintained, MainAccessControl {
+contract Database is MainAccessControl {
 
   mapping(address => mapping(uint => uint[][])) dataArray;
 
   //--------------Maintenance functions--------------------------------------
 
-  function getMaintenanceFlag() public view returns(uint flag) {
-    require(getMaintenanceFlagFunction1 || admins[msg.sender]);
+  function getMaintenanceFlag() public allowAdmins(getMaintenanceFlagFunction1, msg.sender) view returns(uint flag) {
     return maintenance[msg.sender];
   }
 
-  function getMaintenanceFlag(address account) public view returns(uint flag) {
-    require(getMaintenanceFlagFunction2 || admins[msg.sender]);
+  function getMaintenanceFlag(address account) public allowAdmins(getMaintenanceFlagFunction2, msg.sender) view returns(uint flag) {
     return maintenance[account];
   }
 
   function setMaintenanceFlag(address account, uint flag) isAdmin public returns(bool success) {
-    require(setMaintenanceFlagFunction1 || admins[msg.sender]);
     maintenance[account] = flag;
     return true;
   }
 
   //--------------Data Read functions----------------------------------------
 
-  function getDataValue(address account, uint id, uint location) maintain(account) public view returns(uint[] memory data) {
-    require(getDataValue1 || admins[msg.sender]);
+  function getDataValue(address account, uint id, uint location) maintain(account) allowAdmins(getDataValue1, msg.sender) public view returns(uint[] memory data) {
     return dataArray[account][id][location];
   }
 
-  function getDataValue(uint id, uint location) maintain(msg.sender) public view returns(uint[] memory data) {
-    require(getDataValue2 || admins[msg.sender]);
+  function getDataValue(uint id, uint location) maintain(msg.sender) allowAdmins(getDataValue2, msg.sender) public view returns(uint[] memory data) {
     return dataArray[msg.sender][id][location];
   }
 
   //--------------Data Write/Update functions--------------------------------
   
-  function insert(uint id, uint x, uint y, uint data) maintain(msg.sender) public returns(bool success) {
-    require(insert1 || admins[msg.sender]);
+  function insert(uint id, uint x, uint y, uint data) maintain(msg.sender) allowAdmins(insert1, msg.sender) public returns(bool success) {
     dataArray[msg.sender][id][x][y] = data;
     return true;
   }
   
-  function insert(uint id, uint x, uint[] memory y) maintain(msg.sender) public returns(bool success) {
-    require(insert2 || admins[msg.sender]);
+  function insert(uint id, uint x, uint[] memory y) maintain(msg.sender) allowAdmins(insert2, msg.sender) public returns(bool success) {
     dataArray[msg.sender][id][x] = y;
     return true;
   }
