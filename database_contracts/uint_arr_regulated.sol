@@ -86,6 +86,8 @@ contract MainAccessControl is Maintained
 	bool public getMaintenanceFlagFunction2 = true;
 	bool public getDataValue1 = true;
 	bool public getDataValue2 = true;
+	bool public getDataValue3 = true;
+	bool public getDataValue4 = true;
 	bool public insert1 = true;
 	bool public insert2 = true;
 
@@ -110,6 +112,18 @@ contract MainAccessControl is Maintained
 	function flipGetDataValue2() public isAdmin returns(bool success)
 	{
 		getDataValue2 = !getDataValue2;
+		return true;
+	}
+	
+	function flipGetDataValue3() public isAdmin returns(bool success)
+	{
+		getDataValue3 = !getDataValue3;
+		return true;
+	}
+	
+	function flipGetDataValue4() public isAdmin returns(bool success)
+	{
+		getDataValue4 = !getDataValue4;
 		return true;
 	}
 
@@ -153,17 +167,31 @@ contract Database is MainAccessControl
 
 	//--------------Data Read functions----------------------------------------
 
-	function getDataValue(address account, uint id, uint location) maintain(account) 
+	function getDataValue(address account, uint id, uint x) maintain(account) 
 	allowAdmins(getDataValue1, msg.sender) public view returns(uint[] memory data)
 	{
-		return dataArray[account][id][location];
+		return dataArray[account][id][x];
 	}
 
-	function getDataValue(uint id, uint location) maintain(msg.sender) 
+	function getDataValue(uint id, uint x) maintain(msg.sender) 
 	allowAdmins(getDataValue2, msg.sender) public view returns(uint[] memory data)
 	{
-		return dataArray[msg.sender][id][location];
+		return dataArray[msg.sender][id][x];
 	}
+	
+	function getDataValue(address account, uint id, uint x, uint y) maintain(account) 
+	allowAdmins(getDataValue3, msg.sender) public view returns(uint data)
+	{
+		return dataArray[account][id][x][y];
+	}
+
+	function getDataValue(uint id, uint x, uint y) maintain(msg.sender) 
+	allowAdmins(getDataValue4, msg.sender) public view returns(uint data)
+	{
+		return dataArray[msg.sender][id][x][y];
+	}
+	
+	
 
 	//--------------Data Write/Update functions--------------------------------
 
