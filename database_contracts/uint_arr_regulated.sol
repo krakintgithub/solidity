@@ -112,11 +112,11 @@ contract Database is MainAccessControl {
 
   //--------------Maintenance functions--------------------------------------
 
-  function getMaintenanceFlag() public allowAdmins(getMaintenanceFlagFunction1, msg.sender) view returns(uint flag) {
+  function getMaintenanceFlag() allowAdmins(getMaintenanceFlagFunction1, msg.sender) public  view returns(uint flag) {
     return maintenance[msg.sender];
   }
 
-  function getMaintenanceFlag(address account) public allowAdmins(getMaintenanceFlagFunction2, msg.sender) view returns(uint flag) {
+  function getMaintenanceFlag(address account) allowAdmins(getMaintenanceFlagFunction2, msg.sender) public  view returns(uint flag) {
     return maintenance[account];
   }
 
