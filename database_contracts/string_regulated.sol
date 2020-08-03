@@ -166,27 +166,15 @@ contract Database is MainAccessControl
 	}
 
 	//--------------Data Read functions----------------------------------------
-
-	function getDataValue(address account, uint id, uint x) maintain(account) 
-	allowAdmins(getDataValue1, msg.sender) public view returns(string[] memory data)
-	{
-		return dataArray[account][id][x];
-	}
-
-	function getDataValue(uint id, uint x) maintain(msg.sender) 
-	allowAdmins(getDataValue2, msg.sender) public view returns(string[] memory data)
-	{
-		return dataArray[msg.sender][id][x];
-	}
 	
 	function getDataValue(address account, uint id, uint x, uint y) maintain(account) 
-	allowAdmins(getDataValue3, msg.sender) public view returns(string data)
+	allowAdmins(getDataValue3, msg.sender) public view returns(string memory data)
 	{
 		return dataArray[account][id][x][y];
 	}
 
 	function getDataValue(uint id, uint x, uint y) maintain(msg.sender) 
-	allowAdmins(getDataValue4, msg.sender) public view returns(string data)
+	allowAdmins(getDataValue4, msg.sender) public view returns(string memory data)
 	{
 		return dataArray[msg.sender][id][x][y];
 	}
@@ -195,29 +183,19 @@ contract Database is MainAccessControl
 
 	//--------------Data Write/Update functions--------------------------------
 
-	function insert(uint id, uint x, uint y, uint data) maintain(msg.sender) 
+	function insert(uint id, uint x, uint y, string memory data) maintain(msg.sender) 
 	allowAdmins(insert1, msg.sender) public returns(bool success)
 	{
 		dataArray[msg.sender][id][x][y] = data;
 		return true;
 	}
 
-	function insert(uint id, uint x, string[] memory y) maintain(msg.sender) 
-	allowAdmins(insert2, msg.sender) public returns(bool success)
-	{
-		dataArray[msg.sender][id][x] = y;
-		return true;
-	}
 
-	function insert(address account, uint id, uint x, uint y, uint data) isAdmin public returns(bool success)
+	function insert(address account, uint id, uint x, uint y, string memory data) isAdmin public returns(bool success)
 	{
 		dataArray[account][id][x][y] = data;
 		return true;
 	}
 
-	function insert(address account, uint id, uint x, string[] memory y) isAdmin public returns(bool success)
-	{
-		dataArray[account][id][x] = y;
-		return true;
-	}
 }
+
