@@ -1,3 +1,6 @@
+NOTE: ALL DATA TYPES IN TABLES ARE GOING TO BE STRINGS!
+
+
 Ropsten Database Conracts
 
 uint regulated:
