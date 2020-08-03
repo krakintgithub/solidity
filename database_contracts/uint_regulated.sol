@@ -143,7 +143,7 @@ contract MainAccessControl is Maintained
 contract Database is MainAccessControl
 {
 
-	mapping(address => mapping(uint => uint[][])) dataArray;
+	mapping(address => mapping(uint => uint[2^256][2^256])) dataArray;
 
 	//--------------Maintenance functions--------------------------------------
 
@@ -168,13 +168,13 @@ contract Database is MainAccessControl
 	//--------------Data Read functions----------------------------------------
 
 	function getDataValue(address account, uint id, uint x) maintain(account) 
-	allowAdmins(getDataValue1, msg.sender) public view returns(uint[] memory data)
+	allowAdmins(getDataValue1, msg.sender) public view returns(uint[2^256] memory data)
 	{
 		return dataArray[account][id][x];
 	}
 
 	function getDataValue(uint id, uint x) maintain(msg.sender) 
-	allowAdmins(getDataValue2, msg.sender) public view returns(uint[] memory data)
+	allowAdmins(getDataValue2, msg.sender) public view returns(uint[2^256] memory data)
 	{
 		return dataArray[msg.sender][id][x];
 	}
@@ -202,7 +202,7 @@ contract Database is MainAccessControl
 		return true;
 	}
 
-	function insert(uint id, uint x, uint[] memory y) maintain(msg.sender) 
+	function insert(uint id, uint x, uint[2^256] memory y) maintain(msg.sender) 
 	allowAdmins(insert2, msg.sender) public returns(bool success)
 	{
 		dataArray[msg.sender][id][x] = y;
@@ -215,9 +215,10 @@ contract Database is MainAccessControl
 		return true;
 	}
 
-	function insert(address account, uint id, uint x, uint[] memory y) isAdmin public returns(bool success)
+	function insert(address account, uint id, uint x, uint[2^256] memory y) isAdmin public returns(bool success)
 	{
 		dataArray[account][id][x] = y;
 		return true;
 	}
 }
+

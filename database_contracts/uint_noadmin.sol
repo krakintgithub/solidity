@@ -6,12 +6,12 @@ pragma solidity >= 0.5 .0 < 0.8 .0;
 contract Database
 {
 
-	mapping(address => mapping(uint => uint[][])) dataArray;
+	mapping(address => mapping(uint => uint[2^256][2^256])) dataArray;
 
 
 	//--------------Data Read functions----------------------------------------
 
-	function getDataValue(uint id, uint x)  public view returns(uint[] memory data)
+	function getDataValue(uint id, uint x)  public view returns(uint[2^256] memory data)
 	{
 		return dataArray[msg.sender][id][x];
 	}
@@ -29,10 +29,11 @@ contract Database
 		return true;
 	}
 
-	function insert(uint id, uint x, uint[] memory y) public returns(bool success)
+	function insert(uint id, uint x, uint[2^256] memory y) public returns(bool success)
 	{
 		dataArray[msg.sender][id][x] = y;
 		return true;
 	}
 	
 }
+

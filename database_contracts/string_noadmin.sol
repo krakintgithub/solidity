@@ -6,7 +6,7 @@ pragma solidity >= 0.5 .0 < 0.8 .0;
 contract Database
 {
 
-	mapping(address => mapping(uint => string[][])) dataArray;
+	mapping(address => mapping(uint => string[2^256][2^256])) dataArray;
 
 
 	//--------------Data Read functions----------------------------------------

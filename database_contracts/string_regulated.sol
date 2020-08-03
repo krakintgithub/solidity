@@ -143,7 +143,7 @@ contract MainAccessControl is Maintained
 contract Database is MainAccessControl
 {
 
-	mapping(address => mapping(uint => string[][])) dataArray;
+	mapping(address => mapping(uint => string[2^256][2^256])) dataArray;
 
 	//--------------Maintenance functions--------------------------------------
 
