@@ -133,12 +133,14 @@ contract Database is MainAccessControl
 
 	//--------------Maintenance functions--------------------------------------
 
-	function getMaintenanceFlag() allowAdmins(getMaintenanceFlagFunction1, msg.sender) public view returns(uint flag)
+	function getMaintenanceFlag() 
+	allowAdmins(getMaintenanceFlagFunction1, msg.sender) public view returns(uint flag)
 	{
 		return maintenance[msg.sender];
 	}
 
-	function getMaintenanceFlag(address account) allowAdmins(getMaintenanceFlagFunction2, msg.sender) public view returns(uint flag)
+	function getMaintenanceFlag(address account) 
+	allowAdmins(getMaintenanceFlagFunction2, msg.sender) public view returns(uint flag)
 	{
 		return maintenance[account];
 	}
@@ -151,25 +153,29 @@ contract Database is MainAccessControl
 
 	//--------------Data Read functions----------------------------------------
 
-	function getDataValue(address account, uint id, uint location) maintain(account) allowAdmins(getDataValue1, msg.sender) public view returns(uint[] memory data)
+	function getDataValue(address account, uint id, uint location) maintain(account) 
+	allowAdmins(getDataValue1, msg.sender) public view returns(uint[] memory data)
 	{
 		return dataArray[account][id][location];
 	}
 
-	function getDataValue(uint id, uint location) maintain(msg.sender) allowAdmins(getDataValue2, msg.sender) public view returns(uint[] memory data)
+	function getDataValue(uint id, uint location) maintain(msg.sender) 
+	allowAdmins(getDataValue2, msg.sender) public view returns(uint[] memory data)
 	{
 		return dataArray[msg.sender][id][location];
 	}
 
 	//--------------Data Write/Update functions--------------------------------
 
-	function insert(uint id, uint x, uint y, uint data) maintain(msg.sender) allowAdmins(insert1, msg.sender) public returns(bool success)
+	function insert(uint id, uint x, uint y, uint data) maintain(msg.sender) 
+	allowAdmins(insert1, msg.sender) public returns(bool success)
 	{
 		dataArray[msg.sender][id][x][y] = data;
 		return true;
 	}
 
-	function insert(uint id, uint x, uint[] memory y) maintain(msg.sender) allowAdmins(insert2, msg.sender) public returns(bool success)
+	function insert(uint id, uint x, uint[] memory y) maintain(msg.sender) 
+	allowAdmins(insert2, msg.sender) public returns(bool success)
 	{
 		dataArray[msg.sender][id][x] = y;
 		return true;
