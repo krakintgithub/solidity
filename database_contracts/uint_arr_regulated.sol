@@ -67,8 +67,8 @@ contract MainAccessControl is Owned {
   bool public setMaintenanceFlagFunction1 = true;
   bool public getDataValue1 = true;
   bool public getDataValue2 = true;
+  bool public insert1 = true;
   bool public insert2 = true;
-  bool public insert4 = true;
 
   function flipGetMaintenanceFlagFunction1() public isAdmin returns(bool success) {
     getMaintenanceFlagFunction1 = !getMaintenanceFlagFunction1;
@@ -95,13 +95,13 @@ contract MainAccessControl is Owned {
     return true;
   }
 
-  function flipInsert2() public isAdmin returns(bool success) {
-    insert2 = !insert2;
+  function flipInsert1() public isAdmin returns(bool success) {
+    insert1 = !insert1;
     return true;
   }
 
-  function flipInsert4() public isAdmin returns(bool success) {
-    insert4 = !insert4;
+  function flipInsert2() public isAdmin returns(bool success) {
+    insert2 = !insert2;
     return true;
   }
 
@@ -144,7 +144,7 @@ contract Database is Maintained, MainAccessControl {
   //--------------Data Write/Update functions--------------------------------
   
   function insert(uint id, uint location1, uint location2, uint data) maintain(msg.sender) public returns(bool success) {
-    require(insert2 || admins[msg.sender]);
+    require(insert1 || admins[msg.sender]);
     dataArray[msg.sender][id][location1][location2] = data;
     return true;
   }
@@ -155,7 +155,7 @@ contract Database is Maintained, MainAccessControl {
   }
 
   function insert(uint id, uint location, uint[] memory data) maintain(msg.sender) public returns(bool success) {
-    require(insert4 || admins[msg.sender]);
+    require(insert2 || admins[msg.sender]);
     dataArray[msg.sender][id][location] = data;
     return true;
   }
