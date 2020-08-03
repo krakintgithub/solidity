@@ -69,7 +69,6 @@ contract MainAccessControl is Maintained {
 
   bool public getMaintenanceFlagFunction1 = true;
   bool public getMaintenanceFlagFunction2 = true;
-  //bool public setMaintenanceFlagFunction1 = true;
   bool public getDataValue1 = true;
   bool public getDataValue2 = true;
   bool public insert1 = true;
@@ -84,11 +83,6 @@ contract MainAccessControl is Maintained {
     getMaintenanceFlagFunction2 = !getMaintenanceFlagFunction2;
     return true;
   }
-
-//   function flipSetMaintenanceFlagFunction1() public isAdmin returns(bool success) {
-//     setMaintenanceFlagFunction1 = !setMaintenanceFlagFunction1;
-//     return true;
-//   }
 
   function flipGetDataValue1() public isAdmin returns(bool success) {
     getDataValue1 = !getDataValue1;
