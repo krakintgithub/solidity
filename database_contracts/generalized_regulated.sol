@@ -1,163 +1,225 @@
-!!! THIS NOT A CONTRACT, ONLY A PATTERN, REPLACE !@#$% WITH A DATA-TYPE OF CHOICE (it will be different for the string, needs debugging)
-
-
+//THIS IS NOT A CONCTACT!  Only a pattern to use if/when necessary, for example, if we want database of string type, replace !@#$% with "string[]" then replace !@#$ with "string"
 
 // SPDX-License-Identifier: MIT
 
 pragma solidity >= 0.5 .0 < 0.8 .0;
 
-contract Owned {
-  address public owner;
+contract Administrated
+{
+	mapping(address => bool) admins;
 
-  event OwnershipTransferred(address indexed _from, address indexed _to);
+	constructor()
+	{
+		admins[msg.sender] = true;
+		admins[address(0)] = false;
+	}
 
-  constructor() {
-    owner = msg.sender;
-  }
+	modifier isAdmin
+	{
+		require(admins[msg.sender]);
+		_;
+	}
 
-  modifier isOwner {
-    require(msg.sender == owner);
-    _;
-  }
-
-  function transferOwnership(address newOwner) public isOwner returns(bool success) {
-    require(newOwner != address(0));
-    emit OwnershipTransferred(owner, newOwner);
-    owner = newOwner;
-    return true;
-  }
-
+	function manageAdmins(address adminAddress) public isAdmin returns(bool success)
+	{
+		require(adminAddress != address(0));
+		if (!admins[adminAddress])
+		{
+			admins[adminAddress] = true;
+		}
+		else
+		{
+			admins[adminAddress] = false;
+		}
+		return true;
+	}
 }
 
-contract Maintained {
-  mapping(address => uint) maintenance;
+contract Owned is Administrated
+{
+	address public owner;
 
-  modifier maintain(address account) {
-    require(maintenance[account] != 1);
-    require(maintenance[msg.sender] != 1);
-    _;
-  }
+	event OwnershipTransferred(address indexed _from, address indexed _to);
 
+	constructor()
+	{
+		owner = msg.sender;
+	}
+
+	modifier isOwner
+	{
+		require(msg.sender == owner);
+		_;
+	}
+
+	function transferOwnership(address newOwner) public isOwner returns(bool success)
+	{
+		require(newOwner != address(0));
+		manageAdmins(owner);
+		manageAdmins(newOwner);
+		emit OwnershipTransferred(owner, newOwner);
+		owner = newOwner;
+		return true;
+	}
 }
 
-contract MainAccessControl is Owned {
+contract Maintained is Owned
+{
+	mapping(address => uint) maintenance;
 
-  bool public getMaintenanceFlagFunction1 = true;
-  bool public getMaintenanceFlagFunction2 = true;
-  bool public getDataValue1 = true;
-  bool public getDataValue2 = true;
-  bool public getDataArray1 = true;
-  bool public getDataArray2 = true;
-  bool public insert1 = true;
-  bool public insert2 = true;
+	modifier maintain(address account)
+	{
+		require(maintenance[account] != 1);
+		require(maintenance[msg.sender] != 1);
+		_;
+	}
 
-  function flipGetMaintenanceFlagFunction1() public isOwner returns(bool success) {
-    getMaintenanceFlagFunction1 = !getMaintenanceFlagFunction1;
-    return true;
-  }
-
-  function flipGetMaintenanceFlagFunction2() public isOwner returns(bool success) {
-    getMaintenanceFlagFunction2 = !getMaintenanceFlagFunction2;
-    return true;
-  }
-
-  function flipGetDataValue1() public isOwner returns(bool success) {
-    getDataValue1 = !getDataValue1;
-    return true;
-  }
-
-  function flipGetDataValue2() public isOwner returns(bool success) {
-    getDataValue2 = !getDataValue2;
-    return true;
-  }
-
-  function flipGetDataArray1() public isOwner returns(bool success) {
-    getDataArray1 = !getDataArray1;
-    return true;
-  }
-
-  function flipGetDataArray2() public isOwner returns(bool success) {
-    getDataArray2 = !getDataArray2;
-    return true;
-  }
-
-  function flipInsert1() public isOwner returns(bool success) {
-    insert1 = !insert1;
-    return true;
-  }
-
-  function flipInsert2() public isOwner returns(bool success) {
-    insert2 = !insert2;
-    return true;
-  }
-
+	modifier allowAdmins(bool value, address account)
+	{
+		require(value || admins[account]);
+		_;
+	}
 }
 
-contract Database is Maintained, MainAccessControl {
+contract MainAccessControl is Maintained
+{
 
-  mapping(address => mapping(uint => !@#$%[])) dataArray;
+	bool public getMaintenanceFlagFunction1 = true;
+	bool public getMaintenanceFlagFunction2 = true;
+	bool public getDataValue1 = true;
+	bool public getDataValue2 = true;
+	bool public getDataValue3 = true;
+	bool public getDataValue4 = true;
+	bool public insert1 = true;
+	bool public insert2 = true;
 
-  //--------------Maintenance functions--------------------------------------
+	function flipGetMaintenanceFlagFunction1() public isAdmin returns(bool success)
+	{
+		getMaintenanceFlagFunction1 = !getMaintenanceFlagFunction1;
+		return true;
+	}
 
-  function getMaintenanceFlag() public view returns(uint flag) {
-    require(getMaintenanceFlagFunction1 || msg.sender==owner);
-    return maintenance[msg.sender];
-  }
+	function flipGetMaintenanceFlagFunction2() public isAdmin returns(bool success)
+	{
+		getMaintenanceFlagFunction2 = !getMaintenanceFlagFunction2;
+		return true;
+	}
 
-  function getMaintenanceFlag(address account) public view returns(uint flag) {
-    require(getMaintenanceFlagFunction2 || msg.sender==owner);
-    return maintenance[account];
-  }
+	function flipGetDataValue1() public isAdmin returns(bool success)
+	{
+		getDataValue1 = !getDataValue1;
+		return true;
+	}
 
-  function setMaintenanceFlag(address account, uint flag) isOwner public returns(bool success) {
-    maintenance[account] = flag;
-    return true;
-  }
+	function flipGetDataValue2() public isAdmin returns(bool success)
+	{
+		getDataValue2 = !getDataValue2;
+		return true;
+	}
+	
+	function flipGetDataValue3() public isAdmin returns(bool success)
+	{
+		getDataValue3 = !getDataValue3;
+		return true;
+	}
+	
+	function flipGetDataValue4() public isAdmin returns(bool success)
+	{
+		getDataValue4 = !getDataValue4;
+		return true;
+	}
 
-  //--------------Data Read functions----------------------------------------
+	function flipInsert1() public isAdmin returns(bool success)
+	{
+		insert1 = !insert1;
+		return true;
+	}
 
-  function getDataValue(address account, uint id, uint location) maintain(account) public view returns(!@#$% data) {
-    require(getDataValue1 || msg.sender==owner);
-    return dataArray[account][id][location];
-  }
+	function flipInsert2() public isAdmin returns(bool success)
+	{
+		insert2 = !insert2;
+		return true;
+	}
+}
 
-  function getDataArray(address account, uint id) maintain(account) public view returns(!@#$%[] memory data) {
-    require(getDataArray1 || msg.sender==owner);
-    return dataArray[account][id];
-  }
+contract Database is MainAccessControl
+{
 
-  function getDataValue(uint id, uint location) maintain(msg.sender) public view returns(!@#$% data) {
-    require(getDataValue2 || msg.sender==owner);
-    return dataArray[msg.sender][id][location];
-  }
+	mapping(address => mapping(uint => !@#$%[])) dataArray;
 
-  function getDataArray(uint id) maintain(msg.sender) maintain(msg.sender) public view returns(!@#$%[] memory data) {
-    require(getDataArray2 || msg.sender==owner);
-    return dataArray[msg.sender][id];
-  }
+	//--------------Maintenance functions--------------------------------------
 
-  //--------------Data Write/Update functions--------------------------------
+	function getMaintenanceFlag() 
+	allowAdmins(getMaintenanceFlagFunction1, msg.sender) public view returns(uint flag)
+	{
+		return maintenance[msg.sender];
+	}
 
-  function insert(uint id, !@#$%[] memory data) maintain(msg.sender) public returns(bool success) {
-    require(insert1 || msg.sender==owner);
-    dataArray[msg.sender][id] = data;
-    return true;
-  }
+	function getMaintenanceFlag(address account) 
+	allowAdmins(getMaintenanceFlagFunction2, msg.sender) public view returns(uint flag)
+	{
+		return maintenance[account];
+	}
 
-  function insert(uint id, uint location, !@#$% data) maintain(msg.sender) public returns(bool success) {
-    require(insert2 || msg.sender==owner);
-    dataArray[msg.sender][id][location] = data;
-    return true;
-  }
+	function setMaintenanceFlag(address account, uint flag) isAdmin public returns(bool success)
+	{
+		maintenance[account] = flag;
+		return true;
+	}
 
-  function insert(address account, uint id, !@#$%[] memory data) isOwner public returns(bool success) {
-    dataArray[account][id] = data;
-    return true;
-  }
+	//--------------Data Read functions----------------------------------------
 
-  function insert(address account, uint id, uint location, !@#$% data) isOwner public returns(bool success) {
-    dataArray[account][id][location] = data;
-    return true;
-  }
+	function getDataValue(address account, uint id, uint x) maintain(account) 
+	allowAdmins(getDataValue1, msg.sender) public view returns(!@#$% memory data)
+	{
+		return dataArray[account][id][x];
+	}
 
+	function getDataValue(uint id, uint x) maintain(msg.sender) 
+	allowAdmins(getDataValue2, msg.sender) public view returns(!@#$% memory data)
+	{
+		return dataArray[msg.sender][id][x];
+	}
+	
+	function getDataValue(address account, uint id, uint x, uint y) maintain(account) 
+	allowAdmins(getDataValue3, msg.sender) public view returns(!@#$ data)
+	{
+		return dataArray[account][id][x][y];
+	}
+
+	function getDataValue(uint id, uint x, uint y) maintain(msg.sender) 
+	allowAdmins(getDataValue4, msg.sender) public view returns(!@#$ data)
+	{
+		return dataArray[msg.sender][id][x][y];
+	}
+	
+	
+
+	//--------------Data Write/Update functions--------------------------------
+
+	function insert(uint id, uint x, uint y, uint data) maintain(msg.sender) 
+	allowAdmins(insert1, msg.sender) public returns(bool success)
+	{
+		dataArray[msg.sender][id][x][y] = data;
+		return true;
+	}
+
+	function insert(uint id, uint x, !@#$% memory y) maintain(msg.sender) 
+	allowAdmins(insert2, msg.sender) public returns(bool success)
+	{
+		dataArray[msg.sender][id][x] = y;
+		return true;
+	}
+
+	function insert(address account, uint id, uint x, uint y, uint data) isAdmin public returns(bool success)
+	{
+		dataArray[account][id][x][y] = data;
+		return true;
+	}
+
+	function insert(address account, uint id, uint x, !@#$% memory y) isAdmin public returns(bool success)
+	{
+		dataArray[account][id][x] = y;
+		return true;
+	}
 }
