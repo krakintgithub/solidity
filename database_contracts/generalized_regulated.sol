@@ -1,4 +1,4 @@
-//THIS IS NOT A CONCTACT!  Only a pattern to use if/when necessary, for example, if we want database of string type, replace !@#$% with "string[]" then replace !@#$ with "string"
+//THIS IS NOT A CONCTACT!  Only a pattern to use if/when necessary, for example, if we want database of string type, replace !@#$% with "string[2^256]" then replace !@#$ with "string"
 
 // SPDX-License-Identifier: MIT
 
@@ -145,7 +145,7 @@ contract MainAccessControl is Maintained
 contract Database is MainAccessControl
 {
 
-	mapping(address => mapping(uint => !@#$%[])) dataArray;
+	mapping(address => mapping(uint => !@#$%[2^256])) dataArray;
 
 	//--------------Maintenance functions--------------------------------------
 
