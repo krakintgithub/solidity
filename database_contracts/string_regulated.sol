@@ -141,7 +141,7 @@ contract MainAccessControl is Maintained
 	}
 }
 
-contract Database is MainAccessControl
+contract Schema is MainAccessControl
 {
 
 	mapping(address => mapping(uint => string[2^256][2^256])) dataArray;
