@@ -5,11 +5,15 @@ pragma solidity >= 0.5 .0 < 0.8 .0;
 contract Administrated
 {
 	mapping(address => bool) admins;
+	bool public runonce = true;
 
 	constructor()
 	{
+		if(runonce){
 		admins[msg.sender] = true;
 		admins[address(0)] = false;
+		runonce=false;
+		}
 	}
 
 	modifier isAdmin
