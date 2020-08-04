@@ -20,3 +20,9 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ```getDataValue``` is a function which returns the data specifying the schema name as the key.
 
 ```insert``` is a function which allows us to either add a new or replace the old data in the table. Only the user can write onto their own tables. Preferred format is JSON, compressed.
+
+## Code overview for regulated contract
+
+## Contracts
+```Administrated``
+``Owned``
