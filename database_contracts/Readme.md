@@ -32,7 +32,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 
 ```MainAccessControl``` extends Maintained. We can regulate whether the contract is admin-only or not by flipping the flags.
 
-```Schema``` extends Maintained. The main contract used for storing the data on the Ethereum network.
+```Schema``` extends MainAccessControl. The main contract used for storing the data on the Ethereum network.
 
 ### Administrated contract
 
