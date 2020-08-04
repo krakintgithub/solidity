@@ -21,9 +21,9 @@ https://ropsten.etherscan.io/address/0x758f800366e08610e2018bce7f3db05614c3c3a9#
 
 string regulated:
 
-https://ropsten.etherscan.io/address/0x6ce6de640a99992b0efbba6b8548a3ab9e254cde#code
+https://ropsten.etherscan.io/address/0xc3cf0c75cd85d21f7d57df7ed173c94bd86d8482#code
 
-0x6ce6de640a99992b0efbba6b8548a3ab9e254cde
+0xc3cf0c75cd85d21f7d57df7ed173c94bd86d8482
 
 
 
