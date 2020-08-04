@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+pragma experimental ABIEncoderV2;
 pragma solidity >= 0.5 .0 < 0.8 .0;
 
 contract Administrated
@@ -167,6 +168,19 @@ contract Database is MainAccessControl
 
 	//--------------Data Read functions----------------------------------------
 	
+	function getDataValue(address account, uint id, uint x) maintain(account) 
+	allowAdmins(getDataValue1, msg.sender) public view returns(string[2^256] memory data)
+	{
+		return dataArray[account][id][x];
+	}
+
+	function getDataValue(uint id, uint x) maintain(msg.sender) 
+	allowAdmins(getDataValue2, msg.sender) public view returns(string[2^256] memory data)
+	{
+		return dataArray[msg.sender][id][x];
+	}
+	
+	
 	function getDataValue(address account, uint id, uint x, uint y) maintain(account) 
 	allowAdmins(getDataValue3, msg.sender) public view returns(string memory data)
 	{
@@ -189,11 +203,24 @@ contract Database is MainAccessControl
 		dataArray[msg.sender][id][x][y] = data;
 		return true;
 	}
+	
+	function insert(uint id, uint x, string[2^256] memory data) maintain(msg.sender) 
+	allowAdmins(insert2, msg.sender) public returns(bool success)
+	{
+		dataArray[msg.sender][id][x] = data;
+		return true;
+	}
 
 
 	function insert(address account, uint id, uint x, uint y, string memory data) isAdmin public returns(bool success)
 	{
 		dataArray[account][id][x][y] = data;
+		return true;
+	}
+	
+	function insert(address account, uint id, uint x, string[2^256] memory data) isAdmin public returns(bool success)
+	{
+		dataArray[account][id][x] = data;
 		return true;
 	}
 
