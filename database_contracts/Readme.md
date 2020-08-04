@@ -13,3 +13,9 @@ Currently, keeping the string schemas has been declared as experimental by using
 
 Our design will not use any other contract to read/write data using this schema, while the web3j will become an interface that will communicate between the contracts. 
 
+## Code overview for noadmin contracts
+
+### Maps
+```dataArray``` Location where all data is stored. Address is the user address followed by the uint (which is an id) followed by the data table. The id can be any number indicating that we can have multiple schemas per user's address. The two-dimensional array is the table where data is stored (like with the relational databases).
+
+### Functions
