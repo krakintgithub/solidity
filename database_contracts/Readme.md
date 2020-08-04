@@ -23,7 +23,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 
 ## Code overview for regulated contract
 
-## Contracts
+### Contracts
 ```Administrated``` This contract is used to allow the administrators to access any of the functions that may be otherwise restricted to anyone else. Furthermore, it contains the flags which tell us whether an account is an administrator or not.
 
 ```Owned``` extends Administrated. The standard Owned contract, adjusted to make the (new) owner the administrator.
@@ -33,3 +33,9 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ```MainAccessControl``` extends Maintained. We can regulate whether the contract is admin-only or not by flipping the flags.
 
 ```Schema``` extends Maintained. The main contract used for storing the data on the Ethereum network.
+
+### Administrated contract
+
+#### Maps
+```admins``` this map tells us whether the account is an admin (true) or not (false).
+
