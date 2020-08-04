@@ -2,7 +2,7 @@
 
 
 //All strings are to be placed as JSON format, to keep the low costs, we can use the gz, bzip2 or deflate to compress.
-//Compressing and decompressing is done externally.
+//Compress and Decompress is done externally
 
 pragma solidity >= 0.5 .0 < 0.8 .0;
 
@@ -18,7 +18,7 @@ contract Schema
 	}
 
 	//--------------Data Write/Update functions--------------------------------
-	function insert(uint id, string memory key, string memory data) public returns(bool success)
+	function insert(string memory key, string memory data) public returns(bool success)
 	{
 		dataArray[msg.sender][key] = data;
 		return true;
