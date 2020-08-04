@@ -31,6 +31,13 @@ contract Administrated
 		}
 		return true;
 	}
+	
+	function isAdminAccount(address account) public view returns(bool value)
+	{
+		admins[account];
+	}
+	
+	
 }
 
 contract Owned is Administrated
@@ -180,3 +187,4 @@ contract Schema is MainAccessControl
 	}
 
 }
+
