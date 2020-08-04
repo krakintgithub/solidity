@@ -24,7 +24,8 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ## Code overview for regulated contract
 
 ## Contracts
-````Administrated```
+```Administrated``` This contract is used to allow the administrators to access any of the functions that may be otherwise restricted to anyone else. Furthermore, it contains the flags which tell us whether an account is an administrator or not.
+
 ```Owned```
 ```Maintained```
 ```MainAccessControl```
