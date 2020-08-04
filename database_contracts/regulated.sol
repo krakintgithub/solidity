@@ -34,7 +34,7 @@ contract Administrated
 	
 	function isAdminAccount(address account) public view returns(bool value)
 	{
-		admins[account];
+		return admins[account];
 	}
 	
 	
