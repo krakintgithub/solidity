@@ -2,23 +2,21 @@
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/logo_s1.png" width="64px" title="Logo">
 </p>
 
-# Krakin't Technical documentation [WORK IN PROGRESS ! CODING IN PROGRESS !]
+# Krakin't Technical documentation
 ## Decentralized schemas
 
 ### Explanation
 
 In order to keep data regarding the startups, individuals, ideas, and so on secure and protected on the block-chain, we need to make a contract that would enable us to add the data onto block-chain. The contract is to be called with the web3j or directly with any other interface. There are two kinds of contracts for each data-type. One ends with regulated.sol other with noadmin.sol. Regulated means that the contract can be adjusted by the project owner or the system administrators. Noadmin means that only the contract owner can add/edit their own data and do nothing else.
 
-Currently, keeping the string schemas has been declared as experimental by using the "pragma experimental ABIEncoderV2;" rather than complicating the code by (De)serializing the string or bytes32 arrays. This may change in the future should the test-cases fail or should there be a security issue.
+Currently, we need to keep everything as the string type (JSON format) since Ethereum does not support multi-dimensional arrays. Furthermore, we can always compress the JSON to make it less expensive. This means that we should keep only the static data on the Ethereum's network. The more dynamic data should be kept elsewhere (centralized or a different technology, other block-chains, etc). Multi-array support is the work in progress while in the meantime we may not need to implement it.
 
-Our design will not use any other contract to read/write data using this schema, while the web3j will become an interface that will communicate between the contracts. 
-
-## Code overview for noadmin contracts 
+## Code overview for noadmin contract
 
 ### Maps
-```dataArray``` Location where all data is stored. Address is the user address followed by the uint (which is an id) followed by the data table. The id can be any number indicating that we can have multiple schemas per user's address. The two-dimensional array is the table where data is stored (like with the relational databases).
+```dataArray``` Location where all data is stored. Address is the user address followed by the string (which is the name of the schema) followed by the data of a string format. The string (schema) can be any string, indicating that we can have multiple schemas per user's address. 
 
 ### Functions
-```getDataValue``` is a function which returns either a single value or an array, int this case, the y-coordinate. However, by design, if we want to return the x-coordinate instead, we need to make a separate schema and flip the x-y values in the table. Returning the array makes it a bit more complicated if we need the flexibility to choose either the row or the column of the table. 
+```getDataValue``` is a function which returns the data specifying the schema name as the key.
 
-```insert``` is a function which allows us to either add a new or replace the old data in the table. Only the user can write onto their own tables. Currently, we can only add the y-coordinate when adding the array. 
+```insert``` is a function which allows us to either add a new or replace the old data in the table. Only the user can write onto their own tables. Preferred format is JSON, compressed.
