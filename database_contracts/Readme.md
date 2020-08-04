@@ -19,4 +19,5 @@ Our design will not use any other contract to read/write data using this schema,
 ```dataArray``` Location where all data is stored. Address is the user address followed by the uint (which is an id) followed by the data table. The id can be any number indicating that we can have multiple schemas per user's address. The two-dimensional array is the table where data is stored (like with the relational databases).
 
 ### Functions
-```getDataValue``` is a function which returns either a single value.
+```getDataValue``` is a function which returns either a single value or an array, int this case, the y-coordinate. However, by design, if we want to return the x-coordinate instead, we need to make a separate schema and flip the x-y values in the table.
+
