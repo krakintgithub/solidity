@@ -5,14 +5,14 @@ pragma solidity >= 0.5 .0 < 0.8 .0;
 contract Administrated
 {
 	mapping(address => bool) admins;
-	bool public runonce = true;
+	bool public runAdminConstrOnce = true;
 
 	constructor()
 	{
 		if(runonce){
 		admins[msg.sender] = true;
 		admins[address(0)] = false;
-		runonce=false;
+		runAdminConstrOnce=false;
 		}
 	}
 
@@ -47,12 +47,16 @@ contract Administrated
 contract Owned is Administrated
 {
 	address public owner;
+	bool public runOwnedConstrOnce = true;
 
 	event OwnershipTransferred(address indexed _from, address indexed _to);
 
 	constructor()
 	{
+	    if(runOwnedConstrOnce){
 		owner = msg.sender;
+	    runOwnedConstrOnce = false;
+	    }
 	}
 
 	modifier isOwner
