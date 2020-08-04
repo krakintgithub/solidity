@@ -21,6 +21,29 @@ contract Schema
 	{
 		return dataArray[msg.sender][id][x];
 	}
+	
+	function getDataValue(uint id) public view returns(string[2^256][2^256] memory data)
+	{
+		return dataArray[msg.sender][id];
+	}
+	function getRow(uint id, uint row, uint startIndex, uint endIndex) public view returns(string[] memory data){
+	    require(startIndex<=endIndex);
+	    uint arrSize = startIndex-endIndex;
+        data = new string[](arrSize);
+        for(uint i=0;i<arrSize;i++){
+            data[i] = dataArray[msg.sender][id][startIndex+i][row];
+        }
+        return data;
+	}
+	function getColumn(uint id, uint column, uint startIndex, uint endIndex) public view returns(string[] memory data){
+	    require(startIndex<=endIndex);
+	    uint arrSize = startIndex-endIndex;
+        data = new string[](arrSize);
+        for(uint i=0;i<arrSize;i++){
+            data[i] = dataArray[msg.sender][id][column][startIndex+i];
+        }
+        return data;
+	}
 
 	//--------------Data Write/Update functions--------------------------------
 
@@ -36,8 +59,11 @@ contract Schema
 		return true;
 	}
 	
+	function insert(uint id, string[2^256][2^256] memory data) public returns(bool success)
+	{
+		dataArray[msg.sender][id] = data;
+		return true;
+	}
+	
 	
 }
-
-
-
