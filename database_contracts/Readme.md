@@ -7,7 +7,7 @@
 
 ### Explanation
 
-In order to keep data regarding the startups, individuals, ideas, and so on secure and protected on the block-chain, we need to make a contract that would enable us to add the data onto block-chain. The contract is to be called with the web3j or directly with any other interface. There are two kinds of contracts for each data-type. One ends with regulated.sol other with noadmin.sol. Regulated means that the contract can be adjusted by the project owner or the system administrators. Noadmin means that only the contract owner can add/edit their own data and do nothing else.
+In order to keep data regarding the startups, individuals, ideas, and so on secure and protected on the block-chain, we need to make a contract that would enable us to add the data onto block-chain. The contract is to be called with any interface. There are two kinds of contracts for each data-type. One is regulated.sol other is noadmin.sol. Regulated means that the contract can be adjusted by the project owner or the system administrators. Noadmin means that only the contract owner can add/edit their own data and do nothing else.
 
 Currently, we need to keep everything as the string type (JSON format) since Ethereum does not support multi-dimensional arrays. Furthermore, we can always compress the JSON to make it less expensive. This means that we should keep only the static data on the Ethereum's network. The more dynamic data should be kept elsewhere (centralized or a different technology, other block-chains, etc). Multi-array support is the work in progress while in the meantime we may not need to implement it.
 
