@@ -24,5 +24,8 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ## Code overview for regulated contract
 
 ## Contracts
-```Administrated``
-``Owned``
+````Administrated```
+```Owned```
+```Maintained```
+```MainAccessControl```
+```Schema```
