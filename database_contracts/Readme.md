@@ -26,7 +26,10 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ## Contracts
 ```Administrated``` This contract is used to allow the administrators to access any of the functions that may be otherwise restricted to anyone else. Furthermore, it contains the flags which tell us whether an account is an administrator or not.
 
-```Owned```
-```Maintained```
-```MainAccessControl```
-```Schema```
+```Owned``` extends Administrated. The standard Owned contract, adjusted to make the (new) owner the administrator.
+
+```Maintained``` extends Owned. This contract is used to keep the track of the accounts, for example, the account with the value 1 has all access restricted and cannot view or alter the data associated with their account. Any other number is to be used with the external applications.
+
+```MainAccessControl``` extends Maintained. We can regulate whether the contract is admin-only or not by flipping the flags.
+
+```Schema``` extends Maintained. The main contract used for storing the data on the Ethereum network.
