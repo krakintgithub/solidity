@@ -11,7 +11,7 @@ In order to keep data regarding the startups, individuals, ideas, ... secure and
 
 Currently, we need to keep everything as the string type (JSON format) since Ethereum does not support multi-dimensional arrays. Furthermore, we can always compress the JSON to make it less expensive. This means that we should keep only the static data on the Ethereum's network. The more dynamic data should be kept elsewhere (centralized or a different technology, other block-chains, etc). Multi-array support is the work in progress while in the meantime we may not need to implement it.
 
-## Code overview for noadmin.sol
+## Code overview for noadmin.sol schemas
 
 ### Maps
 ```dataArray``` Location where all data is stored. Address is the user address followed by the string (which is the name of the schema) followed by the data of a string format. The string (schema) can be any string, indicating that we can have multiple schemas per user's address. 
@@ -21,7 +21,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 
 ```insert``` is a function which allows us to either add a new or replace the old data in the table. Only the user can write onto their own tables. Preferred format is JSON, compressed.
 
-## Code overview for regulated.sol
+## Code overview for regulated.sol schemas
 
 ### Contracts
 ```Administrated``` This contract is used to allow the administrators to access any of the functions that may be otherwise restricted to anyone else. Furthermore, it contains the flags which tell us whether an account is an administrator or not.
