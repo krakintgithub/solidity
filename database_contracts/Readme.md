@@ -90,7 +90,12 @@ Extends the Owned, Administrated, inherits variables, maps, modifiers and functi
 
 ```flipGetMaintenanceFlagFunction1```,```flipGetMaintenanceFlagFunction2```,```flipGetDataValue1```,```flipGetDataValue2```,```flipInsert1``` public, owner-only, these functions are used to decide which functions are open to public and which functions are not. This is a very strict regulation of the contract, and therefore, only the owner can execute them (hopefully, never).
 
-TODO: maintenance functions
+```setMaintenanceFlag``` public, Admins-only. Sets the account type onto a provided 0x address. 1 blocks the user completely.
+
+
+#### Views
+```getMaintenanceFlag``` public, can be restricted to Admins-only. Not restricted by default. The purpose of this function is to see the maintenance status and an account type for a 0x address. Only the Admins can check the status of someone else's account.
+
 
 
 
@@ -104,9 +109,10 @@ The main contract to be compiled. Extends the Administrated, Owned, and MainAcce
 TODO: Continue ! 
  
 #### Views
-``` ``` 
+```getDataValue``` public, can be set to Admins-only. Is not Admins-only by default. Shows the Schema's data. Only admin accounts can look into other's schemas.
+
 
 #### Functions
-``` ```  
+```insert``` public, can be set to Admins-only. Is not Admins-only by default. Updates or adds data to a schema. JSON format (can be compressed and/or encrypted) is preferred. Only admins can alter data of another 0x account.
 
 
