@@ -35,6 +35,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ```Schema``` extends MainAccessControl. The main contract used for storing the data on the Ethereum network.
 
 ### Administrated contract
+Used for managing the project administrators.
 
 #### Maps
 ```admins``` this map tells us whether the account is an admin (true) or not (false).
@@ -46,7 +47,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 The main constructor simply sets the contract publisher as the administrator. We are making sure the constructor is initiated only once during a deployment.
 
 #### Modifiers
-```isAdmin``` the user must be an admin when used with a function.
+```isAdmin``` the user must be an admin when applied to a function.
 
 #### Views
 ```isAdminAccount``` this view tells us whether the certain 0x account is an admin (true) or not (false).
@@ -56,5 +57,25 @@ The main constructor simply sets the contract publisher as the administrator. We
 
 
 ### Owned contract
+Extends the Administrated, inherits variables, maps, modifiers and functions from Administrated. Mainly for allowing the owner-only executions.
+
+#### Events
+```OwnershipTransferred``` used for transferring the ownership to some other account.
+
+#### Variables
+```owner``` public, tells us the address of the owner's 0x account.
+```runOwnedConstrOnce``` public, tells us whether the constructor was initiated, and keeps it locked and safe from hacking.
+
+#### Constructor(s)
+The main constructor simply sets the owner address. We are making sure the constructor is initiated only once during a deployment.
+
+#### Modifiers
+```isOwner``` the user must be an owner when applied to a function.
+
+#### Views
+```isAdminAccount``` this view tells us whether the certain 0x account is an admin (true) or not (false).
+
+#### Functions
+```transferOwnership``` Transfers the ownership from the current owner to a provided 0x address. Can be executred by the owner only. Sets the new owner as an admin, removes admin priviledges of the previous ower. If the new owner were an 
 
 
