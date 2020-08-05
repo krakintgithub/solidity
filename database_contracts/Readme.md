@@ -53,7 +53,7 @@ The main constructor simply sets the contract publisher as the administrator. We
 ```isAdminAccount``` this view tells us whether the certain 0x account is an admin (true) or not (false).
 
 #### Functions
-```manageAdmins``` accepts the 0x account as an input and flips the admin status from true to false and/or from false to true. Only admins can run it.
+```manageAdmins``` accepts the 0x account as an input and flips the admin status from true to false and/or from false to true. Only admins can run this function.
 
 
 ### Owned contract
@@ -78,3 +78,16 @@ The main constructor simply sets the owner address. We are making sure the const
 #### Functions
 ```transferOwnership``` Transfers the ownership from the current owner to a provided 0x address. Can be executred by the owner only. Sets the new owner as an admin, removes admin privileges of the previous ower. To keep the admin privileges of the previous owner, we must execute the ```manageAdmins``` function. 
 
+
+
+
+### MainAccessControl contract
+Extends the Owned, Administrated, inherits variables, maps, modifiers and functions from Administrated and Owned. This contract is used for managing the user types. If the user-type is 1, it means that it has been banned from the database access and it cannot function with regulated.sol database.
+
+
+#### Variables
+```getMaintenanceFlagFunction1```,```getMaintenanceFlagFunction2```,```getDataValue1```,```getDataValue2```,```insert1``` public, these are the flags that are used to either allow the public access to main contract functions or to make it an admin-only access.
+
+#### Functions
+
+```flipGetMaintenanceFlagFunction1```,```flipGetMaintenanceFlagFunction2```,```flipGetDataValue1```,```flipGetDataValue2```,```flipInsert1``` public, owner-only, these functions are used to decide which functions are open to public and which functions are not. This is a very strict regulation of the contract, and therefore, only the owner can execute them (hopefully, never).
