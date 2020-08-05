@@ -39,16 +39,22 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 #### Maps
 ```admins``` this map tells us whether the account is an admin (true) or not (false).
 
+#### Variables
+```runAdminConstrOnce``` public, tells us whether the constructor was initiated, and keeps it locked and safe from hacking.
+
 #### Constructor(s)
 The main constructor simply sets the contract publisher as the administrator. We are making sure the constructor is initiated only once during a deployment.
 
 #### Modifiers
-```isAdmin``` the user must be an admin when used with a function
+```isAdmin``` the user must be an admin when used with a function.
 
 #### Views
-```isAdminAccount``` this view tells us whether the certain 0x account is an admin (true) or not (false)
+```isAdminAccount``` this view tells us whether the certain 0x account is an admin (true) or not (false).
 
 #### Functions
-```manageAdmins``` accepts the 0x account as an input and flips the admin status from true to false and/or from false to true
+```manageAdmins``` accepts the 0x account as an input and flips the admin status from true to false and/or from false to true. Only admins can run it.
+
+
+### Owned contract
 
 
