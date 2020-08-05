@@ -9,7 +9,7 @@ contract Administrated
 
 	constructor()
 	{
-		if(runonce){
+		if(runAdminConstrOnce){
 		admins[msg.sender] = true;
 		admins[address(0)] = false;
 		runAdminConstrOnce=false;
@@ -49,7 +49,7 @@ contract Owned is Administrated
 	address public owner;
 	bool public runOwnedConstrOnce = true;
 
-	event OwnershipTransferred(address indexed _from, address indexed _to);
+	event  OwnershipTransferred(address indexed _from, address indexed _to);
 
 	constructor()
 	{
