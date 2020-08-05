@@ -103,43 +103,36 @@ contract MainAccessControl is Maintained
 	bool public getDataValue2 = true;
 	bool public insert1 = true;
 
-	function flipGetMaintenanceFlagFunction1() public isOwner returns(bool success)
+	function flipGetMaintenanceFlagFunction1() public isAdmin returns(bool success)
 	{
 		getMaintenanceFlagFunction1 = !getMaintenanceFlagFunction1;
 		return true;
 	}
 
-	function flipGetMaintenanceFlagFunction2() public isOwner returns(bool success)
+	function flipGetMaintenanceFlagFunction2() public isAdmin returns(bool success)
 	{
 		getMaintenanceFlagFunction2 = !getMaintenanceFlagFunction2;
 		return true;
 	}
 
-	function flipGetDataValue1() public isOwner returns(bool success)
+	function flipGetDataValue1() public isAdmin returns(bool success)
 	{
 		getDataValue1 = !getDataValue1;
 		return true;
 	}
 
-	function flipGetDataValue2() public isOwner returns(bool success)
+	function flipGetDataValue2() public isAdmin returns(bool success)
 	{
 		getDataValue2 = !getDataValue2;
 		return true;
 	}
 
-	function flipInsert1() public isOwner returns(bool success)
+	function flipInsert1() public isAdmin returns(bool success)
 	{
 		insert1 = !insert1;
 		return true;
 	}
-
-}
-
-contract Schema is MainAccessControl
-{
-
-	mapping(address => mapping(string => string)) dataArray;
-
+	
 	//--------------Maintenance functions--------------------------------------
 
 	function getMaintenanceFlag() 
@@ -159,6 +152,14 @@ contract Schema is MainAccessControl
 		maintenance[account] = flag;
 		return true;
 	}
+
+
+}
+
+contract Schema is MainAccessControl
+{
+
+	mapping(address => mapping(string => string)) dataArray;
 
 	//--------------Data Read functions----------------------------------------
 	
