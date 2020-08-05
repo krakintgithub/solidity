@@ -68,8 +68,8 @@ contract Owned is Administrated
 	function transferOwnership(address newOwner) public isOwner returns(bool success)
 	{
 		require(newOwner != address(0));
-		manageAdmins(owner);
-		manageAdmins(newOwner);
+		if(admins[owner]) manageAdmins(owner);
+		if(!admins[newOwner]) manageAdmins(newOwner);
 		emit OwnershipTransferred(owner, newOwner);
 		owner = newOwner;
 		return true;
