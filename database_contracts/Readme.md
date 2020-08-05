@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/logo_s1.png" width="64px" title="Logo">
 </p>
 
-# Krakin't decentralized Database Technical Documentation
+# Krakin't Decentralized Database - Technical Documentation
 ## Decentralized schemas
 
 ### Explanation
@@ -76,6 +76,5 @@ The main constructor simply sets the owner address. We are making sure the const
 ```isAdminAccount``` this view tells us whether the certain 0x account is an admin (true) or not (false).
 
 #### Functions
-```transferOwnership``` Transfers the ownership from the current owner to a provided 0x address. Can be executred by the owner only. Sets the new owner as an admin, removes admin priviledges of the previous ower. To keep the admin privileges of the previous owner, we must execute the ```manageAdmins``` function. 
-
+```transferOwnership``` Transfers the ownership from the current owner to a provided 0x address. Can be executred by the owner only. Sets the new owner as an admin, removes admin privileges of the previous ower. To keep the admin privileges of the previous owner, we must execute the ```manageAdmins``` function. 
 
