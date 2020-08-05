@@ -22,6 +22,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ```insert``` is a function which allows us to either add a new or replace the old data in the table. Only the user can write onto their own tables. Preferred format is JSON, compressed.
 
 ## Code overview for regulated.sol schemas
+Please note, some of the functions contradict the code of conduct (no gate-keeping!). We will make sure to use those functions only when necessary.
 
 ### Contracts
 ```Administrated``` This contract is used to allow the administrators to access any of the functions that may be otherwise restricted to anyone else. Furthermore, it contains the flags which tell us whether an account is an administrator or not.
@@ -97,17 +98,13 @@ Extends the Owned, Administrated, inherits variables, maps, modifiers and functi
 ```getMaintenanceFlag``` public, can be restricted to Admins-only. Not restricted by default. The purpose of this function is to see the maintenance status and an account type for a 0x address. Only the Admins can check the status of someone else's account.
 
 
-
-
 ### Schema contract
 The main contract to be compiled. Extends the Administrated, Owned, and MainAccessControl. Inherits variables, maps, modifiers and functions from Administrated, Owned, and MainAccessControl. This contract is used to read or insert/replace the data onto block-chain and make it decentralized. Inserted data is of a string type, and therefore the maintenance does cost a lot to perform. All inserts should be JSON. We can apply compression with an encryption too.
 
 
 #### Maps
 ```dataArray``` public, it maps the user address to the schema name, and schema name to data that is stored. Schema name can be any string we choose.
- 
-TODO: Continue ! 
- 
+  
 #### Views
 ```getDataValue``` public, can be set to Admins-only. Is not Admins-only by default. Shows the Schema's data. Only admin accounts can look into other's schemas.
 
