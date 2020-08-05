@@ -79,8 +79,6 @@ The main constructor simply sets the owner address. We are making sure the const
 ```transferOwnership``` Transfers the ownership from the current owner to a provided 0x address. Can be executred by the owner only. Sets the new owner as an admin, removes admin privileges of the previous ower. To keep the admin privileges of the previous owner, we must execute the ```manageAdmins``` function. 
 
 
-
-
 ### MainAccessControl contract
 Extends the Owned, Administrated, inherits variables, maps, modifiers and functions from Administrated and Owned. This contract is used for managing the user types. If the user-type is 1, it means that it has been banned from the database access and it cannot function with regulated.sol database.
 
@@ -91,3 +89,24 @@ Extends the Owned, Administrated, inherits variables, maps, modifiers and functi
 #### Functions
 
 ```flipGetMaintenanceFlagFunction1```,```flipGetMaintenanceFlagFunction2```,```flipGetDataValue1```,```flipGetDataValue2```,```flipInsert1``` public, owner-only, these functions are used to decide which functions are open to public and which functions are not. This is a very strict regulation of the contract, and therefore, only the owner can execute them (hopefully, never).
+
+TODO: maintenance functions
+
+
+
+### Schema contract
+The main contract to be compiled. Extends the Administrated, Owned, and MainAccessControl. Inherits variables, maps, modifiers and functions from Administrated, Owned, and MainAccessControl. This contract is used to read or insert/replace the data onto block-chain and make it decentralized. Inserted data is of a string type, and therefore the maintenance does cost a lot to perform. All inserts should be JSON. We can apply compression with an encryption too.
+
+
+#### Maps
+```dataArray``` public, it maps the user address to the schema name, and schema name to data that is stored. Schema name can be any string we choose.
+ 
+TODO: Continue ! 
+ 
+#### Views
+``` ``` 
+
+#### Functions
+``` ```  
+
+
