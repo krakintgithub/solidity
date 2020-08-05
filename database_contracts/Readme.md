@@ -22,7 +22,7 @@ Currently, we need to keep everything as the string type (JSON format) since Eth
 ```insert``` is a function which allows us to either add a new or replace the old data in the table. Only the user can write onto their own tables. Preferred format is JSON, compressed.
 
 ## Code overview for regulated.sol schemas
-Please note, some of the functions contradict the code of conduct (no gate-keeping!). We will make sure to use those functions only when necessary.
+Please note, some of the functions contradict the code of conduct (no gate-keeping!). We will make sure to use those functions only when necessary. The main goal is to use noadmin.sol as much as possible.
 
 ### Contracts
 ```Administrated``` This contract is used to allow the administrators to access any of the functions that may be otherwise restricted to anyone else. Furthermore, it contains the flags which tell us whether an account is an administrator or not.
