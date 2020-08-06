@@ -78,6 +78,7 @@ using SafeMath for uint256;
 
 mapping (address => uint256) private _balances; //TODO, is a call to ERC20
 mapping (address => mapping (address => uint256)) private _allowances; //TODO, is a call to ERC20
+uint256 private _totalSupply; //TODO, is a call to ERC20
     
 function routed2(uint route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
 public returns (bool success){
@@ -86,6 +87,10 @@ public returns (bool success){
     }
     else if(route == 1){
         _approve(addressArr[0], addressArr[1], uintArr[0]);
+    }
+    else if(route == 2){ //increaseAllowance
+        uint amt = _allowances[addressArr[0]][addressArr[1]].add(uintArr[0]);
+        _approve(addressArr[0], addressArr[1], amt);
     }
     return true;
 }
@@ -96,7 +101,7 @@ public returns (bool success){
     if(route == 0){ //transferFrom
         uint256 amount = _allowances[addressArr[1]][addressArr[0]].sub(uintArr[0], "ERC20: transfer amount exceeds allowance");
         _transfer(addressArr[1], addressArr[2], uintArr[0]);
-        _approve(addressArr[1], addressArr[0], amount); //todo check order of operations approve before transfer.
+        _approve(addressArr[1], addressArr[0], amount); //todo check order of operations, approve before transfer.
     }
     return true;
 }  
@@ -146,17 +151,14 @@ contract ERC20 is Routed {
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
-    uint256 private _totalSupply;
+    uint256 private _totalSupply; //todo, is current supply
 
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    string private _name = "Krakin't";
+    string private _symbol = "KRAEK";
+    uint8 private _decimals = 18;
 
 
-    constructor (string memory name, string memory symbol) {
-        _name = name;
-        _symbol = symbol;
-        _decimals = 18;
+    constructor () {
     }
 
 
@@ -220,8 +222,7 @@ contract ERC20 is Routed {
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
-        
+    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool success) {
         address[3] memory addresseArr = [_msgSender(), sender, recipient];
         uint[3] memory uintArr = [amount,0,0];
         bool[3] memory boolArr;
@@ -229,15 +230,24 @@ contract ERC20 is Routed {
         routed3(0,addresseArr, uintArr,boolArr,"","","");
         
         return true;
- 
+    }
+    
+    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool success) {
+        address[2] memory addresseArr = [_msgSender(), spender];
+        uint[2] memory uintArr = [addedValue,0];
+        bool[2] memory boolArr;
+        
+        routed2(2,addresseArr, uintArr,boolArr,"","","");
+        
+        return true;
     }
 
 //--------------- TODO BELOW:
 
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
-        return true;
-    }
+    // function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
+    //     _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
+    //     return true;
+    // }
 
 
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
