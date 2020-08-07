@@ -73,6 +73,11 @@ constructor () {
 }
 
 
+function equals (string memory a, string memory b) public view returns (bool isEqual) {
+    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))) );
+}
+
+
 function currentCore() public view returns (address routerAddress) {
     return coreContract[currentCoreId];
 }
@@ -96,33 +101,33 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
 }
 
 
-function routed2(uint route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
+function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
 public returns (bool success){
-    if(route == 0){
+    if(equals(route, "transfer")){
         core.transfer(addressArr, uintArr);
     }
-    else if(route == 1){
+    else if(equals(route, "approve")){
         core.approve(addressArr, uintArr);
     }
-    else if(route == 2){
+    else if(equals(route, "increaseAllowance")){
         core.increaseAllowance(addressArr, uintArr);
     }
-    else if(route==3){
+    else if(equals(route, "decreaseAllowance")){
         core.decreaseAllowance(addressArr, uintArr);
     }
-    else if(route==4){
+    else if(equals(route, "burn")){
         core.burn(addressArr, uintArr);
     }
-    else if(route==5){
+    else if(equals(route, "mint")){
         core.mint(addressArr, uintArr);        
     }
     return true;
 }
     
     
-    function routed3(uint route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
+    function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
     public returns (bool success){
-        if(route == 0){
+        if(equals(route, "transferFrom")){
             core.transferFrom(addressArr, uintArr);
         }
         return true;
