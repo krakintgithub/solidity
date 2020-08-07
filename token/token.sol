@@ -20,27 +20,19 @@ interface IERC20
 {
 
 	function totalSupply() external view returns(uint256 data);
-
 	function currentSupply() external view returns(uint256 data);
-
 	function balanceOf(address account) external view returns(uint256 data);
-
 	function allowance(address owner, address spender) external view returns(uint256 data);
-
 	function isAllowedContract(address contractAddress) external view returns(bool isAllowed);
 
-	function updateBalance(address user, uint newBalance) external returns(bool success);
-
-	function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
-
-	function updateSupply(uint newSupply) external returns(bool success);
-
 	function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
-
 	function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
 
 	function transferFrom(address sender, address recipient, uint256 amount) external returns(bool success);
-
+	function updateBalance(address user, uint newBalance) external returns(bool success);
+	function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
+	function updateSupply(uint newSupply) external returns(bool success);
+	
 	event Transfer(address indexed from, address indexed to, uint256 value);
 	event Approval(address indexed owner, address indexed spender, uint256 value);
 }
