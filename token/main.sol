@@ -79,18 +79,36 @@ using SafeMath for uint256;
 mapping (address => uint256) private _balances; //TODO, is a call to ERC20
 mapping (address => mapping (address => uint256)) private _allowances; //TODO, is a call to ERC20
 uint256 private _totalSupply; //TODO, is a call to ERC20
-    
+
+
+//-----------ROUTES START HERE--------------------------------    
 function routed2(uint route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
 public returns (bool success){
     if(route == 0){
-        _transfer(addressArr[0], addressArr[1], uintArr[0]);
+        _transfer(addressArr, uintArr);
     }
     else if(route == 1){
-        _approve(addressArr[0], addressArr[1], uintArr[0]);
+        _approve(addressArr, uintArr);
     }
-    else if(route == 2){ //increaseAllowance
-        uint amt = _allowances[addressArr[0]][addressArr[1]].add(uintArr[0]);
-        _approve(addressArr[0], addressArr[1], amt);
+    else if(route == 2){
+        increaseAllowance(addressArr, uintArr);
+    }
+    else if(route==3){
+        decreaseAllowance(addressArr, uintArr);
+    }
+    else if(route==4){ //burn
+        burn(addressArr, uintArr);
+    }
+    else if(route==5){ //mint
+        //TODO: also must be restricted to owners and defined contracts
+        require(addressArr[0] != addressArr[1], "ERC20: mint to the zero address");
+        _beforeTokenTransfer(addressArr[1], addressArr[0], uintArr[0]);
+
+        _totalSupply = _totalSupply.add(uintArr[0]);
+        _balances[addressArr[0]] = _balances[addressArr[0]].add(uintArr[0]);
+        emit Transfer(addressArr[1], addressArr[0], uintArr[0]);
+        
+        
     }
     return true;
 }
@@ -99,18 +117,19 @@ public returns (bool success){
 function routed3(uint route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
 public returns (bool success){
     if(route == 0){ //transferFrom
-        uint256 amount = _allowances[addressArr[1]][addressArr[0]].sub(uintArr[0], "ERC20: transfer amount exceeds allowance");
-        _transfer(addressArr[1], addressArr[2], uintArr[0]);
-        _approve(addressArr[1], addressArr[0], amount); //todo check order of operations, approve before transfer.
+        _transferFrom(addressArr, uintArr);
     }
     return true;
 }  
+//-----------ROUTES END HERE--------------------------------    
+
+
     
     
-    
-    
-    
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual {
+    function _transfer(address[2] memory addressArr, uint[2] memory uintArr) internal virtual returns (bool success) {
+        address sender = addressArr[0];
+        address recipient = addressArr[1];
+        uint amount = uintArr[0];
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -119,16 +138,72 @@ public returns (bool success){
         _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
         _balances[recipient] = _balances[recipient].add(amount);
         emit Transfer(sender, recipient, amount);
+        return true;
     }
     
     
-    function _approve(address owner, address spender, uint256 amount) internal virtual {
+    function _transferFrom(address[3] memory addressArr, uint[3] memory uintArr) internal virtual returns (bool success) {
+        uint256 amount = _allowances[addressArr[1]][addressArr[0]].sub(uintArr[0], "ERC20: transfer amount exceeds allowance");
+        address[2] memory tmpAddresses1 = [addressArr[1], addressArr[2]];
+        address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
+        
+        uint[2] memory tmpUint = [uintArr[0],uintArr[1]];
+
+        _transfer(tmpAddresses1, tmpUint);
+        _approve(tmpAddresses2, tmpUint); //todo check order of operations, approve before transfer.
+        return true;
+    }
+    
+    
+    function _approve(address[2] memory addressArr, uint[2] memory uintArr) internal virtual {
+        address owner = addressArr[0];
+        address spender = addressArr[1];
+        uint amount = uintArr[0];
+        
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
+ 
+    function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) public virtual returns (bool success) {
+        uintArr[0] = _allowances[addressArr[0]][addressArr[1]].add(uintArr[0]);
+        _approve(addressArr, uintArr);
+        return true;
+    }
+    
+    function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) public virtual returns (bool success) {
+        uintArr[0] = _allowances[addressArr[0]][addressArr[1]].sub(uintArr[0], "ERC20: decreased allowance below zero");
+        _approve(addressArr, uintArr);
+        return true;
+    }
+    
+    
+    function burn(address[2] memory addressArr, uint[2] memory uintArr) public virtual returns (bool success) {
+    //TODO: Restrictions should apply
+    address account = addressArr[0];
+    uint amount = uintArr[0];
+    require(account != address(0), "ERC20: burn from the zero address");
+    _beforeTokenTransfer(account, address(0), amount);
+    _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
+    _totalSupply = _totalSupply.sub(amount);
+    emit Transfer(account, address(0), amount);
+    }
+    
+    
+    function mint(address[2] memory addressArr, uint[2] memory uintArr) public virtual returns (bool success) {
+        //TODO: Restrictions should apply
+        address account = addressArr[0];
+        uint amount = uintArr[0];
+        require(account != address(0), "ERC20: mint to the zero address");
+        _beforeTokenTransfer(address(0), account, amount);
+        _totalSupply = _totalSupply.add(amount);
+        _balances[account] = _balances[account].add(amount);
+        emit Transfer(address(0), account, amount);
+    } 
+    
+    
     
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 
@@ -191,14 +266,7 @@ contract ERC20 is Routed {
         return _allowances[owner][spender];
     }
     
-    // function _setupDecimals(uint8 decimals_) internal {
-    //     _decimals = decimals_;
-    // }
-//-----------------------------------------------------------------
-
-
 //-------------------ROUTED----------------------------------------
-
 
     function transfer(address recipient, uint256 amount) public virtual override returns (bool success) {
         
@@ -241,63 +309,39 @@ contract ERC20 is Routed {
         
         return true;
     }
-
-//--------------- TODO BELOW:
-
-    // function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-    //     _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
-    //     return true;
-    // }
-
-
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
+    
+    
+    
+    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool success) {
+        address[2] memory addresseArr = [_msgSender(), spender];
+        uint[2] memory uintArr = [subtractedValue,0];
+        bool[2] memory boolArr;
+        
+        routed2(3,addresseArr, uintArr,boolArr,"","","");
+        
+        return true;
+    }
+    
+    
+    function burn(address account, uint256 amount) internal virtual returns (bool success) {
+        address[2] memory addresseArr = [account,address(0)];
+        uint[2] memory uintArr = [amount,0];
+        bool[2] memory boolArr;
+        
+        routed2(4,addresseArr, uintArr,boolArr,"","","");
+        
         return true;
     }
 
-
-    // function _transfer(address sender, address recipient, uint256 amount) internal virtual {
-    //     require(sender != address(0), "ERC20: transfer from the zero address");
-    //     require(recipient != address(0), "ERC20: transfer to the zero address");
-
-    //     _beforeTokenTransfer(sender, recipient, amount);
-
-    //     _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
-    //     _balances[recipient] = _balances[recipient].add(amount);
-    //     emit Transfer(sender, recipient, amount);
-    // }
-
-
-    function _mint(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: mint to the zero address");
-
-        _beforeTokenTransfer(address(0), account, amount);
-
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
-        emit Transfer(address(0), account, amount);
+    
+    function mint(address account, uint256 amount) internal virtual returns (bool success) {
+        address[2] memory addresseArr = [account,address(0)];
+        uint[2] memory uintArr = [amount,0];
+        bool[2] memory boolArr;
+        
+        routed2(5,addresseArr, uintArr,boolArr,"","","");
+        
+        return true;   
     }
 
-
-    function _burn(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: burn from the zero address");
-
-        _beforeTokenTransfer(account, address(0), amount);
-
-        _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
-        _totalSupply = _totalSupply.sub(amount);
-        emit Transfer(account, address(0), amount);
-    }
-
-
-    // function _approve(address owner, address spender, uint256 amount) internal virtual {
-    //     require(owner != address(0), "ERC20: approve from the zero address");
-    //     require(spender != address(0), "ERC20: approve to the zero address");
-
-    //     _allowances[owner][spender] = amount;
-    //     emit Approval(owner, spender, amount);
-    // }
-
-
-    // function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 }
