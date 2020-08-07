@@ -13,6 +13,19 @@ abstract contract Context {
     }
 }
 
+interface IERC20 { //TODO complete this
+
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+
 contract Ownable is Context{
     address private _owner;
 
@@ -55,7 +68,7 @@ function routed3(string memory route, address[3] memory addressArr, uint[3] memo
 }
 
 
-contract ERC20 is Ownable{
+contract ERC20 is Ownable,IERC20{
     
     uint public currentRouterId;
 
@@ -67,7 +80,8 @@ contract ERC20 is Ownable{
     mapping (address => uint256) private _balances;
     mapping (address => mapping (address => uint256)) private _allowances;
 
-    uint256 private _totalSupply; //todo, is current supply
+    uint256 private _totalSupply;
+    uint256 private _currentSupply;
 
     string private _name = "Krakin't";
     string private _symbol = "KRAEK";
@@ -81,17 +95,21 @@ contract ERC20 is Ownable{
     }
 
 
-    function totalSupply() public view returns (uint256 data) {
+    function totalSupply() override public view returns (uint256 data) {
         return _totalSupply;
+    }
+    
+    function currentSupply() public view returns (uint256 data) {
+        return _currentSupply;
     }
 
 
-    function balanceOf(address account) public view returns (uint256 data) {
+    function balanceOf(address account) override public view returns (uint256 data) {
         return _balances[account];
     }
     
     
-    function allowance(address owner, address spender) public view virtual returns (uint256 data) {
+    function allowance(address owner, address spender) override public view virtual returns (uint256 data) {
         return _allowances[owner][spender];
     }
     
@@ -101,6 +119,38 @@ contract ERC20 is Ownable{
     
     function getIsAllowedContract(address contractAddress) public view virtual returns (bool isAllowed){
         return isAllowedContract[contractAddress];
+    }
+    
+//-------------------------------------------------------------------------
+    function updateBalance(address user, uint newBalance) external virtual returns (bool success){
+        require(isAllowedContract[msg.sender]);
+        _balances[user] = newBalance;
+        return true;
+    }
+    
+    function updateAllowance(address owner, address spender, uint newAllowance) external virtual returns (bool success){
+        require(isAllowedContract[msg.sender]);
+        _allowances[owner][spender] = newAllowance;
+        return true;
+    }
+    
+    function updateSupply(uint newSupply) external virtual returns (bool success){
+        require(isAllowedContract[msg.sender]);
+        _totalSupply = newSupply;
+        _currentSupply = newSupply;
+        return true;
+    }
+    
+    function emitTransfer(address fromAddress, address toAddress, uint amount) external virtual returns (bool success){
+        require(isAllowedContract[msg.sender]);
+        emit Transfer(fromAddress, toAddress, amount);
+        return true;
+    }
+    
+    function emitApproval(address fromAddress, address toAddress, uint amount) external virtual returns (bool success){
+        require(isAllowedContract[msg.sender]);
+        emit Approval(fromAddress, toAddress, amount);
+        return true;
     }
     
 //-------------------------------------------------------------------------
@@ -114,13 +164,13 @@ function setNewRouterContract(address routerAddress) onlyOwner public virtual re
     return true;
 }
 
-function setIsAllowedContract(address allowedContract, bool value) onlyOwner public virtual returns (bool success){
+function setAllowedContract(address allowedContract, bool value) onlyOwner public virtual returns (bool success){
      isAllowedContract[allowedContract] = value;
      return true;
 }
 //-------------------START ROUTED----------------------------------------
 
-    function transfer(address recipient, uint256 amount) public virtual returns (bool success) {
+    function transfer(address recipient, uint256 amount) override public virtual returns (bool success) {
         
         address[2] memory addresseArr = [_msgSender(), recipient];
         uint[2] memory uintArr = [amount,0];
@@ -142,7 +192,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual returns (bool success) {
+    function transferFrom(address sender, address recipient, uint256 amount) override public virtual returns (bool success) {
         address[3] memory addresseArr = [_msgSender(), sender, recipient];
         uint[3] memory uintArr = [amount,0,0];
         bool[3] memory boolArr;
