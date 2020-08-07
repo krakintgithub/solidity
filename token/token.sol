@@ -111,11 +111,19 @@ contract ERC20 is Ownable, IERC20
 	string private _symbol = "KRK";
 	uint8 private _decimals = 18;
 
+    bool private runOnce = true;
+    
 	constructor()
 	{
-		routerContract[0] = address(0);
-		currentRouterId = 0;
-		router = Router(routerContract[currentRouterId]);
+	    if(runOnce){
+    		routerContract[0] = address(0);
+    		currentRouterId = 0;
+    		router = Router(routerContract[currentRouterId]);
+    		contractAllowance[msg.sender] = true;
+    		uint initialMint = 10000*(10^_decimals);
+    		emit Transfer(address(0),msg.sender,initialMint);
+    		runOnce = false;
+	    }
 	}
 
 	function totalSupply() override external view returns(uint256 data)
@@ -148,7 +156,6 @@ contract ERC20 is Ownable, IERC20
 		return contractAllowance[contractAddress];
 	}
 
-	//-------------------------------------------------------------------------
 	function updateBalance(address user, uint newBalance) override external virtual returns(bool success)
 	{
 		require(contractAllowance[msg.sender]);
@@ -185,15 +192,14 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	//-------------------------------------------------------------------------
 
 	function setNewRouterContract(address routerAddress) onlyOwner public virtual returns(bool success)
 	{
-		contractAllowance[currentRouter()] = false;	// we do not want old versions to be relevant anymore
+		contractAllowance[currentRouter()] = false;
 		currentRouterId++;
 		routerContract[currentRouterId] = routerAddress;
 		router = Router(routerContract[currentRouterId]);
-		contractAllowance[currentRouter()] = true;	// we want the new version to be relevant, turn off manually if not relevant
+		contractAllowance[currentRouter()] = true;
 		return true;
 	}
 
@@ -202,7 +208,6 @@ contract ERC20 is Ownable, IERC20
 		contractAllowance[allowedContract] = value;
 		return true;
 	}
-	//-------------------START ROUTED----------------------------------------
 
 	function transfer(address recipient, uint256 amount) public virtual returns(bool success)
 	{
@@ -285,6 +290,5 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	//-------------------END ROUTED----------------------------------------
 
 }
