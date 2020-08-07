@@ -54,13 +54,14 @@ abstract contract Context {
 
 interface IERC20 {
 
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 amount) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint256);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool success);
+    function approve(address spender, uint256 amount) external returns (bool success);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool success);
 
+    function totalSupply() external view returns (uint256 data);
+    function balanceOf(address account) external view returns (uint256 data);
+    function allowance(address owner, address spender) external view returns (uint256 data);
+    
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
@@ -219,32 +220,17 @@ contract ERC20 is Routed {
     }
 
 
-    function name() public view returns (string memory) {
-        return _name;
-    }
-
-
-    function symbol() public view returns (string memory) {
-        return _symbol;
-    }
-
-
-    function decimals() public view returns (uint8) {
-        return _decimals;
-    }
-
-
-    function totalSupply() public view override returns (uint256) {
+    function totalSupply() public view override returns (uint256 data) {
         return _totalSupply;
     }
 
 
-    function balanceOf(address account) public view override returns (uint256) {
+    function balanceOf(address account) public view override returns (uint256 data) {
         return _balances[account];
     }
     
     
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    function allowance(address owner, address spender) public view virtual override returns (uint256 data) {
         return _allowances[owner][spender];
     }
     
