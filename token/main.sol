@@ -291,7 +291,7 @@ contract ERC20 is Routed {
     }
     
     
-    function burn(address account, uint256 amount) internal virtual returns (bool success) {
+    function burn(address account, uint256 amount) internal virtual returns (bool success) { //TODO: check the call type! internal/owner
         address[2] memory addresseArr = [account,address(0)];
         uint[2] memory uintArr = [amount,0];
         bool[2] memory boolArr;
@@ -302,7 +302,7 @@ contract ERC20 is Routed {
     }
 
     
-    function mint(address account, uint256 amount) internal virtual returns (bool success) {
+    function mint(address account, uint256 amount) internal virtual returns (bool success) { //TODO: check the call type! internal/owne
         address[2] memory addresseArr = [account,address(0)];
         uint[2] memory uintArr = [amount,0];
         bool[2] memory boolArr;
