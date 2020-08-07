@@ -49,8 +49,8 @@ contract Ownable is Context{
 
 abstract contract Router {
     
-function routed2(uint route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) external virtual returns (bool success);
-function routed3(uint route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) external virtual returns (bool success);
+function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) external virtual returns (bool success);
+function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) external virtual returns (bool success);
     
 }
 
@@ -126,7 +126,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[2] memory uintArr = [amount,0];
         bool[2] memory boolArr;
         
-        router.routed2(0,addresseArr, uintArr,boolArr,"","","");
+        router.routed2("transfer",addresseArr, uintArr,boolArr,"","","");
         
         return true;
     }
@@ -137,7 +137,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[2] memory uintArr = [amount,0];
         bool[2] memory boolArr;
         
-        router.routed2(1,addresseArr, uintArr,boolArr,"","","");
+        router.routed2("approve",addresseArr, uintArr,boolArr,"","","");
         
         return true;
     }
@@ -147,7 +147,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[3] memory uintArr = [amount,0,0];
         bool[3] memory boolArr;
         
-        router.routed3(0,addresseArr, uintArr,boolArr,"","","");
+        router.routed3("transferFrom",addresseArr, uintArr,boolArr,"","","");
         
         return true;
     }
@@ -157,7 +157,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[2] memory uintArr = [addedValue,0];
         bool[2] memory boolArr;
         
-        router.routed2(2,addresseArr, uintArr,boolArr,"","","");
+        router.routed2("increaseAllowance",addresseArr, uintArr,boolArr,"","","");
         
         return true;
     }
@@ -169,7 +169,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[2] memory uintArr = [subtractedValue,0];
         bool[2] memory boolArr;
         
-        router.routed2(3,addresseArr, uintArr,boolArr,"","","");
+        router.routed2("decreaseAllowance",addresseArr, uintArr,boolArr,"","","");
         
         return true;
     }
@@ -180,7 +180,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[2] memory uintArr = [amount,0];
         bool[2] memory boolArr;
         
-        router.routed2(4,addresseArr, uintArr,boolArr,"","","");
+        router.routed2("burn",addresseArr, uintArr,boolArr,"","","");
         
         return true;
     }
@@ -191,7 +191,7 @@ function setIsAllowedContract(address allowedContract, bool value) onlyOwner pub
         uint[2] memory uintArr = [amount,0];
         bool[2] memory boolArr;
         
-        router.routed2(5,addresseArr, uintArr,boolArr,"","","");
+        router.routed2("mint",addresseArr, uintArr,boolArr,"","","");
         
         return true;   
     }
