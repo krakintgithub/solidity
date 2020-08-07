@@ -84,7 +84,7 @@ mapping (address => uint256) private _balances; //TODO, is a call to ERC20
 mapping (address => mapping (address => uint256)) private _allowances; //TODO, is a call to ERC20
 uint256 private _totalSupply; //TODO, is a call to ERC20
     
-    function _transfer(address[2] memory addressArr, uint[2] memory uintArr) internal virtual returns (bool success) {
+    function transfer(address[2] memory addressArr, uint[2] memory uintArr) internal virtual returns (bool success) {
         address sender = addressArr[0];
         address recipient = addressArr[1];
         uint amount = uintArr[0];
@@ -100,20 +100,20 @@ uint256 private _totalSupply; //TODO, is a call to ERC20
     }
     
     
-    function _transferFrom(address[3] memory addressArr, uint[3] memory uintArr) internal virtual returns (bool success) {
+    function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) internal virtual returns (bool success) {
         uint256 amount = _allowances[addressArr[1]][addressArr[0]].sub(uintArr[0], "ERC20: transfer amount exceeds allowance");
         address[2] memory tmpAddresses1 = [addressArr[1], addressArr[2]];
         address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
         
         uint[2] memory tmpUint = [uintArr[0],uintArr[1]];
 
-        _transfer(tmpAddresses1, tmpUint);
-        _approve(tmpAddresses2, tmpUint); //todo check order of operations, approve before transfer.
+        transfer(tmpAddresses1, tmpUint);
+        approve(tmpAddresses2, tmpUint); //todo check order of operations, approve before transfer.
         return true;
     }
     
     
-    function _approve(address[2] memory addressArr, uint[2] memory uintArr) internal virtual {
+    function approve(address[2] memory addressArr, uint[2] memory uintArr) internal virtual returns (bool success){
         address owner = addressArr[0];
         address spender = addressArr[1];
         uint amount = uintArr[0];
@@ -123,17 +123,18 @@ uint256 private _totalSupply; //TODO, is a call to ERC20
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
+        return true;
     }
  
     function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) public virtual returns (bool success) {
         uintArr[0] = _allowances[addressArr[0]][addressArr[1]].add(uintArr[0]);
-        _approve(addressArr, uintArr);
+        approve(addressArr, uintArr);
         return true;
     }
     
     function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) public virtual returns (bool success) {
         uintArr[0] = _allowances[addressArr[0]][addressArr[1]].sub(uintArr[0], "ERC20: decreased allowance below zero");
-        _approve(addressArr, uintArr);
+        approve(addressArr, uintArr);
         return true;
     }
     
