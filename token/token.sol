@@ -99,9 +99,8 @@ contract ERC20 is Ownable{
         return routerContract[currentRouterId];
     }
     
-    function pastRouter(uint routerId) public view returns (address routerAddress){
-        require(routerId<=currentRouterId);
-        return routerContract[routerId];
+    function getIsAllowedContract(address contractAddress) public view virtual returns (bool isAllowed){
+        return isAllowedContract[contractAddress];
     }
     
 //-------------------------------------------------------------------------
