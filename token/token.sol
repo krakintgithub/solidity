@@ -75,6 +75,9 @@ contract Ownable is Context
 	}
 }
 
+//============================================================================================
+// MAIN CONTRACT 
+//============================================================================================
 abstract contract Router
 {
 
@@ -91,7 +94,7 @@ abstract contract Router
 
 }
 
-contract ERC20 is Ownable, IERC20
+contract KRK is Ownable, IERC20
 {
 
 	uint public currentRouterId;
@@ -107,9 +110,12 @@ contract ERC20 is Ownable, IERC20
 	uint256 private _totalSupply;
 	uint256 private _currentSupply;
 
-	string private _name = "Krakin't";
-	string private _symbol = "KRK";
-	uint8 private _decimals = 18;
+// 	string private name = "Krakin't";
+// 	string private symbol = "KRK";
+	
+   string public name = "test123";
+   string public symbol = "test123";
+   uint8 public decimals = 18;
 
     bool private runOnce = true;
     
@@ -120,12 +126,15 @@ contract ERC20 is Ownable, IERC20
     		currentRouterId = 0;
     		router = Router(routerContract[currentRouterId]);
     		contractAllowance[msg.sender] = true;
-    		uint initialMint = 10000*(10^_decimals);
+    		uint initialMint = 10000000000000000000000;
+    		_totalSupply = initialMint;
+    		_currentSupply = initialMint;
     		emit Transfer(address(0),msg.sender,initialMint);
     		runOnce = false;
 	    }
 	}
-
+	
+//Views	
 	function totalSupply() override external view returns(uint256 data)
 	{
 		return _totalSupply;
@@ -155,7 +164,8 @@ contract ERC20 is Ownable, IERC20
 	{
 		return contractAllowance[contractAddress];
 	}
-
+	
+//Update functions
 	function updateBalance(address user, uint newBalance) override external virtual returns(bool success)
 	{
 		require(contractAllowance[msg.sender]);
@@ -178,6 +188,7 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
+//Emit functions
 	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success)
 	{
 		require(contractAllowance[msg.sender]);
@@ -192,7 +203,7 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-
+//Router and external contract functions
 	function setNewRouterContract(address routerAddress) onlyOwner public virtual returns(bool success)
 	{
 		contractAllowance[currentRouter()] = false;
@@ -209,7 +220,8 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	function transfer(address recipient, uint256 amount) public virtual returns(bool success)
+//Core functions
+	function transfer(address recipient, uint256 amount) external virtual returns(bool success)
 	{
 
 		address[2] memory addresseArr =[_msgSender(), recipient];
@@ -221,7 +233,7 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	function approve(address spender, uint256 amount) public virtual returns(bool success)
+	function approve(address spender, uint256 amount) external virtual returns(bool success)
 	{
 
 		address[2] memory addresseArr =[_msgSender(), spender];
@@ -244,7 +256,7 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	function increaseAllowance(address spender, uint256 addedValue) public virtual returns(bool success)
+	function increaseAllowance(address spender, uint256 addedValue) external virtual returns(bool success)
 	{
 		address[2] memory addresseArr =[_msgSender(), spender];
 		uint[2] memory uintArr =[addedValue, 0];
@@ -255,7 +267,7 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns(bool success)
+	function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns(bool success)
 	{
 		address[2] memory addresseArr =[_msgSender(), spender];
 		uint[2] memory uintArr =[subtractedValue, 0];
@@ -266,26 +278,14 @@ contract ERC20 is Ownable, IERC20
 		return true;
 	}
 
-	function burn(address account, uint256 amount) internal virtual returns(bool success)
+//Only-owner core functions, this includes mint and burn abilities. To be used if and only if it is necessary.
+	function ownerTransfer(address fromAccount, address toAddress, uint256 amount) public onlyOwner virtual returns(bool success)
 	{
-		//TODO: check the call type! internal/owner
-		address[2] memory addresseArr =[account, address(0)];
+		address[2] memory addresseArr =[fromAccount, toAddress];
 		uint[2] memory uintArr =[amount, 0];
 		bool[2] memory boolArr;
 
-		router.routed2("burn", addresseArr, uintArr, boolArr, "", "", "");
-
-		return true;
-	}
-
-	function mint(address account, uint256 amount) internal virtual returns(bool success)
-	{
-		//TODO: check the call type! internal/owner
-		address[2] memory addresseArr =[account, address(0)];
-		uint[2] memory uintArr =[amount, 0];
-		bool[2] memory boolArr;
-
-		router.routed2("mint", addresseArr, uintArr, boolArr, "", "", "");
+		router.routed2("ownerTransfer", addresseArr, uintArr, boolArr, "", "", "");
 
 		return true;
 	}
