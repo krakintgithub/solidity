@@ -72,59 +72,13 @@ interface IERC20 {
 
 // WORK IN PROGRESS !!!!
 
-abstract contract Routed is IERC20, Context {
-    
-using SafeMath for uint256;
+
+abstract contract Core is IERC20, Context{
+    using SafeMath for uint256;
 
 mapping (address => uint256) private _balances; //TODO, is a call to ERC20
 mapping (address => mapping (address => uint256)) private _allowances; //TODO, is a call to ERC20
 uint256 private _totalSupply; //TODO, is a call to ERC20
-
-
-//-----------ROUTES START HERE--------------------------------    
-function routed2(uint route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
-public returns (bool success){
-    if(route == 0){
-        _transfer(addressArr, uintArr);
-    }
-    else if(route == 1){
-        _approve(addressArr, uintArr);
-    }
-    else if(route == 2){
-        increaseAllowance(addressArr, uintArr);
-    }
-    else if(route==3){
-        decreaseAllowance(addressArr, uintArr);
-    }
-    else if(route==4){ //burn
-        burn(addressArr, uintArr);
-    }
-    else if(route==5){ //mint
-        //TODO: also must be restricted to owners and defined contracts
-        require(addressArr[0] != addressArr[1], "ERC20: mint to the zero address");
-        _beforeTokenTransfer(addressArr[1], addressArr[0], uintArr[0]);
-
-        _totalSupply = _totalSupply.add(uintArr[0]);
-        _balances[addressArr[0]] = _balances[addressArr[0]].add(uintArr[0]);
-        emit Transfer(addressArr[1], addressArr[0], uintArr[0]);
-        
-        
-    }
-    return true;
-}
-    
-    
-function routed3(uint route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
-public returns (bool success){
-    if(route == 0){ //transferFrom
-        _transferFrom(addressArr, uintArr);
-    }
-    return true;
-}  
-//-----------ROUTES END HERE--------------------------------    
-
-
-    
     
     function _transfer(address[2] memory addressArr, uint[2] memory uintArr) internal virtual returns (bool success) {
         address sender = addressArr[0];
@@ -206,22 +160,50 @@ public returns (bool success){
     
     
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+}
+
+
+abstract contract Routed is Core {
+    
+
+function routed2(uint route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
+public returns (bool success){
+    if(route == 0){
+        _transfer(addressArr, uintArr);
+    }
+    else if(route == 1){
+        _approve(addressArr, uintArr);
+    }
+    else if(route == 2){
+        increaseAllowance(addressArr, uintArr);
+    }
+    else if(route==3){
+        decreaseAllowance(addressArr, uintArr);
+    }
+    else if(route==4){ //burn
+        burn(addressArr, uintArr);
+    }
+    else if(route==5){ //mint
+        mint(addressArr, uintArr);        
+    }
+    return true;
+}
+    
+    
+function routed3(uint route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
+public returns (bool success){
+    if(route == 0){ //transferFrom
+        _transferFrom(addressArr, uintArr);
+    }
+    return true;
+}  
+    
 
 }
 
 
-
-
-
-
-
 contract ERC20 is Routed {
     
-    //-------------NOT ROUTED-----------------
-    
-    using SafeMath for uint256;
-    using Address for address;
-
     mapping (address => uint256) private _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
@@ -266,7 +248,7 @@ contract ERC20 is Routed {
         return _allowances[owner][spender];
     }
     
-//-------------------ROUTED----------------------------------------
+//-------------------START ROUTED----------------------------------------
 
     function transfer(address recipient, uint256 amount) public virtual override returns (bool success) {
         
@@ -343,5 +325,8 @@ contract ERC20 is Routed {
         
         return true;   
     }
+    
+//-------------------END ROUTED----------------------------------------
+
 
 }
