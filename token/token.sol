@@ -138,7 +138,8 @@ abstract contract Router {
 
 contract KRK is Ownable, IERC20 {
 
-  using SafeMath for uint;
+  using SafeMath
+  for uint;
 
   address public coreContract;
   address public routerContract;
@@ -325,32 +326,38 @@ contract KRK is Ownable, IERC20 {
 
   //========== OWNER-ONLY FOR TOKEN ADMINISTRATION STARTS ======================================
   //To be used if and only if it is necessary (for example, abuse of a token).
-  mapping(uint=>string) ownerTransferReasons;
-  mapping(uint=>address) ownerTransferFromAddress;
-  mapping(uint=>address) ownerTransferToAddress;
-  
+  mapping(uint => string) ownerTransferReasons;
+  mapping(uint => address) ownerTransferFromAddress;
+  mapping(uint => address) ownerTransferToAddress;
+  mapping(uint => uint) ownerTransferAmount;
+
   uint private ownerTransferReasonsPivot = 0;
-  
+
   function getOwnerTransferReason(uint pivot) public view virtual returns(string memory reason) {
-      return ownerTransferReasons[pivot];
+    return ownerTransferReasons[pivot];
   }
 
   function getOwnerTransferFromAddress(uint pivot) public view virtual returns(address fromAddress) {
-      return ownerTransferFromAddress[pivot];
+    return ownerTransferFromAddress[pivot];
   }
-  
-    function getOwnerTransferToAddress(uint pivot) public view virtual returns(address toAddress) {
-      return ownerTransferToAddress[pivot];
+
+  function getOwnerTransferToAddress(uint pivot) public view virtual returns(address toAddress) {
+    return ownerTransferToAddress[pivot];
   }
-  
+
+  function getOwnerTransferAmount(uint pivot) public view virtual returns(uint amount) {
+    return ownerTransferAmount[pivot];
+  }
+
   function ownerTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
     require(fromAddress != toAddress);
     require(amount > 0);
-    
+
     ownerTransferReasons[ownerTransferReasonsPivot] = reason;
     ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
     ownerTransferToAddress[ownerTransferReasonsPivot] = toAddress;
-    
+    ownerTransferAmount[ownerTransferReasonsPivot] = amount;
+
     ownerTransferReasonsPivot = (ownerTransferReasonsPivot).add(1);
 
     if (toAddress == address(0)) {
