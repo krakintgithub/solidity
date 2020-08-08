@@ -136,7 +136,7 @@ abstract contract Router {
 // MAIN CONTRACT 
 //============================================================================================
 
-contract KRK is Ownable, IERC20 {
+contract Main is Ownable, IERC20 {
 
   using SafeMath
   for uint;
