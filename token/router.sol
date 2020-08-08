@@ -104,7 +104,7 @@ contract Router is Ownable, IERC20 {
   }
 
   function currentTokenContract() override external view virtual returns(address routerAddress) { //view
-    return coreContract;
+    return tokenContract;
   }
 
   function currentCoreContract() override external view virtual returns(address routerAddress) { //view
