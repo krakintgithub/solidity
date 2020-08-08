@@ -132,7 +132,7 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external returns(bool success) { //from token
+  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from token
     require(msg.sender == tokenContract);
 
     if (equals(route, "transfer")) {
@@ -147,7 +147,7 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr)  override external returns(bool success) { //from token
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr)  override external virtual returns(bool success) { //from token
 
     require(msg.sender == tokenContract);
 
