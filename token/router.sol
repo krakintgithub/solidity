@@ -1,137 +1,167 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity >= 0.5 .0 < 0.8 .0;
+
 abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
-    }
+  function _msgSender() internal view virtual returns(address payable) {
+    return msg.sender;
+  }
 
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; 
-        return msg.data;
-    }
+  function _msgData() internal view virtual returns(bytes memory) {
+    this;
+    return msg.data;
+  }
 }
 
-contract Ownable is Context{
-    address private _owner;
+contract Ownable is Context {
+  address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
+  constructor() {
+    address msgSender = _msgSender();
+    _owner = msgSender;
+    emit OwnershipTransferred(address(0), msgSender);
+  }
 
-    constructor ()  {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
+  function owner() public view returns(address) {
+    return _owner;
+  }
 
-    function owner() public view returns (address) {
-        return _owner;
-    }
+  modifier onlyOwner() {
+    require(_owner == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
 
-    modifier onlyOwner() {
-        require(_owner == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
+  function renounceOwnership() public virtual onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
 
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
+  function transferOwnership(address newOwner) public virtual onlyOwner {
+    require(newOwner != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
 }
 
+interface IERC20 {
+  function currentCoreContract() external view returns(address routerAddress);
 
+  function currentTokenContract() external view returns(address routerAddress);
 
+  function getExternalContractAddress(string memory contractName) external view returns(address routerAddress);
+
+  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr,
+    bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar)
+  external returns(bool success);
+
+}
 
 abstract contract Core {
-    
-function transfer(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns (bool success);
-function approve(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns (bool success);
-function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns (bool success);
-function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns (bool success);
-function burn(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns (bool success);
-function mint(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns (bool success);
-function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) external virtual returns (bool success);
+
+  function transfer(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+
+  function approve(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+
+  function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+
+  function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+
+  function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
 
 }
 
-contract Router is Ownable {
+//============================================================================================
+// MAIN CONTRACT 
+//============================================================================================
+contract Router is Ownable, IERC20 {
 
-uint public currentCoreId;
-mapping (uint => address) private coreContract;
-Core private core;
+  address public tokenContract;
+  address public coreContract;
+  Core private core;
 
-mapping (address=>bool) private isAllowedContract; //todo, for mint for example.
+  mapping(string => address) public otherContracts;
 
+  bool private mainConstructorLocked = false;
 
-constructor () {
-    coreContract[0] = address(0);
-    currentCoreId = 0;
-    core = Core(coreContract[currentCoreId]);
-}
+  constructor() {
+    if (!mainConstructorLocked) {
+      tokenContract = address(0x1f76E9D2D609A178141C63aC3B23F250462D8927); //Can be hardcoded or use address(0)
+      coreContract = address(0);
+      mainConstructorLocked = true;
+    }
+  }
 
+  //============== CORE FUNCTIONS START HERE ==================================================
+  //These functions should never change when introducing a new version of a router.
+  //Router is expected to constantly change, and the code should be written under 
+  //the "NON-CORE FUNCTIONS TO BE CODED BELOW".
 
-function equals (string memory a, string memory b) public view returns (bool isEqual) {
-    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))) );
-}
+  function equals(string memory a, string memory b) internal view virtual returns(bool isEqual) {
+    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+  }
 
+  function currentTokenContract() override external view virtual returns(address routerAddress) { //view
+    return coreContract;
+  }
 
-function currentCore() public view returns (address routerAddress) {
-    return coreContract[currentCoreId];
-}
-    
-function getIsAllowedContract(address contractAddress) public view virtual returns (bool isAllowed){
-    return isAllowedContract[contractAddress];
-}
-    
-function setNewCoreContract(address coreAddress) onlyOwner public virtual returns (bool success) {
-    isAllowedContract[currentCore()] = false; // we do not want old versions to be relevant anymore
-    currentCoreId ++;
-    coreContract[currentCoreId] = coreAddress;
-    core = Core(coreContract[currentCoreId]);
-    isAllowedContract[currentCore()] = true; // we want the new version to be relevant, turn off manually if not relevant
+  function currentCoreContract() override external view virtual returns(address routerAddress) { //view
+    return coreContract;
+  }
+
+  function getExternalContractAddress(string memory contractName) override external view virtual returns(address routerAddress) { //view
+    return otherContracts[contractName];
+  }
+
+  function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) { //owner
+    tokenContract = newTokenAddress;
     return true;
-}
+  }
 
-function setIsAllowedContract(address allowedContract, bool value) onlyOwner public virtual returns (bool success){
-     isAllowedContract[allowedContract] = value;
-     return true;
-}
+  //function is not needed if token address is hard-coded in a constructor
+  //   function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
+  //     coreContract = newCoreAddress;
+  //     core = Core(coreContract);
+  //     return true;
+  //   }
 
+  function setNewOtherContract(string memory contractName, address newContractAddress) onlyOwner public virtual returns(bool success) { //owner
+    otherContracts[contractName] = newContractAddress;
+    return true;
+  }
 
-function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
-public returns (bool success){
-    if(equals(route, "transfer")){
-        core.transfer(addressArr, uintArr);
-    }
-    else if(equals(route, "approve")){
-        core.approve(addressArr, uintArr);
-    }
-    else if(equals(route, "increaseAllowance")){
-        core.increaseAllowance(addressArr, uintArr);
-    }
-    else if(equals(route, "decreaseAllowance")){
-        core.decreaseAllowance(addressArr, uintArr);
-    }
-    else if(equals(route, "burn")){
-        core.burn(addressArr, uintArr);
-    }
-    else if(equals(route, "mint")){
-        core.mint(addressArr, uintArr);        
+  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr,
+    bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar)
+  override external returns(bool success) { //from token
+
+    require(msg.sender == tokenContract);
+
+    if (equals(route, "transfer")) {
+      core.transfer(addressArr, uintArr);
+    } else if (equals(route, "approve")) {
+      core.approve(addressArr, uintArr);
+    } else if (equals(route, "increaseAllowance")) {
+      core.increaseAllowance(addressArr, uintArr);
+    } else if (equals(route, "decreaseAllowance")) {
+      core.decreaseAllowance(addressArr, uintArr);
     }
     return true;
-}
-    
-    
-    function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar) 
-    public returns (bool success){
-        if(equals(route, "transferFrom")){
-            core.transferFrom(addressArr, uintArr);
-        }
-        return true;
-    }  
-    
+  }
+
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr,
+    bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar)
+  public returns(bool success) { //from token
+
+    require(msg.sender == tokenContract);
+
+    if (equals(route, "transferFrom")) {
+      core.transferFrom(addressArr, uintArr);
+    }
+    return true;
+  }
+  //============== CORE FUNCTIONS END HERE ==================================================
+
+  //=============== NON-CORE FUNCTIONS TO BE CODED BELOW ====================================
 
 }
