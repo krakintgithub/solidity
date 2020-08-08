@@ -16,6 +16,6 @@ Any additional steps that are not core-related will apply (for example, addition
 On Ropsten...
 
 #### TOKEN: 
-0x1f76E9D2D609A178141C63aC3B23F250462D8927
+0xACBA92dFBe28Db42f4f7F4182142537cD29C21a4
 
-https://ropsten.etherscan.io/address/0x1f76e9d2d609a178141c63ac3b23f250462d8927#code
+https://ropsten.etherscan.io/address/0xACBA92dFBe28Db42f4f7F4182142537cD29C21a4#code
