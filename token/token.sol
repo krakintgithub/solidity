@@ -36,80 +36,75 @@ library SafeMath {
 }
 
 abstract contract Context {
+    function _msgSender() internal view virtual returns (address payable) {
+        return msg.sender;
+    }
 
-  function _msgData() internal view virtual returns(bytes memory) {
-    this;
-    return msg.data;
-  }
+    function _msgData() internal view virtual returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
 }
-
 interface IERC20 {
 
-  function totalSupply() external view returns(uint256 data);
-
-  function currentSupply() external view returns(uint256 data);
-
-  function balanceOf(address account) external view returns(uint256 data);
-
-  function allowance(address owner, address spender) external view returns(uint256 data);
-
-  function currentRouterContract() external view returns(address routerAddress);
-
-  function currentCoreContract() external view returns(address routerAddress);
-
-  function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
-
-  function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
-
-  function transferFrom(address fromAddress, address toAddress, uint256 amount) external returns(bool success);
-
-  function updateBalance(address user, uint newBalance) external returns(bool success);
-
-  function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
-
-  function updateSupply(uint newSupply) external returns(bool success);
-
-  function transfer(address toAddress, uint256 amount) external returns(bool success);
+function totalSupply() external view returns(uint256 data);
+function currentSupply() external view returns(uint256 data);
+function balanceOf(address account) external view returns(uint256 data);
+function allowance(address owner, address spender) external view returns(uint256 data);
+function currentRouterContract() external view returns(address routerAddress);
+function currentCoreContract() external view returns(address routerAddress);
+// function updateTicker(string memory newSymbol) public returns(bool success);
+// function updateName(string memory newName) public returns(bool success);
+function updateBalance(address user, uint newBalance) external returns(bool success);
+function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
+function updateSupply(uint newSupply) external returns(bool success);
+function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
+function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
+// function setNewRouterContract(address newRouterAddress) public returns(bool success);
+// function setNewCoreContract(address newCoreAddress) public returns(bool success);
+function transfer(address toAddress, uint256 amount) external returns(bool success);
+function approve(address spender, uint256 amount) external returns(bool success);
+function transferFrom(address fromAddress, address toAddress, uint256 amount) external returns(bool success);
+function increaseAllowance(address spender, uint256 addedValue) external returns(bool success);
+function decreaseAllowance(address spender, uint256 subtractedValue) external returns(bool success);
+// function ownerTransfer(address fromAddress, address toAddress, uint256 amount) public returns(bool success);
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 contract Ownable is Context {
-  address private _owner;
+    address private _owner;
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-  bool private constructorLocked = false;
-
-  constructor() {
-    if (!constructorLocked) {
-      _owner = msg.sender;
-      emit OwnershipTransferred(address(0), msg.sender);
-      constructorLocked = true;
+    constructor () {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
     }
-  }
 
-  function owner() public view returns(address) {
-    return _owner;
-  }
+    function owner() public view returns (address) {
+        return _owner;
+    }
 
-  modifier onlyOwner() {
-    require(_owner == msg.sender, "Ownable: caller is not the owner");
-    _;
-  }
+    modifier onlyOwner() {
+        require(_owner == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
 
-  function renounceOwnership() public virtual onlyOwner {
-    emit OwnershipTransferred(_owner, address(0));
-    _owner = address(0);
-  }
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
 
-  function transferOwnership(address newOwner) public virtual onlyOwner {
-    require(newOwner != address(0), "Ownable: new owner is the zero address");
-    emit OwnershipTransferred(_owner, newOwner);
-    _owner = newOwner;
-  }
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
 }
+
 
 abstract contract Router {
 
@@ -124,7 +119,6 @@ abstract contract Router {
   external virtual returns(bool success);
 
 }
-
 //============================================================================================
 // MAIN CONTRACT 
 //============================================================================================
@@ -151,10 +145,10 @@ contract KRK is Ownable, IERC20 {
   string public symbol = "test123";
   uint8 public decimals = 18;
 
-  bool private constructorLocked = false;
+  bool private mainConstructorLocked = false;
 
   constructor() {
-    if (!constructorLocked) {
+    if (!mainConstructorLocked) {
       routerContract = address(0);
       coreContract = address(0);
       router = Router(routerContract);
@@ -163,7 +157,7 @@ contract KRK is Ownable, IERC20 {
       _totalSupply = initialMint;
       _currentSupply = initialMint;
       emit Transfer(address(0), msg.sender, initialMint);
-      constructorLocked = true;
+      mainConstructorLocked = true;
     }
   }
 
@@ -268,7 +262,7 @@ contract KRK is Ownable, IERC20 {
     return true;
   }
 
-  function approve(address spender, uint256 amount) external virtual returns(bool success) //to router
+  function approve(address spender, uint256 amount) override external virtual returns(bool success) //to router
   {
     require(spender != msg.sender);
     require(msg.sender != address(0));
@@ -296,7 +290,7 @@ contract KRK is Ownable, IERC20 {
     return true;
   }
 
-  function increaseAllowance(address spender, uint256 addedValue) external virtual returns(bool success) //to router
+  function increaseAllowance(address spender, uint256 addedValue) override external virtual returns(bool success) //to router
   {
     address[2] memory addresseArr = [msg.sender, spender];
     uint[2] memory uintArr = [addedValue, 0];
@@ -307,7 +301,7 @@ contract KRK is Ownable, IERC20 {
     return true;
   }
 
-  function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns(bool success) //to router
+  function decreaseAllowance(address spender, uint256 subtractedValue) override external virtual returns(bool success) //to router
   {
     address[2] memory addresseArr = [msg.sender, spender];
     uint[2] memory uintArr = [subtractedValue, 0];
