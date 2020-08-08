@@ -121,15 +121,9 @@ contract Ownable is Context {
 
 abstract contract Router {
 
-  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr,
-    bool[2] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var,
-    string memory stringVar)
-  external virtual returns(bool success);
+  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr,
-    bool[3] memory boolArr, bytes memory bytesVar, bytes32 bytes32Var,
-    string memory stringVar)
-  external virtual returns(bool success);
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
 
 }
 //============================================================================================
@@ -267,9 +261,8 @@ contract Main is Ownable, IERC20 {
 
     address[2] memory addresseArr = [msg.sender, toAddress];
     uint[2] memory uintArr = [amount, 0];
-    bool[2] memory boolArr;
 
-    router.routed2("transfer", addresseArr, uintArr, boolArr, "", "", "");
+    router.routed2("transfer", addresseArr, uintArr);
 
     return true;
   }
@@ -281,9 +274,8 @@ contract Main is Ownable, IERC20 {
 
     address[2] memory addresseArr = [msg.sender, spender];
     uint[2] memory uintArr = [amount, 0];
-    bool[2] memory boolArr;
 
-    router.routed2("approve", addresseArr, uintArr, boolArr, "", "", "");
+    router.routed2("approve", addresseArr, uintArr);
 
     return true;
   }
@@ -295,9 +287,8 @@ contract Main is Ownable, IERC20 {
 
     address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
     uint[3] memory uintArr = [amount, 0, 0];
-    bool[3] memory boolArr;
 
-    router.routed3("transferFrom", addresseArr, uintArr, boolArr, "", "", "");
+    router.routed3("transferFrom", addresseArr, uintArr);
 
     return true;
   }
@@ -306,9 +297,8 @@ contract Main is Ownable, IERC20 {
   {
     address[2] memory addresseArr = [msg.sender, spender];
     uint[2] memory uintArr = [addedValue, 0];
-    bool[2] memory boolArr;
 
-    router.routed2("increaseAllowance", addresseArr, uintArr, boolArr, "", "", "");
+    router.routed2("increaseAllowance", addresseArr, uintArr);
 
     return true;
   }
@@ -317,9 +307,8 @@ contract Main is Ownable, IERC20 {
   {
     address[2] memory addresseArr = [msg.sender, spender];
     uint[2] memory uintArr = [subtractedValue, 0];
-    bool[2] memory boolArr;
 
-    router.routed2("decreaseAllowance", addresseArr, uintArr, boolArr, "", "", "");
+    router.routed2("decreaseAllowance", addresseArr, uintArr);
 
     return true;
   }
