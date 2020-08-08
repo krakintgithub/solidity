@@ -145,6 +145,11 @@ contract Core is IERC20, Ownable {
     return true;
   }
 
+  //============== CORE FUNCTIONS START HERE ==================================================
+  //These functions should never change when introducing a new version of a router.
+  //Router is expected to constantly change, and the code should be written under 
+  //the "NON-CORE FUNCTIONS TO BE CODED BELOW".
+
   function transfer(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
     require(msg.sender == routerContract);
     _transfer(addressArr, uintArr);
@@ -217,5 +222,9 @@ contract Core is IERC20, Ownable {
     return true;
 
   }
+
+  //=============== NON-CORE FUNCTIONS TO BE CODED BELOW ====================================
+
+  //TODO: code the mint and burn functions
 
 }
