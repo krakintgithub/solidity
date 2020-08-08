@@ -168,44 +168,45 @@ contract KRK is Ownable, IERC20 {
   }
 
   //Views	
-  function totalSupply() override external view returns(uint256 data) {
+  function totalSupply() override external view returns(uint256 data) { //view
     return _totalSupply;
   }
 
-  function currentSupply() override external view returns(uint256 data) {
+  function currentSupply() override external view returns(uint256 data) { //view
     return _currentSupply;
   }
 
-  function balanceOf(address account) override external view returns(uint256 data) {
+  function balanceOf(address account) override external view returns(uint256 data) { //view
     return balances[account];
   }
 
-  function allowance(address owner, address spender) override external view virtual returns(uint256 data) {
+  function allowance(address owner, address spender) override external view virtual returns(uint256 data) { //view
     return allowances[owner][spender];
   }
 
-  function currentRouterContract() override external view virtual returns(address routerAddress) {
+  function currentRouterContract() override external view virtual returns(address routerAddress) { //view
     return routerContract;
   }
 
-  function currentCoreContract() override external view virtual returns(address routerAddress) {
+  function currentCoreContract() override external view virtual returns(address routerAddress) { //view
     return coreContract;
   }
 
   //Update functions
 
-  function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success) {
+  function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success) { //owner
     symbol = newSymbol;
     return true;
   }
 
-  function updateName(string memory newName) onlyOwner public virtual returns(bool success) {
+  function updateName(string memory newName) onlyOwner public virtual returns(bool success) { //owner
     name = newName;
     return true;
   }
 
-  function updateBalance(address user, uint newBalance) override external virtual returns(bool success) //core
+  function updateBalance(address user, uint newBalance) override external virtual returns(bool success) //from core
   {
+    require(msg.sender == coreContract);
     balances[user] = newBalance;
     return true;
   }
@@ -241,13 +242,13 @@ contract KRK is Ownable, IERC20 {
   }
 
   //Router and Core-contract functions
-  function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
+  function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) { //owner
     routerContract = newRouterAddress;
     router = Router(routerContract);
     return true;
   }
 
-  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) {
+  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
     coreContract = newCoreAddress;
     return true;
   }
@@ -318,7 +319,7 @@ contract KRK is Ownable, IERC20 {
   }
 
   //To be used if and only if it is necessary (for example, abuse of a token).
-  function ownerTransfer(address fromAddress, address toAddress, uint256 amount) public onlyOwner virtual returns(bool success) {
+  function ownerTransfer(address fromAddress, address toAddress, uint256 amount) public onlyOwner virtual returns(bool success) { //owner
     require(fromAddress != toAddress);
     require(amount > 0);
 
