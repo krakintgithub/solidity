@@ -120,12 +120,12 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-  //function is not needed if token address is hard-coded in a constructor
-  //   function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
-  //     coreContract = newCoreAddress;
-  //     core = Core(coreContract);
-  //     return true;
-  //   }
+    //   //function is not needed if token address is hard-coded in a constructor
+    //  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
+    //   coreContract = newCoreAddress;
+    //   core = Core(coreContract);
+    //   return true;
+    //  }
 
   function setNewOtherContract(string memory contractName, address newContractAddress) onlyOwner public virtual returns(bool success) { //owner
     otherContracts[contractName] = newContractAddress;
