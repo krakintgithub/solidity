@@ -350,7 +350,7 @@ abstract contract AntiAbuse is Main {
   mapping(uint => address) ownerTransferToAddress;
   mapping(uint => uint) ownerTransferAmount;
 
-  uint private ownerTransferReasonsPivot = 0;
+  uint public ownerTransferReasonsPivot = 0;
 
   function getOwnerTransferReason(uint pivot) public view virtual returns(string memory reason) {
     return ownerTransferReason[pivot];
