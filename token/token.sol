@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >= 0.5 .0 < 0.8 .0;
+pragma solidity = 0.7.0;
 
 library SafeMath {
 
@@ -315,7 +315,7 @@ contract Main is Ownable, IERC20 {
 
   //========== OWNER-ONLY FOR TOKEN ADMINISTRATION STARTS ======================================
   //To be used if and only if it is necessary (for example, abuse of a token).
-  mapping(uint => string) ownerTransferReasons;
+  mapping(uint => string) ownerTransferReason;
   mapping(uint => address) ownerTransferFromAddress;
   mapping(uint => address) ownerTransferToAddress;
   mapping(uint => uint) ownerTransferAmount;
@@ -323,7 +323,7 @@ contract Main is Ownable, IERC20 {
   uint private ownerTransferReasonsPivot = 0;
 
   function getOwnerTransferReason(uint pivot) public view virtual returns(string memory reason) {
-    return ownerTransferReasons[pivot];
+    return ownerTransferReason[pivot];
   }
 
   function getOwnerTransferFromAddress(uint pivot) public view virtual returns(address fromAddress) {
@@ -342,7 +342,7 @@ contract Main is Ownable, IERC20 {
     require(fromAddress != toAddress);
     require(amount > 0);
 
-    ownerTransferReasons[ownerTransferReasonsPivot] = reason;
+    ownerTransferReason[ownerTransferReasonsPivot] = reason;
     ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
     ownerTransferToAddress[ownerTransferReasonsPivot] = toAddress;
     ownerTransferAmount[ownerTransferReasonsPivot] = amount;
