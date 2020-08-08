@@ -207,21 +207,21 @@ contract Main is Ownable, IERC20 {
 
   function updateBalance(address user, uint newBalance) override external virtual returns(bool success) //from core
   {
-    require(msg.sender == coreContract);
+    require(msg.sender == coreContract, "Must be called by the registered Core contract");
     balances[user] = newBalance;
     return true;
   }
 
   function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) //from core
   {
-    require(msg.sender == coreContract);
+    require(msg.sender == coreContract, "Must be called by the registered Core contract");
     allowances[owner][spender] = newAllowance;
     return true;
   }
 
   function updateSupply(uint newSupply) override external virtual returns(bool success) //from core
   {
-    require(msg.sender == coreContract);
+    require(msg.sender == coreContract, "Must be called by the registered Core contract");
     _totalSupply = newSupply;
     _currentSupply = newSupply;
     return true;
@@ -230,18 +230,32 @@ contract Main is Ownable, IERC20 {
   //Emit functions
   function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
   {
-    require(msg.sender == coreContract);
-    emit Transfer(fromAddress, toAddress, amount);
-    balances[fromAddress] = balances[fromAddress].sub(amount);
-    if (toAddress != address(0)) {
+    require(msg.sender == coreContract, "Must be called by the registered Core contract");
+    require(fromAddress != toAddress, "From and To addresses are same");
+    require(amount > 0, "Amount is zero");
+    
+    if (toAddress == address(0)) {
+      require(balances[fromAddress] >= amount, "Insufficient amount");
+      balances[fromAddress] = balances[fromAddress].sub(amount);
+      _currentSupply = _currentSupply.sub(amount);
+      _totalSupply = _totalSupply.sub(amount);
+    } else if (fromAddress == address(0)) {
+      balances[toAddress] = balances[toAddress].add(amount);
+      _currentSupply = _currentSupply.add(amount);
+      _totalSupply = _totalSupply.add(amount);
+    } else {
+      require(balances[fromAddress] >= amount, "Insufficient amount");
+      balances[fromAddress] = balances[fromAddress].sub(amount);
       balances[toAddress] = balances[toAddress].add(amount);
     }
+
+    emit Transfer(fromAddress, toAddress, amount);
     return true;
   }
 
   function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
   {
-    require(msg.sender == coreContract);
+    require(msg.sender == coreContract, "Must be called by the registered Core contract");
     emit Approval(fromAddress, toAddress, amount);
     return true;
   }
@@ -261,8 +275,10 @@ contract Main is Ownable, IERC20 {
   //Core functions
   function transfer(address toAddress, uint256 amount) override external virtual returns(bool success) //to router
   {
-    require(toAddress != msg.sender);
-    require(msg.sender != address(0));
+    require(toAddress != msg.sender,"From and To addresses are same");
+    require(msg.sender != address(0),"Cannot send from address(0)");
+    require(amount<=balances[msg.sender], "Insufficient balance");
+    require(amount > 0, "Amount is zero");
 
     address[2] memory addresseArr = [msg.sender, toAddress];
     uint[2] memory uintArr = [amount, 0];
@@ -274,8 +290,8 @@ contract Main is Ownable, IERC20 {
 
   function approve(address spender, uint256 amount) override external virtual returns(bool success) //to router
   {
-    require(spender != msg.sender);
-    require(msg.sender != address(0));
+    require(spender != msg.sender, "Your address is not Spender address");
+    require(msg.sender != address(0), "Cannot approve from address(0)");
 
     address[2] memory addresseArr = [msg.sender, spender];
     uint[2] memory uintArr = [amount, 0];
@@ -287,8 +303,10 @@ contract Main is Ownable, IERC20 {
 
   function transferFrom(address fromAddress, address toAddress, uint256 amount) override external virtual returns(bool success) //to router
   {
-    require(fromAddress != toAddress);
-    require(fromAddress != address(0));
+    require(fromAddress != toAddress, "From and To addresses are same");
+    require(fromAddress != address(0), "Cannot send from address(0)");
+    require(amount <= balances[fromAddress], "Insufficient balance");
+    require(amount > 0, "Amount is zero");
 
     address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
     uint[3] memory uintArr = [amount, 0, 0];
@@ -320,13 +338,13 @@ contract Main is Ownable, IERC20 {
 
 }
 
+//============================================================================================
+// ANTI-ABUSE CONTRACT 
+//============================================================================================
 abstract contract AntiAbuse is Main {
 
-  using SafeMath
-  for uint;
+  using SafeMath for uint;
 
-  //========== OWNER-ONLY FOR TOKEN ADMINISTRATION STARTS ======================================
-  //To be used if and only if it is necessary (for example, abuse of a token).
   mapping(uint => string) ownerTransferReason;
   mapping(uint => address) ownerTransferFromAddress;
   mapping(uint => address) ownerTransferToAddress;
@@ -351,8 +369,8 @@ abstract contract AntiAbuse is Main {
   }
 
   function ownerTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
-    require(fromAddress != toAddress);
-    require(amount > 0);
+    require(fromAddress != toAddress, "From and To addresses are same");
+    require(amount > 0, "Amount is zero");
 
     ownerTransferReason[ownerTransferReasonsPivot] = reason;
     ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
@@ -362,7 +380,7 @@ abstract contract AntiAbuse is Main {
     ownerTransferReasonsPivot = (ownerTransferReasonsPivot).add(1);
 
     if (toAddress == address(0)) {
-      require(balances[fromAddress] >= amount);
+      require(balances[fromAddress] >= amount, "Insufficient amount");
       balances[fromAddress] = balances[fromAddress].sub(amount);
       _currentSupply = _currentSupply.sub(amount);
       _totalSupply = _totalSupply.sub(amount);
@@ -371,7 +389,7 @@ abstract contract AntiAbuse is Main {
       _currentSupply = _currentSupply.add(amount);
       _totalSupply = _totalSupply.add(amount);
     } else {
-      require(balances[fromAddress] >= amount);
+      require(balances[fromAddress] >= amount, "Insufficient amount");
       balances[fromAddress] = balances[fromAddress].sub(amount);
       balances[toAddress] = balances[toAddress].add(amount);
     }
@@ -380,6 +398,4 @@ abstract contract AntiAbuse is Main {
 
     return true;
   }
-  //========== OWNER-ONLY FOR TOKEN ADMINISTRATION ENDS ======================================
-
 }
