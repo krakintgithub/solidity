@@ -82,7 +82,7 @@ contract Router is Ownable, IERC20 {
   address public coreContract;
   Core private core;
 
-  mapping(string => address) public otherContracts;
+  mapping(string => address) public otherContracts; //for non-core functions
 
   bool private mainConstructorLocked = false;
 
