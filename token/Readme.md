@@ -10,6 +10,7 @@
 9. router.sol - update the core address as new core address
 
 Only the router should change when deploying the update to a code, meaning, we do steps 4,5,8
+Any additional steps that are not core-related will apply (for example, additional contracts in a router)
 
 
 On Ropsten...
