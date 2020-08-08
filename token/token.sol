@@ -71,7 +71,6 @@ interface IERC20
 	function currentSupply() external view returns(uint256 data);
 	function balanceOf(address account) external view returns(uint256 data);
 	function allowance(address owner, address spender) external view returns(uint256 data);
-	function isAllowedContract(address contractAddress) external view returns(bool isAllowed);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
 	function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
@@ -148,12 +147,9 @@ contract KRK is Ownable, IERC20
 
     using SafeMath for uint;
 
-	uint public currentRouterId;
-
-	mapping(uint => address) private routerContract;
+    address private coreContract;
+    address private routerContract;
 	Router private router;
-
-	mapping(address => bool) private contractAllowance;	//todo, for mint for example.
 
 	mapping(address => uint256) private balances;
 	mapping(address => mapping(address => uint256)) private allowances;
@@ -173,10 +169,8 @@ contract KRK is Ownable, IERC20
 	constructor()
 	{
 	    if(runOnce){
-    		routerContract[0] = address(0);
-    		currentRouterId = 0;
-    		router = Router(routerContract[currentRouterId]);
-    		contractAllowance[msg.sender] = true;
+    		routerContract = address(0);
+    		router = Router(routerContract);
     		uint _DECIMALSCONSTANT = 10 ** uint(decimals);
     		uint initialMint = (uint(10000)).mul(_DECIMALSCONSTANT);
     		_totalSupply = initialMint;
@@ -209,14 +203,13 @@ contract KRK is Ownable, IERC20
 
 	function currentRouter() public view returns(address routerAddress)
 	{
-		return routerContract[currentRouterId];
+		return routerContract;
+	}
+	function currentCore() public view returns(address routerAddress)
+	{
+		return coreContract;
 	}
 
-	function isAllowedContract(address contractAddress) override external view virtual returns(bool isAllowed)
-	{
-		return contractAllowance[contractAddress];
-	}
-	
 //Update functions
 
     function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success){
@@ -231,60 +224,56 @@ contract KRK is Ownable, IERC20
 
 	function updateBalance(address user, uint newBalance) override external virtual returns(bool success) //core
 	{
-		require(contractAllowance[msg.sender]);
 		balances[user] = newBalance;
 		return true;
 	}
 
-	function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) //core
+	function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) //from core
 	{
-		require(contractAllowance[msg.sender]);
+	    require(msg.sender == coreContract);
 		allowances[owner][spender] = newAllowance;
 		return true;
 	}
 
-	function updateSupply(uint newSupply) override external virtual returns(bool success) //core
+	function updateSupply(uint newSupply) override external virtual returns(bool success) //from core
 	{
-		require(contractAllowance[msg.sender]);
+	    require(msg.sender == coreContract);
 		_totalSupply = newSupply;
 		_currentSupply = newSupply;
 		return true;
 	}
 
 //Emit functions
-	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //core
+	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
 	{
-		require(contractAllowance[msg.sender]);
+	    require(msg.sender == coreContract);
 		emit Transfer(fromAddress, toAddress, amount);
 		return true;
 	}
 
-	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //core
+	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
 	{
-		require(contractAllowance[msg.sender]);
+	    require(msg.sender == coreContract);
 		emit Approval(fromAddress, toAddress, amount);
 		return true;
 	}
 
-//Router and external contract functions
+//Router and Core-contract functions
 	function setNewRouterContract(address routerAddress) onlyOwner public virtual returns(bool success)
 	{
-		contractAllowance[currentRouter()] = false;
-		currentRouterId++;
-		routerContract[currentRouterId] = routerAddress;
-		router = Router(routerContract[currentRouterId]);
-		contractAllowance[currentRouter()] = true;
+		routerContract = routerAddress;
+		router = Router(routerContract);
 		return true;
 	}
 
-	function setAllowedContract(address allowedContract, bool value) onlyOwner public virtual returns(bool success)
+	function setNewCoreContract(address coreAddress) onlyOwner public virtual returns(bool success)
 	{
-		contractAllowance[allowedContract] = value;
+		coreContract = coreAddress;
 		return true;
 	}
-
+	
 //Core functions
-	function transfer(address recipient, uint256 amount) external virtual returns(bool success) //core
+	function transfer(address recipient, uint256 amount) external virtual returns(bool success) //to router
 	{
         require(recipient!=msg.sender);
         require(msg.sender!=address(0));
@@ -298,7 +287,7 @@ contract KRK is Ownable, IERC20
 		return true;
 	}
 
-	function approve(address spender, uint256 amount) external virtual returns(bool success) //core
+	function approve(address spender, uint256 amount) external virtual returns(bool success) //to router
 	{
         require(spender!=msg.sender);
         require(msg.sender!=address(0));
@@ -312,7 +301,7 @@ contract KRK is Ownable, IERC20
 		return true;
 	}
 
-	function transferFrom(address sender, address recipient, uint256 amount) override external virtual returns(bool success) //core
+	function transferFrom(address sender, address recipient, uint256 amount) override external virtual returns(bool success) //to router
 	{
 	    require(sender!=recipient);
 	    require(sender!=address(0));
@@ -326,7 +315,7 @@ contract KRK is Ownable, IERC20
 		return true;
 	}
 
-	function increaseAllowance(address spender, uint256 addedValue) external virtual returns(bool success) //core
+	function increaseAllowance(address spender, uint256 addedValue) external virtual returns(bool success) //to router
 	{
 		address[2] memory addresseArr =[msg.sender, spender];
 		uint[2] memory uintArr =[addedValue, 0];
@@ -337,7 +326,7 @@ contract KRK is Ownable, IERC20
 		return true;
 	}
 
-	function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns(bool success) //core
+	function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns(bool success) //to router
 	{
 		address[2] memory addresseArr =[msg.sender, spender];
 		uint[2] memory uintArr =[subtractedValue, 0];
