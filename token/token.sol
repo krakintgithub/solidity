@@ -53,21 +53,16 @@ function balanceOf(address account) external view returns(uint256 data);
 function allowance(address owner, address spender) external view returns(uint256 data);
 function currentRouterContract() external view returns(address routerAddress);
 function currentCoreContract() external view returns(address routerAddress);
-// function updateTicker(string memory newSymbol) public returns(bool success);
-// function updateName(string memory newName) public returns(bool success);
 function updateBalance(address user, uint newBalance) external returns(bool success);
 function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
 function updateSupply(uint newSupply) external returns(bool success);
 function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
 function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
-// function setNewRouterContract(address newRouterAddress) public returns(bool success);
-// function setNewCoreContract(address newCoreAddress) public returns(bool success);
 function transfer(address toAddress, uint256 amount) external returns(bool success);
 function approve(address spender, uint256 amount) external returns(bool success);
 function transferFrom(address fromAddress, address toAddress, uint256 amount) external returns(bool success);
 function increaseAllowance(address spender, uint256 addedValue) external returns(bool success);
 function decreaseAllowance(address spender, uint256 subtractedValue) external returns(bool success);
-// function ownerTransfer(address fromAddress, address toAddress, uint256 amount) public returns(bool success);
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -78,10 +73,14 @@ contract Ownable is Context {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
+    bool private ownershipConstructorLocked = false;
     constructor () {
+        if(!ownershipConstructorLocked){
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
+        ownershipConstructorLocked = true;
+        }
     }
 
     function owner() public view returns (address) {
@@ -152,8 +151,7 @@ contract KRK is Ownable, IERC20 {
       routerContract = address(0);
       coreContract = address(0);
       router = Router(routerContract);
-      uint _DECIMALSCONSTANT = 10 ** uint(decimals);
-      uint initialMint = (uint(10000)).mul(_DECIMALSCONSTANT);
+      uint initialMint = 10000000000000000000000; //10K
       _totalSupply = initialMint;
       _currentSupply = initialMint;
       emit Transfer(address(0), msg.sender, initialMint);
