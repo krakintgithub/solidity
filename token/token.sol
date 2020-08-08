@@ -36,74 +36,88 @@ library SafeMath {
 }
 
 abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
-    }
+  function _msgSender() internal view virtual returns(address payable) {
+    return msg.sender;
+  }
 
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
+  function _msgData() internal view virtual returns(bytes memory) {
+    this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+    return msg.data;
+  }
 }
 interface IERC20 {
 
-function totalSupply() external view returns(uint256 data);
-function currentSupply() external view returns(uint256 data);
-function balanceOf(address account) external view returns(uint256 data);
-function allowance(address owner, address spender) external view returns(uint256 data);
-function currentRouterContract() external view returns(address routerAddress);
-function currentCoreContract() external view returns(address routerAddress);
-function updateBalance(address user, uint newBalance) external returns(bool success);
-function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
-function updateSupply(uint newSupply) external returns(bool success);
-function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
-function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
-function transfer(address toAddress, uint256 amount) external returns(bool success);
-function approve(address spender, uint256 amount) external returns(bool success);
-function transferFrom(address fromAddress, address toAddress, uint256 amount) external returns(bool success);
-function increaseAllowance(address spender, uint256 addedValue) external returns(bool success);
-function decreaseAllowance(address spender, uint256 subtractedValue) external returns(bool success);
+  function totalSupply() external view returns(uint256 data);
+
+  function currentSupply() external view returns(uint256 data);
+
+  function balanceOf(address account) external view returns(uint256 data);
+
+  function allowance(address owner, address spender) external view returns(uint256 data);
+
+  function currentRouterContract() external view returns(address routerAddress);
+
+  function currentCoreContract() external view returns(address routerAddress);
+
+  function updateBalance(address user, uint newBalance) external returns(bool success);
+
+  function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
+
+  function updateSupply(uint newSupply) external returns(bool success);
+
+  function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
+
+  function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
+
+  function transfer(address toAddress, uint256 amount) external returns(bool success);
+
+  function approve(address spender, uint256 amount) external returns(bool success);
+
+  function transferFrom(address fromAddress, address toAddress, uint256 amount) external returns(bool success);
+
+  function increaseAllowance(address spender, uint256 addedValue) external returns(bool success);
+
+  function decreaseAllowance(address spender, uint256 subtractedValue) external returns(bool success);
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 contract Ownable is Context {
-    address private _owner;
+  address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    bool private ownershipConstructorLocked = false;
-    constructor () {
-        if(!ownershipConstructorLocked){
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-        ownershipConstructorLocked = true;
-        }
+  bool private ownershipConstructorLocked = false;
+  constructor() {
+    if (!ownershipConstructorLocked) {
+      address msgSender = _msgSender();
+      _owner = msgSender;
+      emit OwnershipTransferred(address(0), msgSender);
+      ownershipConstructorLocked = true;
     }
+  }
 
-    function owner() public view returns (address) {
-        return _owner;
-    }
+  function owner() public view returns(address) {
+    return _owner;
+  }
 
-    modifier onlyOwner() {
-        require(_owner == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
+  modifier onlyOwner() {
+    require(_owner == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
 
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
+  function renounceOwnership() public virtual onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
 
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
+  function transferOwnership(address newOwner) public virtual onlyOwner {
+    require(newOwner != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
 }
-
 
 abstract contract Router {
 
