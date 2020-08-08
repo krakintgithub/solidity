@@ -156,6 +156,7 @@ contract KRK is Ownable, IERC20 {
   constructor() {
     if (!constructorLocked) {
       routerContract = address(0);
+      coreContract = address(0);
       router = Router(routerContract);
       uint _DECIMALSCONSTANT = 10 ** uint(decimals);
       uint initialMint = (uint(10000)).mul(_DECIMALSCONSTANT);
