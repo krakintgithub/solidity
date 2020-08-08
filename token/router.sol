@@ -52,9 +52,10 @@ interface IERC20 {
 
   function getExternalContractAddress(string memory contractName) external view returns(address routerAddress);
 
-  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr,
-    bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar)
-  external returns(bool success);
+  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+  
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
+
 
 }
 
@@ -87,7 +88,7 @@ contract Router is Ownable, IERC20 {
 
   constructor() {
     if (!mainConstructorLocked) {
-      tokenContract = address(0x1f76E9D2D609A178141C63aC3B23F250462D8927); //Can be hardcoded or use address(0)
+      tokenContract = address(0xACBA92dFBe28Db42f4f7F4182142537cD29C21a4); //Can be hardcoded or use address(0)
       coreContract = address(0);
       mainConstructorLocked = true;
     }
@@ -131,10 +132,7 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr, bool[2] memory boolArr,
-    bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar)
-  override external returns(bool success) { //from token
-
+  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external returns(bool success) { //from token
     require(msg.sender == tokenContract);
 
     if (equals(route, "transfer")) {
@@ -149,9 +147,7 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr, bool[3] memory boolArr,
-    bytes memory bytesVar, bytes32 bytes32Var, string memory stringVar)
-  public returns(bool success) { //from token
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr)  override external returns(bool success) { //from token
 
     require(msg.sender == tokenContract);
 
