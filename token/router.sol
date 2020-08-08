@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity = 0.7.0;
+pragma solidity = 0.7 .0;
 
 abstract contract Context {
   function _msgSender() internal view virtual returns(address payable) {
@@ -53,9 +53,8 @@ interface IERC20 {
   function getExternalContractAddress(string memory contractName) external view returns(address routerAddress);
 
   function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
-  
-  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
 
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
 
 }
 
@@ -120,12 +119,12 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-    //   //function is not needed if token address is hard-coded in a constructor
-    //  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
-    //   coreContract = newCoreAddress;
-    //   core = Core(coreContract);
-    //   return true;
-    //  }
+  //   //function is not needed if token address is hard-coded in a constructor
+  //  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
+  //   coreContract = newCoreAddress;
+  //   core = Core(coreContract);
+  //   return true;
+  //  }
 
   function setNewOtherContract(string memory contractName, address newContractAddress) onlyOwner public virtual returns(bool success) { //owner
     otherContracts[contractName] = newContractAddress;
@@ -147,7 +146,7 @@ contract Router is Ownable, IERC20 {
     return true;
   }
 
-  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr)  override external virtual returns(bool success) { //from token
+  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) { //from token
 
     require(msg.sender == tokenContract);
 
@@ -159,5 +158,6 @@ contract Router is Ownable, IERC20 {
   //============== CORE FUNCTIONS END HERE ==================================================
 
   //=============== NON-CORE FUNCTIONS TO BE CODED BELOW ====================================
-
+  //TODO: The mint function (under a miner contract) goes here, token has no mint but core and router do. 
+  //TODO: the burn functon goes here and in core but not in token.
 }
