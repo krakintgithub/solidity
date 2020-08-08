@@ -41,7 +41,7 @@ abstract contract Context {
   }
 
   function _msgData() internal view virtual returns(bytes memory) {
-    this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+    this; // silence state mutability warning without generating bytecode
     return msg.data;
   }
 }
@@ -138,8 +138,7 @@ abstract contract Router {
 
 contract KRK is Ownable, IERC20 {
 
-  using SafeMath
-  for uint;
+  using SafeMath for uint;
 
   address public coreContract;
   address public routerContract;
@@ -165,7 +164,7 @@ contract KRK is Ownable, IERC20 {
       routerContract = address(0);
       coreContract = address(0);
       router = Router(routerContract);
-      uint initialMint = 10000000000000000000000; //10K
+      uint initialMint = 10000000000000000000000; //10 thousand tokens with 18 decimals
       _totalSupply = initialMint;
       _currentSupply = initialMint;
       emit Transfer(address(0), msg.sender, initialMint);
@@ -324,10 +323,35 @@ contract KRK is Ownable, IERC20 {
     return true;
   }
 
+  //========== OWNER-ONLY FOR TOKEN ADMINISTRATION STARTS ======================================
   //To be used if and only if it is necessary (for example, abuse of a token).
-  function ownerTransfer(address fromAddress, address toAddress, uint256 amount) public onlyOwner virtual returns(bool success) { //owner
+  mapping(uint=>string) ownerTransferReasons;
+  mapping(uint=>address) ownerTransferFromAddress;
+  mapping(uint=>address) ownerTransferToAddress;
+  
+  uint private ownerTransferReasonsPivot = 0;
+  
+  function getOwnerTransferReason(uint pivot) public view virtual returns(string memory reason) {
+      return ownerTransferReasons[pivot];
+  }
+
+  function getOwnerTransferFromAddress(uint pivot) public view virtual returns(address fromAddress) {
+      return ownerTransferFromAddress[pivot];
+  }
+  
+    function getOwnerTransferToAddress(uint pivot) public view virtual returns(address toAddress) {
+      return ownerTransferToAddress[pivot];
+  }
+  
+  function ownerTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
     require(fromAddress != toAddress);
     require(amount > 0);
+    
+    ownerTransferReasons[ownerTransferReasonsPivot] = reason;
+    ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
+    ownerTransferToAddress[ownerTransferReasonsPivot] = toAddress;
+    
+    ownerTransferReasonsPivot = (ownerTransferReasonsPivot).add(1);
 
     if (toAddress == address(0)) {
       require(balances[fromAddress] >= amount);
@@ -348,5 +372,6 @@ contract KRK is Ownable, IERC20 {
 
     return true;
   }
+  //========== OWNER-ONLY FOR TOKEN ADMINISTRATION ENDS ======================================
 
 }
