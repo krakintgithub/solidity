@@ -88,7 +88,7 @@ contract Router is Ownable, IERC20 {
 
   constructor() {
     if (!mainConstructorLocked) {
-      tokenContract = address(0xACBA92dFBe28Db42f4f7F4182142537cD29C21a4); //Can be hardcoded or use address(0)
+      tokenContract = address(0xE4F82Ed7FEcfae6629d034332A89F4830b74ed27); //Can be hardcoded or use address(0) and uncomment setNewCoreContract
       coreContract = address(0);
       mainConstructorLocked = true;
     }
