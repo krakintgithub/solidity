@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity = 0.7.0;
+pragma solidity = 0.7 .0;
 
 library SafeMath {
 
@@ -126,6 +126,7 @@ abstract contract Router {
   function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
 
 }
+
 //============================================================================================
 // MAIN CONTRACT 
 //============================================================================================
@@ -139,8 +140,8 @@ contract Main is Ownable, IERC20 {
   address public routerContract;
   Router private router;
 
-  mapping(address => uint256) private balances;
-  mapping(address => mapping(address => uint256)) private allowances;
+  mapping(address => uint256) internal balances;
+  mapping(address => mapping(address => uint256)) internal allowances;
 
   uint256 public _totalSupply;
   uint256 public _currentSupply;
@@ -231,6 +232,10 @@ contract Main is Ownable, IERC20 {
   {
     require(msg.sender == coreContract);
     emit Transfer(fromAddress, toAddress, amount);
+    balances[fromAddress] = balances[fromAddress].sub(amount);
+    if (toAddress != address(0)) {
+      balances[toAddress] = balances[toAddress].add(amount);
+    }
     return true;
   }
 
@@ -312,6 +317,13 @@ contract Main is Ownable, IERC20 {
 
     return true;
   }
+
+}
+
+abstract contract AntiAbuse is Main {
+
+  using SafeMath
+  for uint;
 
   //========== OWNER-ONLY FOR TOKEN ADMINISTRATION STARTS ======================================
   //To be used if and only if it is necessary (for example, abuse of a token).
