@@ -146,7 +146,7 @@ contract Core is IERC20, Ownable {
 	//the "NON-CORE FUNCTIONS TO BE CODED BELOW".
 
 	function transfer(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: transfer | message: Must be called by the registered Router contract");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: transfer | message: Must be called by the registered Router contract");
 		_transfer(addressArr, uintArr);
 		return true;
 	}
@@ -155,18 +155,18 @@ contract Core is IERC20, Ownable {
 		address sender = addressArr[0];
 		address recipient = addressArr[1];
 
-		require(sender != address(0), "at: core.sol | contract: Core | method: _transfer | message: Sender cannot be address(0)");
+		require(sender != address(0), "at: core.sol | contract: Core | function: _transfer | message: Sender cannot be address(0)");
 
 		uint amount = uintArr[0];
 
-		require(amount <= token.balanceOf(sender), "at: core.sol | contract: Core | method: _transfer | message: Insufficient amount");
+		require(amount <= token.balanceOf(sender), "at: core.sol | contract: Core | function: _transfer | message: Insufficient amount");
 
 		token.emitTransfer(sender, recipient, amount);
 		return true;
 	}
 
 	function approve(address[2] memory addressArr, uint[2] memory uintArr) override external returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: approve | message: Must be called by the registered Router contract");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: approve | message: Must be called by the registered Router contract");
 		_approve(addressArr, uintArr);
 		return true;
 	}
@@ -176,8 +176,8 @@ contract Core is IERC20, Ownable {
 		address spender = addressArr[1];
 		uint amount = uintArr[0];
 
-		require(owner != address(0), "at: core.sol | contract: Core | method: _approve | message: ERC20: approve from the zero address");
-		require(spender != address(0), "at: core.sol | contract: Core | method: _approve | message: ERC20: approve to the zero address");
+		require(owner != address(0), "at: core.sol | contract: Core | function: _approve | message: ERC20: approve from the zero address");
+		require(spender != address(0), "at: core.sol | contract: Core | function: _approve | message: ERC20: approve to the zero address");
 
 		token.updateAllowance(owner, spender, amount);
 		token.emitApproval(owner, spender, amount);
@@ -186,9 +186,9 @@ contract Core is IERC20, Ownable {
 	}
 
 	function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: transferFrom | message: Must be called by the registered Router contract");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: transferFrom | message: Must be called by the registered Router contract");
 		uint allowance = token.allowance(addressArr[1], addressArr[0]);
-		require(allowance >= uintArr[0], "at: core.sol | contract: Core | method: transferFrom | message: Insufficient amount");
+		require(allowance >= uintArr[0], "at: core.sol | contract: Core | function: transferFrom | message: Insufficient amount");
 
 		address[2] memory tmpAddresses1 = [addressArr[1], addressArr[2]];
 		address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
@@ -202,7 +202,7 @@ contract Core is IERC20, Ownable {
 	}
 
 	function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: increaseAllowance | message: Must be called by the registered Router contract");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: increaseAllowance | message: Must be called by the registered Router contract");
 		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).add(uintArr[0]);
 		uintArr[0] = newAllowance;
 		_approve(addressArr, uintArr);
@@ -210,8 +210,8 @@ contract Core is IERC20, Ownable {
 	}
 
 	function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: decreaseAllowance | message: Must be called by the registered Router contract");
-		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: core.sol | contract: Core | method: decreaseAllowance | message: ERC20: decreased allowance below zero");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: decreaseAllowance | message: Must be called by the registered Router contract");
+		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: core.sol | contract: Core | function: decreaseAllowance | message: ERC20: decreased allowance below zero");
 		uintArr[0] = newAllowance;
 		_approve(addressArr, uintArr);
 		return true;
@@ -226,7 +226,7 @@ contract Core is IERC20, Ownable {
 	// We can also design another external router, possibilities are infinite.
 
 	function mint(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: mint | message: Must be called by the registered Router contract");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: mint | message: Must be called by the registered Router contract");
 		address fromAddress = address(0);
 		address toAddress = addressArr[1];
 		uint amount = uintArr[0];
@@ -235,7 +235,7 @@ contract Core is IERC20, Ownable {
 	}
 
 	function burn(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: burn | message: Must be called by the registered Router contract");
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: burn | message: Must be called by the registered Router contract");
 		address fromAddress = addressArr[0];
 		address toAddress = address(0);
 		uint amount = uintArr[0];
