@@ -223,7 +223,7 @@ contract Core is IERC20, Ownable {
 
 	//=============== NON-CORE FUNCTIONS TO BE CODED BELOW ====================================
 	// This code is a subject to a change, should we decide to alter anything.
-	// We can also design another external router, possibilities are infinite.
+	// We can also design another external contract, possibilities are infinite.
 
 	function mint(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: mint | message: Must be called by the registered Router contract");
