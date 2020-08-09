@@ -1,12 +1,37 @@
+Deployed:
+
+
+token.sol
 0x68aBfb74bc9fE723960e61a103D67f24835F8b9a
 https://rinkeby.etherscan.io/address/0x68abfb74bc9fe723960e61a103d67f24835f8b9a#code
 
+owner is confirmed, minted tokens confirmed, decimals and all variables confirmed.
+non-owner cannot execute owner-only functions
 
+updated name and ticker, reflected in metamask, not reflected on etherscan
 
+connected all contracts together, sent amount from owner to other account. all good.
+
+logged in as second ETH account:
+- approve accessible
+- decrease/increase allowance - accessible
+- emitAproval failed - OK
+- emitTransfer failed - OK
+- renounceOwnershit failed - ok
+- newCore/RouterAddress failed - ok
+- transfer to address(0) passed - ok, total supply OK
+- transfer to self - failed - OK
+- transferFrom failed ok
+- uncommon transfer failed ok
+
+ 
+-------------------------
+
+Router
 0x271ebfF9873011E389eA9DEE5742d3FB3e162710
 https://rinkeby.etherscan.io/address/0x271ebff9873011e389ea9dee5742d3fb3e162710#code
 
 
-
-https://rinkeby.etherscan.io/address/0x2fc1ad3e07f3f355b93c8dac9847dd1efb1754cb#code
+Core
 0x2FC1aD3e07F3F355B93c8Dac9847Dd1efB1754CB
+https://rinkeby.etherscan.io/address/0x2fc1ad3e07f3f355b93c8dac9847dd1efb1754cb#code
