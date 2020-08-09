@@ -119,7 +119,7 @@ contract Core is IERC20, Ownable {
 
   constructor() {
     if (!mainConstructorLocked) {
-      tokenContract = address(0x47b56CAB404B6eD77cd5304f480C9961A49A3d18); //Can be hardcoded or use address(0) and uncomment setNewTokenContract
+      tokenContract = address(0); //Can be hardcoded or use address(0) and uncomment setNewTokenContract
       routerContract = address(0);
       token = Token(tokenContract);
       mainConstructorLocked = true;
@@ -137,6 +137,7 @@ contract Core is IERC20, Ownable {
    //function is not needed if token address is hard-coded in a constructor
      function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) { //owner
        tokenContract = newTokenAddress;
+       token = Token(newTokenAddress);
        return true;
      }
 
