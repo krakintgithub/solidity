@@ -11,6 +11,7 @@ The basic mutable design consists of three files. Token, Router, and a Core. We 
 This design is great for a simple use, however, there is a high danger of things becoming too complicated. In order to avoid creating the complications, any additional design should, under almost any circumstance, remain the same as in a diagram below. If not, then we are either not doing things properly, or the project is introducting something innovative.
 
 
+</br>
 <p align="center">
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/diagrams/basicDiagram.jpg"  title="Basic Diagram">
 </p>
