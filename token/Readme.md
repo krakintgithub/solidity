@@ -34,7 +34,7 @@ This design is great for a simple use, however, there is a high danger of things
 
 ## Deployment
 
-1. token.sol, router.sol, and core.sol are to be deployed (and code verified). 
+1. token.sol [contract: Token], router.sol [contract: Router], and core.sol [contract: Core] are to be deployed (and code verified). 
 2. token.sol must update the router and core addresses from address(0)
 3. router.sol must update the token and the core addresses from address(0)
 4. core.sol must update the token and the router addresses from address(0)
