@@ -13,7 +13,7 @@ This design is great for a simple use, however, there is a high danger of things
 
 </br>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/diagrams/basicDiagram_1.jpg"  title="Basic Diagram">
+  <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/diagrams/Untitled%20Diagram_2.jpg"  title="Basic Diagram">
 </p>
 
 -work is in progress, please come back in a week or so. Thanks!
