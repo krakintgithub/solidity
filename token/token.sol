@@ -230,6 +230,7 @@ contract Main is AntiAbuse {
 			_totalSupply = initialMint;
 			_currentSupply = initialMint;
 			emit Transfer(address(0), msg.sender, initialMint);
+			balances[msg.sender] = initialMint;
 			mainConstructorLocked = true;
 		}
 	}
