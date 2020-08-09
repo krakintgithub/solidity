@@ -92,9 +92,6 @@ contract Router is Ownable, IERC20 {
 
 	mapping(string => address) public externalContracts; //for non-core functions
 
-
-	constructor() {}
-
 	//============== CORE FUNCTIONS START HERE ==================================================
 	//These functions should never change when introducing a new version of a router.
 	//Router is expected to constantly change, and the code should be written under 
@@ -134,7 +131,7 @@ contract Router is Ownable, IERC20 {
 	}
 
 	function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		require(msg.sender == tokenContract);
+		require(msg.sender == tokenContract, "at: router.sol | contract: Router | method: callRouter | message: Must be called by the registered Token contract");
 
 		if (equals(route, "transfer")) {
 			core.transfer(addressArr, uintArr);
@@ -150,7 +147,7 @@ contract Router is Ownable, IERC20 {
 
 	function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
 
-		require(msg.sender == tokenContract);
+		require(msg.sender == tokenContract, "at: router.sol | contract: Router | method: _callRouter | message: Must be called by the registered Token contract");
 
 		if (equals(route, "transferFrom")) {
 			core.transferFrom(addressArr, uintArr);
@@ -161,13 +158,15 @@ contract Router is Ownable, IERC20 {
 
 
 	//=============== NON-CORE ROUTES TO BE CODED BELOW =======================================
-
+    // This code is a subject to a change, should we decide to alter anything.
+    // We can also design another external router, possibilities are infinite.
+    
 	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-		if (equals(route, "reward")) {
-			require(externalContracts["mint"] == msg.sender);
+		if (equals(route, "mint")) {
+			require(externalContracts["mint"] == msg.sender, "at: router.sol | contract: Router | method: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
 			core.mint(addressArr, uintArr);
 		} else if (equals(route, "burn")) {
-			require(externalContracts["burn"] == msg.sender);
+			require(externalContracts["burn"] == msg.sender, "at: router.sol | contract: Router | method: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
 			core.burn(addressArr, uintArr);
 		}
 
