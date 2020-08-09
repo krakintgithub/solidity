@@ -87,7 +87,7 @@ contract Router is Ownable, IERC20 {
 
   constructor() {
     if (!mainConstructorLocked) {
-      tokenContract = address(0xE4F82Ed7FEcfae6629d034332A89F4830b74ed27); //Can be hardcoded or use address(0) and uncomment setNewCoreContract
+      tokenContract = address(0x68aBfb74bc9fE723960e61a103D67f24835F8b9a); //Can be hardcoded or use address(0) and uncomment setNewCoreContract
       coreContract = address(0);
       mainConstructorLocked = true;
     }
@@ -114,17 +114,17 @@ contract Router is Ownable, IERC20 {
     return otherContracts[contractName];
   }
 
+ //function is not needed if token address is hard-coded in a constructor
   function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) { //owner
     tokenContract = newTokenAddress;
     return true;
   }
 
-  //   //function is not needed if token address is hard-coded in a constructor
-  //  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
-  //   coreContract = newCoreAddress;
-  //   core = Core(coreContract);
-  //   return true;
-  //  }
+    function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
+     coreContract = newCoreAddress;
+     core = Core(coreContract);
+     return true;
+    }
 
   function setNewOtherContract(string memory contractName, address newContractAddress) onlyOwner public virtual returns(bool success) { //owner
     otherContracts[contractName] = newContractAddress;
