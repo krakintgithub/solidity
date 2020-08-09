@@ -31,4 +31,13 @@ This design is great for a simple use, however, there is a high danger of things
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/diagrams/Untitled%20Diagram_2.jpg"  title="Basic Diagram">
 </p>
 
+
+## Deployment
+
+1. token.sol, router.sol, and core.sol are to be deployed (and code verified). 
+2. token.sol must update the router and core addresses from address(0)
+3. router.sol must update the token and the core addresses from address(0)
+4. core.sol must update the token and the router addresses from address(0)
+5. any other additional contract pointing to a router must be added to a router using setNewExternalContract
+
 -work is in progress, please come back in a week or so. Thanks!
