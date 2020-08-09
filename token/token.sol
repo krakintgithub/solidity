@@ -121,9 +121,8 @@ contract Ownable is Context {
 
 abstract contract Router {
 
-	function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
-
-	function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
+	function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+	function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
 
 }
 
@@ -147,10 +146,10 @@ abstract contract MainVariables {
 //============================================================================================
 // ANTI-ABUSE CONTRACT 
 //============================================================================================
+
 abstract contract AntiAbuse is MainVariables, Ownable, IERC20 {
 
-	using SafeMath
-	for uint;
+	using SafeMath for uint;
 
 	mapping(uint => string) ownerTransferReason;
 	mapping(uint => address) ownerTransferFromAddress;
@@ -175,7 +174,7 @@ abstract contract AntiAbuse is MainVariables, Ownable, IERC20 {
 		return ownerTransferAmount[pivot];
 	}
 
-	function uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
+	function uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { 
 		require(fromAddress != toAddress, "From and To addresses are same");
 		require(amount > 0, "Amount is zero");
 
@@ -223,9 +222,6 @@ contract Token is AntiAbuse {
 
 	constructor() {
 		if (!mainConstructorLocked) {
-			routerContract = address(0);
-			coreContract = address(0);
-			router = Router(routerContract);
 			uint initialMint = 10000000000000000000000; //10 thousand tokens with 18 decimals
 			_totalSupply = initialMint;
 			_currentSupply = initialMint;
@@ -235,67 +231,75 @@ contract Token is AntiAbuse {
 		}
 	}
 
-	//Views	
-	function totalSupply() override external view returns(uint256 data) { //view
+	
+	function totalSupply() override external view returns(uint256 data) { 
 		return _totalSupply;
 	}
 
-	function currentSupply() override external view returns(uint256 data) { //view
+	function currentSupply() override external view returns(uint256 data) { 
 		return _currentSupply;
 	}
 
-	function balanceOf(address account) override external view returns(uint256 data) { //view
+	function balanceOf(address account) override external view returns(uint256 data) { 
 		return balances[account];
 	}
 
-	function allowance(address owner, address spender) override external view virtual returns(uint256 data) { //view
+	function allowance(address owner, address spender) override external view virtual returns(uint256 data) { 
 		return allowances[owner][spender];
 	}
 
-	function currentRouterContract() override external view virtual returns(address routerAddress) { //view
+	function currentRouterContract() override external view virtual returns(address routerAddress) { 
 		return routerContract;
 	}
 
-	function currentCoreContract() override external view virtual returns(address routerAddress) { //view
+	function currentCoreContract() override external view virtual returns(address routerAddress) { 
 		return coreContract;
 	}
 
 	//Update functions
 
-	function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success) { //owner
+	function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success) { 
 		symbol = newSymbol;
+		
 		return true;
 	}
 
-	function updateName(string memory newName) onlyOwner public virtual returns(bool success) { //owner
+	function updateName(string memory newName) onlyOwner public virtual returns(bool success) { 
 		name = newName;
+		
 		return true;
 	}
 
-	function updateBalance(address user, uint newBalance) override external virtual returns(bool success) //from core
+	function updateBalance(address user, uint newBalance) override external virtual returns(bool success) 
 	{
 		require(msg.sender == coreContract, "Must be called by the registered Core contract");
+		
 		balances[user] = newBalance;
+		
 		return true;
 	}
 
-	function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) //from core
+	function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) 
 	{
 		require(msg.sender == coreContract, "Must be called by the registered Core contract");
+		
 		allowances[owner][spender] = newAllowance;
+		
 		return true;
 	}
 
-	function updateSupply(uint newSupply) override external virtual returns(bool success) //from core
+	function updateSupply(uint newSupply) override external virtual returns(bool success) 
 	{
 		require(msg.sender == coreContract, "Must be called by the registered Core contract");
+		
 		_totalSupply = newSupply;
 		_currentSupply = newSupply;
+		
 		return true;
 	}
 
 	//Emit functions
-	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
+	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) 
 	{
 		require(msg.sender == coreContract, "Must be called by the registered Core contract");
 		require(fromAddress != toAddress, "From and To addresses are same");
@@ -317,30 +321,35 @@ contract Token is AntiAbuse {
 		}
 
 		emit Transfer(fromAddress, toAddress, amount);
+		
 		return true;
 	}
 
-	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
+	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) 
 	{
 		require(msg.sender == coreContract, "Must be called by the registered Core contract");
+		
 		emit Approval(fromAddress, toAddress, amount);
+		
 		return true;
 	}
 
 	//Router and Core-contract functions
-	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) { //owner
+	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) { 
 		routerContract = newRouterAddress;
 		router = Router(routerContract);
+		
 		return true;
 	}
 
-	function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
+	function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { 
 		coreContract = newCoreAddress;
+		
 		return true;
 	}
 
 	//Core functions
-	function transfer(address toAddress, uint256 amount) override external virtual returns(bool success) //to router
+	function transfer(address toAddress, uint256 amount) override external virtual returns(bool success) 
 	{
 		require(toAddress != msg.sender, "From and To addresses are same");
 		require(msg.sender != address(0), "Cannot send from address(0)");
@@ -349,26 +358,24 @@ contract Token is AntiAbuse {
 
 		address[2] memory addresseArr = [msg.sender, toAddress];
 		uint[2] memory uintArr = [amount, 0];
-
-		router.routed2("transfer", addresseArr, uintArr);
+		router.callRouter("transfer", addresseArr, uintArr);
 
 		return true;
 	}
 
-	function approve(address spender, uint256 amount) override external virtual returns(bool success) //to router
+	function approve(address spender, uint256 amount) override external virtual returns(bool success) 
 	{
 		require(spender != msg.sender, "Your address is not Spender address");
 		require(msg.sender != address(0), "Cannot approve from address(0)");
-
+		
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [amount, 0];
-
-		router.routed2("approve", addresseArr, uintArr);
-
+		router.callRouter("approve", addresseArr, uintArr);
+		
 		return true;
 	}
 
-	function transferFrom(address fromAddress, address toAddress, uint256 amount) override external virtual returns(bool success) //to router
+	function transferFrom(address fromAddress, address toAddress, uint256 amount) override external virtual returns(bool success) 
 	{
 		require(fromAddress != toAddress, "From and To addresses are same");
 		require(fromAddress != address(0), "Cannot send from address(0)");
@@ -377,29 +384,26 @@ contract Token is AntiAbuse {
 
 		address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
 		uint[3] memory uintArr = [amount, 0, 0];
-
-		router.routed3("transferFrom", addresseArr, uintArr);
-
+		router._callRouter("transferFrom", addresseArr, uintArr);
+		
 		return true;
 	}
 
-	function increaseAllowance(address spender, uint256 addedValue) override external virtual returns(bool success) //to router
+	function increaseAllowance(address spender, uint256 addedValue) override external virtual returns(bool success) 
 	{
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [addedValue, 0];
-
-		router.routed2("increaseAllowance", addresseArr, uintArr);
-
+		router.callRouter("increaseAllowance", addresseArr, uintArr);
+		
 		return true;
 	}
 
-	function decreaseAllowance(address spender, uint256 subtractedValue) override external virtual returns(bool success) //to router
+	function decreaseAllowance(address spender, uint256 subtractedValue) override external virtual returns(bool success) 
 	{
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [subtractedValue, 0];
-
-		router.routed2("decreaseAllowance", addresseArr, uintArr);
-
+		router.callRouter("decreaseAllowance", addresseArr, uintArr);
+		
 		return true;
 	}
 
