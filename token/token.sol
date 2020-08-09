@@ -212,7 +212,7 @@ abstract contract AntiAbuse is MainVariables, Ownable, IERC20 {
 // MAIN CONTRACT 
 //============================================================================================
 
-contract Main is AntiAbuse {
+contract Token is AntiAbuse {
 
 	using SafeMath
 	for uint;
