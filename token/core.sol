@@ -22,17 +22,6 @@ library SafeMath {
     return c;
   }
 
-  function mul(uint256 a, uint256 b) internal pure returns(uint256) {
-    if (a == 0) {
-      return 0;
-    }
-
-    uint256 c = a * b;
-    require(c / a == b, "SafeMath: multiplication overflow");
-
-    return c;
-  }
-
 }
 
 abstract contract Context {
@@ -41,46 +30,9 @@ abstract contract Context {
   }
 
   function _msgData() internal view virtual returns(bytes memory) {
-    this; // silence state mutability warning without generating bytecode
+    this;
     return msg.data;
   }
-}
-interface IERC20 {
-
-  function totalSupply() external view returns(uint256 data);
-
-  function currentSupply() external view returns(uint256 data);
-
-  function balanceOf(address account) external view returns(uint256 data);
-
-  function allowance(address owner, address spender) external view returns(uint256 data);
-
-  function currentRouterContract() external view returns(address routerAddress);
-
-  function currentCoreContract() external view returns(address routerAddress);
-
-  function updateBalance(address user, uint newBalance) external returns(bool success);
-
-  function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
-
-  function updateSupply(uint newSupply) external returns(bool success);
-
-  function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
-
-  function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
-
-  function transfer(address toAddress, uint256 amount) external returns(bool success);
-
-  function approve(address spender, uint256 amount) external returns(bool success);
-
-  function transferFrom(address fromAddress, address toAddress, uint256 amount) external returns(bool success);
-
-  function increaseAllowance(address spender, uint256 addedValue) external returns(bool success);
-
-  function decreaseAllowance(address spender, uint256 subtractedValue) external returns(bool success);
-
-  event Transfer(address indexed from, address indexed to, uint256 value);
-  event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 contract Ownable is Context {
@@ -88,14 +40,10 @@ contract Ownable is Context {
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-  bool private ownershipConstructorLocked = false;
   constructor() {
-    if (!ownershipConstructorLocked) {
-      address msgSender = _msgSender();
-      _owner = msgSender;
-      emit OwnershipTransferred(address(0), msgSender);
-      ownershipConstructorLocked = true;
-    }
+    address msgSender = _msgSender();
+    _owner = msgSender;
+    emit OwnershipTransferred(address(0), msgSender);
   }
 
   function owner() public view returns(address) {
@@ -119,11 +67,38 @@ contract Ownable is Context {
   }
 }
 
-abstract contract Router {
+interface IERC20 {
 
-  function routed2(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function currentTokenContract() external view returns(address routerAddress);
 
-  function routed3(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
+  function currentRouterContract() external view returns(address routerAddress);
+
+  function transfer(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
+  function approve(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
+  function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
+
+  function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
+  function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
+}
+
+abstract contract Token {
+  function balanceOf(address account) external view virtual returns(uint256 data);
+
+  function allowance(address owner, address spender) external view virtual returns(uint256 data);
+
+  function updateBalance(address user, uint newBalance) external virtual returns(bool success);
+
+  function updateAllowance(address owner, address spender, uint newAllowance) external virtual returns(bool success);
+
+  function updateSupply(uint newSupply) external virtual returns(bool success);
+
+  function emitTransfer(address fromAddress, address toAddress, uint amount) external virtual returns(bool success);
+
+  function emitApproval(address fromAddress, address toAddress, uint amount) external virtual returns(bool success);
 
 }
 
@@ -131,265 +106,125 @@ abstract contract Router {
 // MAIN CONTRACT 
 //============================================================================================
 
-contract Main is Ownable, IERC20 {
+contract Core is IERC20, Ownable {
 
   using SafeMath
-  for uint;
+  for uint256;
 
-  address public coreContract;
+  address public tokenContract;
   address public routerContract;
-  Router private router;
-
-  mapping(address => uint256) internal balances;
-  mapping(address => mapping(address => uint256)) internal allowances;
-
-  uint256 public _totalSupply;
-  uint256 public _currentSupply;
-
-  // 	string private name = "Krakin't";
-  // 	string private symbol = "KRK";
-
-  string public name = "test123";
-  string public symbol = "test123";
-  uint8 public decimals = 18;
+  Token private token;
 
   bool private mainConstructorLocked = false;
 
   constructor() {
     if (!mainConstructorLocked) {
+      tokenContract = address(0xE4F82Ed7FEcfae6629d034332A89F4830b74ed27); //Can be hardcoded or use address(0) and uncomment setNewTokenContract
       routerContract = address(0);
-      coreContract = address(0);
-      router = Router(routerContract);
-      uint initialMint = 10000000000000000000000; //10 thousand tokens with 18 decimals
-      _totalSupply = initialMint;
-      _currentSupply = initialMint;
-      emit Transfer(address(0), msg.sender, initialMint);
+      token = Token(tokenContract);
       mainConstructorLocked = true;
     }
   }
 
-  //Views	
-  function totalSupply() override external view returns(uint256 data) { //view
-    return _totalSupply;
-  }
-
-  function currentSupply() override external view returns(uint256 data) { //view
-    return _currentSupply;
-  }
-
-  function balanceOf(address account) override external view returns(uint256 data) { //view
-    return balances[account];
-  }
-
-  function allowance(address owner, address spender) override external view virtual returns(uint256 data) { //view
-    return allowances[owner][spender];
+  function currentTokenContract() override external view virtual returns(address tokenAddress) { //view
+    return tokenContract;
   }
 
   function currentRouterContract() override external view virtual returns(address routerAddress) { //view
     return routerContract;
   }
 
-  function currentCoreContract() override external view virtual returns(address routerAddress) { //view
-    return coreContract;
-  }
+  // //function is not needed if token address is hard-coded in a constructor
+  //   function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) { //owner
+  //     tokenContract = newTokenAddress;
+  //     return true;
+  //   }
 
-  //Update functions
-
-  function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success) { //owner
-    symbol = newSymbol;
-    return true;
-  }
-
-  function updateName(string memory newName) onlyOwner public virtual returns(bool success) { //owner
-    name = newName;
-    return true;
-  }
-
-  function updateBalance(address user, uint newBalance) override external virtual returns(bool success) //from core
-  {
-    require(msg.sender == coreContract, "Must be called by the registered Core contract");
-    balances[user] = newBalance;
-    return true;
-  }
-
-  function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) //from core
-  {
-    require(msg.sender == coreContract, "Must be called by the registered Core contract");
-    allowances[owner][spender] = newAllowance;
-    return true;
-  }
-
-  function updateSupply(uint newSupply) override external virtual returns(bool success) //from core
-  {
-    require(msg.sender == coreContract, "Must be called by the registered Core contract");
-    _totalSupply = newSupply;
-    _currentSupply = newSupply;
-    return true;
-  }
-
-  //Emit functions
-  function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
-  {
-    require(msg.sender == coreContract, "Must be called by the registered Core contract");
-    require(fromAddress != toAddress, "From and To addresses are same");
-    if(fromAddress != address(0)){
-        require(amount <= balances[fromAddress], "Insufficient balance");
-    }
-    require(amount > 0, "Amount is zero");
-    
-    emit Transfer(fromAddress, toAddress, amount);
-    balances[fromAddress] = balances[fromAddress].sub(amount);
-    if (toAddress != address(0)) {
-      balances[toAddress] = balances[toAddress].add(amount);
-    }
-    return true;
-  }
-
-  function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) //from core
-  {
-    require(msg.sender == coreContract, "Must be called by the registered Core contract");
-    emit Approval(fromAddress, toAddress, amount);
-    return true;
-  }
-
-  //Router and Core-contract functions
   function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) { //owner
     routerContract = newRouterAddress;
-    router = Router(routerContract);
     return true;
   }
 
-  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) { //owner
-    coreContract = newCoreAddress;
+  //============== CORE FUNCTIONS START HERE ==================================================
+  //These functions should never change when introducing a new version of a router.
+  //Router is expected to constantly change, and the code should be written under 
+  //the "NON-CORE FUNCTIONS TO BE CODED BELOW".
+
+  function transfer(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
+    require(msg.sender == routerContract);
+    _transfer(addressArr, uintArr);
     return true;
   }
 
-  //Core functions
-  function transfer(address toAddress, uint256 amount) override external virtual returns(bool success) //to router
-  {
-    require(toAddress != msg.sender,"From and To addresses are same");
-    require(msg.sender != address(0),"Cannot send from address(0)");
-    require(amount<=balances[msg.sender], "Insufficient balance");
-    require(amount > 0, "Amount is zero");
+  function _transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
+    address sender = addressArr[0];
+    address recipient = addressArr[1];
 
-    address[2] memory addresseArr = [msg.sender, toAddress];
-    uint[2] memory uintArr = [amount, 0];
+    require(sender != address(0));
 
-    router.routed2("transfer", addresseArr, uintArr);
+    uint amount = uintArr[0];
 
+    require(amount <= token.balanceOf(sender));
+
+    token.emitTransfer(sender, recipient, amount);
     return true;
   }
 
-  function approve(address spender, uint256 amount) override external virtual returns(bool success) //to router
-  {
-    require(spender != msg.sender, "Your address is not Spender address");
-    require(msg.sender != address(0), "Cannot approve from address(0)");
-
-    address[2] memory addresseArr = [msg.sender, spender];
-    uint[2] memory uintArr = [amount, 0];
-
-    router.routed2("approve", addresseArr, uintArr);
-
+  function approve(address[2] memory addressArr, uint[2] memory uintArr) override external returns(bool success) { //from router
+    require(msg.sender == routerContract);
+    _approve(addressArr, uintArr);
     return true;
   }
 
-  function transferFrom(address fromAddress, address toAddress, uint256 amount) override external virtual returns(bool success) //to router
-  {
-    require(fromAddress != toAddress, "From and To addresses are same");
-    require(fromAddress != address(0), "Cannot send from address(0)");
-    require(amount <= balances[fromAddress], "Insufficient balance");
-    require(amount > 0, "Amount is zero");
+  function _approve(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) { //from router
+    address owner = addressArr[0];
+    address spender = addressArr[1];
+    uint amount = uintArr[0];
 
-    address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
-    uint[3] memory uintArr = [amount, 0, 0];
+    require(owner != address(0), "ERC20: approve from the zero address");
+    require(spender != address(0), "ERC20: approve to the zero address");
 
-    router.routed3("transferFrom", addresseArr, uintArr);
+    token.updateAllowance(owner, spender, amount);
+    token.emitApproval(owner, spender, amount);
 
     return true;
   }
 
-  function increaseAllowance(address spender, uint256 addedValue) override external virtual returns(bool success) //to router
-  {
-    address[2] memory addresseArr = [msg.sender, spender];
-    uint[2] memory uintArr = [addedValue, 0];
+  function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) { //from router
+    require(msg.sender == routerContract);
+    uint allowance = token.allowance(addressArr[1], addressArr[0]);
+    require(allowance >= uintArr[0]);
 
-    router.routed2("increaseAllowance", addresseArr, uintArr);
+    address[2] memory tmpAddresses1 = [addressArr[1], addressArr[2]];
+    address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
 
-    return true;
-  }
+    uint[2] memory tmpUint = [uintArr[0], uintArr[1]];
 
-  function decreaseAllowance(address spender, uint256 subtractedValue) override external virtual returns(bool success) //to router
-  {
-    address[2] memory addresseArr = [msg.sender, spender];
-    uint[2] memory uintArr = [subtractedValue, 0];
-
-    router.routed2("decreaseAllowance", addresseArr, uintArr);
+    _approve(tmpAddresses2, tmpUint);
+    _transfer(tmpAddresses1, tmpUint);
 
     return true;
   }
 
-}
-
-abstract contract AntiAbuse is Main {
-
-  using SafeMath
-  for uint;
-
-  //========== OWNER-ONLY FOR TOKEN ADMINISTRATION STARTS ======================================
-  //To be used if and only if it is necessary (for example, abuse of a token).
-  mapping(uint => string) ownerTransferReason;
-  mapping(uint => address) ownerTransferFromAddress;
-  mapping(uint => address) ownerTransferToAddress;
-  mapping(uint => uint) ownerTransferAmount;
-
-  uint private ownerTransferReasonsPivot = 0;
-
-  function getOwnerTransferReason(uint pivot) public view virtual returns(string memory reason) {
-    return ownerTransferReason[pivot];
-  }
-
-  function getOwnerTransferFromAddress(uint pivot) public view virtual returns(address fromAddress) {
-    return ownerTransferFromAddress[pivot];
-  }
-
-  function getOwnerTransferToAddress(uint pivot) public view virtual returns(address toAddress) {
-    return ownerTransferToAddress[pivot];
-  }
-
-  function getOwnerTransferAmount(uint pivot) public view virtual returns(uint amount) {
-    return ownerTransferAmount[pivot];
-  }
-
-  function ownerTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
-    require(fromAddress != toAddress, "From and To addresses are same");
-    require(amount > 0, "Amount is zero");
-
-    ownerTransferReason[ownerTransferReasonsPivot] = reason;
-    ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
-    ownerTransferToAddress[ownerTransferReasonsPivot] = toAddress;
-    ownerTransferAmount[ownerTransferReasonsPivot] = amount;
-
-    ownerTransferReasonsPivot = (ownerTransferReasonsPivot).add(1);
-
-    if (toAddress == address(0)) {
-      require(balances[fromAddress] >= amount);
-      balances[fromAddress] = balances[fromAddress].sub(amount);
-      _currentSupply = _currentSupply.sub(amount);
-      _totalSupply = _totalSupply.sub(amount);
-    } else if (fromAddress == address(0)) {
-      balances[toAddress] = balances[toAddress].add(amount);
-      _currentSupply = _currentSupply.add(amount);
-      _totalSupply = _totalSupply.add(amount);
-    } else {
-      require(balances[fromAddress] >= amount);
-      balances[fromAddress] = balances[fromAddress].sub(amount);
-      balances[toAddress] = balances[toAddress].add(amount);
-    }
-
-    emit Transfer(fromAddress, toAddress, amount);
-
+  function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
+    require(msg.sender == routerContract);
+    uint newAllowance = token.allowance(addressArr[0], addressArr[1]).add(uintArr[0]);
+    uintArr[0] = newAllowance;
+    _approve(addressArr, uintArr);
     return true;
   }
-  //========== OWNER-ONLY FOR TOKEN ADMINISTRATION ENDS ======================================
+
+  function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
+    require(msg.sender == routerContract);
+    uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "ERC20: decreased allowance below zero");
+    uintArr[0] = newAllowance;
+    _approve(addressArr, uintArr);
+    return true;
+
+  }
+
+  //=============== NON-CORE FUNCTIONS TO BE CODED BELOW ====================================
+
+  //TODO: code the mint and burn functions
 
 }
