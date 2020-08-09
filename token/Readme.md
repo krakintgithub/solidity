@@ -16,7 +16,7 @@ Controller: partially core.sol and any other contract we may add
 
 Database: regulated.sol and noadmin.sol
 
-Service: external application or any other contract we may add to communicate to a database
+Service: external application or any other contract we may add to communicate with a database
 
 Router: router.sol
 
