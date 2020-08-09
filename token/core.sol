@@ -85,6 +85,10 @@ interface IERC20 {
 
 	function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
 
+	function mint(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
+	function burn(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
 }
 
 abstract contract Token {
@@ -117,21 +121,21 @@ contract Core is IERC20, Ownable {
 	address public routerContract;
 	Token private token;
 
-	function currentTokenContract() override external view virtual returns(address tokenAddress) { //view
+	function currentTokenContract() override external view virtual returns(address tokenAddress) {
 		return tokenContract;
 	}
 
-	function currentRouterContract() override external view virtual returns(address routerAddress) { //view
+	function currentRouterContract() override external view virtual returns(address routerAddress) {
 		return routerContract;
 	}
 
-	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) { //owner
+	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
 		tokenContract = newTokenAddress;
 		token = Token(newTokenAddress);
 		return true;
 	}
 
-	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) { //owner
+	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
 		routerContract = newRouterAddress;
 		return true;
 	}
@@ -141,7 +145,7 @@ contract Core is IERC20, Ownable {
 	//Router is expected to constantly change, and the code should be written under 
 	//the "NON-CORE FUNCTIONS TO BE CODED BELOW".
 
-	function transfer(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
+	function transfer(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: transfer | message: Must be called by the registered Router contract");
 		_transfer(addressArr, uintArr);
 		return true;
@@ -161,13 +165,13 @@ contract Core is IERC20, Ownable {
 		return true;
 	}
 
-	function approve(address[2] memory addressArr, uint[2] memory uintArr) override external returns(bool success) { //from router
+	function approve(address[2] memory addressArr, uint[2] memory uintArr) override external returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: approve | message: Must be called by the registered Router contract");
 		_approve(addressArr, uintArr);
 		return true;
 	}
 
-	function _approve(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) { //from router
+	function _approve(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
 		address owner = addressArr[0];
 		address spender = addressArr[1];
 		uint amount = uintArr[0];
@@ -181,7 +185,7 @@ contract Core is IERC20, Ownable {
 		return true;
 	}
 
-	function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) { //from router
+	function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: transferFrom | message: Must be called by the registered Router contract");
 		uint allowance = token.allowance(addressArr[1], addressArr[0]);
 		require(allowance >= uintArr[0], "at: core.sol | contract: Core | method: transferFrom | message: Insufficient amount");
@@ -197,7 +201,7 @@ contract Core is IERC20, Ownable {
 		return true;
 	}
 
-	function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
+	function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: increaseAllowance | message: Must be called by the registered Router contract");
 		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).add(uintArr[0]);
 		uintArr[0] = newAllowance;
@@ -205,7 +209,7 @@ contract Core is IERC20, Ownable {
 		return true;
 	}
 
-	function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) { //from router
+	function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: decreaseAllowance | message: Must be called by the registered Router contract");
 		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: core.sol | contract: Core | method: decreaseAllowance | message: ERC20: decreased allowance below zero");
 		uintArr[0] = newAllowance;
@@ -214,9 +218,29 @@ contract Core is IERC20, Ownable {
 
 	}
 
+	//============== CORE FUNCTIONS END HERE ==================================================
+
+
 	//=============== NON-CORE FUNCTIONS TO BE CODED BELOW ====================================
+	// This code is a subject to a change, should we decide to alter anything.
+	// We can also design another external router, possibilities are infinite.
 
-	//TODO: code the mint and burn functions
+	function mint(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: mint | message: Must be called by the registered Router contract");
+		address fromAddress = address(0);
+		address toAddress = addressArr[1];
+		uint amount = uintArr[0];
+		token.emitTransfer(fromAddress, toAddress, amount);
+		return true;
+	}
 
+	function burn(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | method: burn | message: Must be called by the registered Router contract");
+		address fromAddress = addressArr[0];
+		address toAddress = address(0);
+		uint amount = uintArr[0];
+		token.emitTransfer(fromAddress, toAddress, amount);
+		return true;
+	}
 }
 
