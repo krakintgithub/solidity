@@ -175,7 +175,7 @@ abstract contract AntiAbuse is MainVariables, Ownable, IERC20 {
 		return ownerTransferAmount[pivot];
 	}
 
-	function ownerTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
+	function uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) { //owner
 		require(fromAddress != toAddress, "From and To addresses are same");
 		require(amount > 0, "Amount is zero");
 
