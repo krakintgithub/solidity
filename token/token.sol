@@ -179,8 +179,8 @@ abstract contract AntiAbuse is MainVariables, Ownable, IERC20 {
 	}
 
 	function uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) {
-		require(fromAddress != toAddress, "at: token.sol | contract: AntiAbuse | method: uncommonTransfer | message: From and To addresses are same");
-		require(amount > 0, "at: token.sol | contract: AntiAbuse | method: uncommonTransfer | message: Amount is zero");
+		require(fromAddress != toAddress, "at: token.sol | contract: AntiAbuse | function: uncommonTransfer | message: From and To addresses are same");
+		require(amount > 0, "at: token.sol | contract: AntiAbuse | function: uncommonTransfer | message: Amount is zero");
 
 		ownerTransferReason[ownerTransferReasonsPivot] = reason;
 		ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
@@ -275,7 +275,7 @@ contract Token is AntiAbuse {
 	}
 
 	function updateBalance(address user, uint newBalance) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | method: updateBalance | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateBalance | message: Must be called by the registered Core contract");
 
 		balances[user] = newBalance;
 
@@ -283,7 +283,7 @@ contract Token is AntiAbuse {
 	}
 
 	function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | method: updateAllowance | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateAllowance | message: Must be called by the registered Core contract");
 
 		allowances[owner][spender] = newAllowance;
 
@@ -291,7 +291,7 @@ contract Token is AntiAbuse {
 	}
 
 	function updateSupply(uint newSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | method: updateSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateSupply | message: Must be called by the registered Core contract");
 
 		_totalSupply = newSupply;
 		_currentSupply = newSupply;
@@ -301,12 +301,12 @@ contract Token is AntiAbuse {
 
 	//Emit functions
 	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | method: emitTransfer | message: Must be called by the registered Core contract");
-		require(fromAddress != toAddress, "at: token.sol | contract: Token | method: emitTransfer | message: From and To addresses are same");
-		require(amount > 0, "at: token.sol | contract: Token | method: emitTransfer | message: Amount is zero");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: emitTransfer | message: Must be called by the registered Core contract");
+		require(fromAddress != toAddress, "at: token.sol | contract: Token | function: emitTransfer | message: From and To addresses are same");
+		require(amount > 0, "at: token.sol | contract: Token | function: emitTransfer | message: Amount is zero");
 
 		if (toAddress == address(0)) {
-			require(balances[fromAddress] >= amount, "at: token.sol | contract: Token | method: emitTransfer | message: Insufficient amount");
+			require(balances[fromAddress] >= amount, "at: token.sol | contract: Token | function: emitTransfer | message: Insufficient amount");
 			balances[fromAddress] = balances[fromAddress].sub(amount);
 			_currentSupply = _currentSupply.sub(amount);
 			_totalSupply = _totalSupply.sub(amount);
@@ -315,7 +315,7 @@ contract Token is AntiAbuse {
 			_currentSupply = _currentSupply.add(amount);
 			_totalSupply = _totalSupply.add(amount);
 		} else {
-			require(balances[fromAddress] >= amount, "at: token.sol | contract: Token | method: emitTransfer | message: Insufficient amount");
+			require(balances[fromAddress] >= amount, "at: token.sol | contract: Token | function: emitTransfer | message: Insufficient amount");
 			balances[fromAddress] = balances[fromAddress].sub(amount);
 			balances[toAddress] = balances[toAddress].add(amount);
 		}
@@ -326,7 +326,7 @@ contract Token is AntiAbuse {
 	}
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | method: emitApproval | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: emitApproval | message: Must be called by the registered Core contract");
 
 		emit Approval(fromAddress, toAddress, amount);
 
@@ -349,10 +349,10 @@ contract Token is AntiAbuse {
 
 	//Core functions
 	function transfer(address toAddress, uint256 amount) override external virtual returns(bool success) {
-		require(toAddress != msg.sender, "at: token.sol | contract: Token | method: transfer | message: From and To addresses are same");
-		require(msg.sender != address(0), "at: token.sol | contract: Token | method: transfer | message: Cannot send from address(0)");
-		require(amount <= balances[msg.sender], "at: token.sol | contract: Token | method: transfer | message: Insufficient balance");
-		require(amount > 0, "at: token.sol | contract: Token | method: transfer | message: Amount is zero");
+		require(toAddress != msg.sender, "at: token.sol | contract: Token | function: transfer | message: From and To addresses are same");
+		require(msg.sender != address(0), "at: token.sol | contract: Token | function: transfer | message: Cannot send from address(0)");
+		require(amount <= balances[msg.sender], "at: token.sol | contract: Token | function: transfer | message: Insufficient balance");
+		require(amount > 0, "at: token.sol | contract: Token | function: transfer | message: Amount is zero");
 
 		address[2] memory addresseArr = [msg.sender, toAddress];
 		uint[2] memory uintArr = [amount, 0];
@@ -362,8 +362,8 @@ contract Token is AntiAbuse {
 	}
 
 	function approve(address spender, uint256 amount) override external virtual returns(bool success) {
-		require(spender != msg.sender, "at: token.sol | contract: Token | method: approve | message: Your address is not Spender address");
-		require(msg.sender != address(0), "at: token.sol | contract: Token | method: approve | message: Cannot approve from address(0)");
+		require(spender != msg.sender, "at: token.sol | contract: Token | function: approve | message: Your address is not Spender address");
+		require(msg.sender != address(0), "at: token.sol | contract: Token | function: approve | message: Cannot approve from address(0)");
 
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [amount, 0];
@@ -373,10 +373,10 @@ contract Token is AntiAbuse {
 	}
 
 	function transferFrom(address fromAddress, address toAddress, uint256 amount) override external virtual returns(bool success) {
-		require(fromAddress != toAddress, "at: token.sol | contract: Token | method: transferFrom | message: From and To addresses are same");
-		require(fromAddress != address(0), "at: token.sol | contract: Token | method: transferFrom | message: Cannot send from address(0)");
-		require(amount <= balances[fromAddress], "at: token.sol | contract: Token | method: transferFrom | message: Insufficient balance");
-		require(amount > 0, "at: token.sol | contract: Token | method: transferFrom | message: Amount is zero");
+		require(fromAddress != toAddress, "at: token.sol | contract: Token | function: transferFrom | message: From and To addresses are same");
+		require(fromAddress != address(0), "at: token.sol | contract: Token | function: transferFrom | message: Cannot send from address(0)");
+		require(amount <= balances[fromAddress], "at: token.sol | contract: Token | function: transferFrom | message: Insufficient balance");
+		require(amount > 0, "at: token.sol | contract: Token | function: transferFrom | message: Amount is zero");
 
 		address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
 		uint[3] memory uintArr = [amount, 0, 0];
