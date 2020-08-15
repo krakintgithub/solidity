@@ -283,8 +283,44 @@ emitApproval(address fromAddress, address toAddress, uint amount)
 ```
 Used by the Core only, is meant to approve the token transfers from fromAddress to toAddress
 
+##### Functions-router and core
+```js
+setNewRouterContract(address newRouterAddress)
+```
 
 
+```js
+setNewCoreContract(address newCoreAddress)
+```
+
+
+
+##### Functions-core
+
+
+```js
+transfer(address toAddress, uint256 amount)
+```
+
+
+```js
+approve(address spender, uint256 amount)
+```
+
+
+```js
+transferFrom(address fromAddress, address toAddress, uint256 amount)
+```
+
+
+```js
+increaseAllowance(address spender, uint256 addedValue)
+```
+
+
+```js
+decreaseAllowance(address spender, uint256 subtractedValue)
+```
 
 
 -work is in progress, please come back in a week or so. Thanks!
