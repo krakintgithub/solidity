@@ -44,9 +44,16 @@ This design is great for a simple use, however, there is a high danger of things
 
 ### General
 ```SafeMath``` used for applying the basic math functions
+
 ```Context``` used with the Ownable contract
+
 ```IERC20``` interface to basic token functions
+
 ```Context``` used mainly for the contract owner maintenance
+
+### token.sol
+
+
 
 
 
