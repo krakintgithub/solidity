@@ -92,11 +92,64 @@ executes the callRouter function of the router.sol, assuming that each array has
 
 #### MainVariables
 
+```js
+address public coreContract;
+```
+This is the address of an external Core contract. We are using this address to confirm the contract calls where only the Core can initiate the function. 
 
+```js
+address public routerContract;
+```
+This is the address of an external Router contract. We are using this address to call the Router functions, making the token mutable. 
+
+
+```js
+mapping(address => uint256) internal balances;
+```
+This is the map which contains all the balances.
+
+```js
+mapping(address => mapping(address => uint256)) internal allowances;
+```
+This is the map which contains all the allowances. This is used when one account wants to allow another to do a transfer on their behalf
+
+```js
+uint256 public _totalSupply;
+```
+Shows the total supply of tokens, not a hard-coded number since the token is mutable.
+
+```js
+uint256 public _currentSupply;
+```
+Shows the current supply of circulating tokens. This number is meant to constantly change, given the proof of burn design.
+
+
+```js
+string private name = "Krakin't";
+```
+This is the name of a token, as it will appear on exchanges, etc.
+
+```js
+string private symbol = "KRK";
+```
+This is the ticker symbol of a token
+
+
+```js
+uint8 public decimals = 18;
+```
+Tells us how many decimals the token has
+
+#### AntiAbuse
 
 -work is in progress, please come back in a week or so. Thanks!
 
 //TODOs
 1. make the lock on the AntiAbuse
+
 2. separate total and current supply, but join it in the Core
+
 3. remove string public name = "test123"; string public symbol = "test123"; from token.sol
+
+4. double-check mapping(address => uint256) internal balances; is it public in original zeppelin contract?
+
