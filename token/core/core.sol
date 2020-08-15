@@ -96,9 +96,9 @@ abstract contract Token {
 
 	function allowance(address owner, address spender) external view virtual returns(uint256 data);
 
-	function updateBalance(address user, uint newBalance) external virtual returns(bool success);
-
-	function updateAllowance(address owner, address spender, uint newAllowance) external virtual returns(bool success);
+	function updateTotalSupply(uint newSupply) external virtual returns(bool success);
+	
+	function updateCurrentSupply(uint newSupply) external virtual returns(bool success);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external virtual returns(bool success);
 
@@ -177,7 +177,6 @@ contract Core is IERC20, Ownable {
 		require(owner != address(0), "at: core.sol | contract: Core | function: _approve | message: ERC20: approve from the zero address");
 		require(spender != address(0), "at: core.sol | contract: Core | function: _approve | message: ERC20: approve to the zero address");
 
-		token.updateAllowance(owner, spender, amount);
 		token.emitApproval(owner, spender, amount);
 
 		return true;
