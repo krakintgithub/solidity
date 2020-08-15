@@ -80,9 +80,15 @@ This design is great for a simple use, however, there is a high danger of things
 
 #### Router
 
-```callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr)``` executes the callRouter function of the router.sol, assuming that each array has two elements. If array has no second element, it is a null or a zero.
+``` js
+callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr)
+``` 
+executes the callRouter function of the router.sol, assuming that each array has two elements. If array has no second element, it is a null or a zero.
 
-```_callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr)```  executes the callRouter function of the router.sol, assuming that each array has three elements. If array has no second or third element, it is a null or a zero.
+``` js
+_callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr)
+```  
+executes the callRouter function of the router.sol, assuming that each array has three elements. If array has no second or third element, it is a null or a zero.
 
 #### MainVariables
 
