@@ -100,8 +100,6 @@ abstract contract Token {
 
 	function updateAllowance(address owner, address spender, uint newAllowance) external virtual returns(bool success);
 
-	function updateSupply(uint newSupply) external virtual returns(bool success);
-
 	function emitTransfer(address fromAddress, address toAddress, uint amount) external virtual returns(bool success);
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) external virtual returns(bool success);
