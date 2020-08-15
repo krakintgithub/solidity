@@ -80,6 +80,7 @@ This design is great for a simple use, however, there is a high danger of things
 
 #### Router
 
+##### Functions
 ``` js
 callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr)
 ``` 
@@ -91,6 +92,8 @@ _callRouter(string memory route, address[3] memory addressArr, uint[3] memory ui
 executes the callRouter function of the router.sol, assuming that each array has three elements. If array has no second or third element, it is a null or a zero.
 
 #### MainVariables
+
+##### Variables
 
 ```js
 address public coreContract;
@@ -141,6 +144,35 @@ uint8 public decimals = 18;
 Tells us how many decimals the token has
 
 #### AntiAbuse
+
+##### Variables
+
+```js
+mapping(uint => string) ownerTransferReason;
+```
+
+
+```js
+mapping(uint => address) ownerTransferFromAddress;
+```
+
+
+```js
+mapping(uint => address) ownerTransferToAddress;
+```
+
+
+```js
+mapping(uint => uint) ownerTransferAmount;
+```
+
+
+```js
+uint public ownerTransferReasonsPivot = 0;
+```
+
+
+
 
 -work is in progress, please come back in a week or so. Thanks!
 
