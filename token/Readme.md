@@ -40,4 +40,15 @@ This design is great for a simple use, however, there is a high danger of things
 4. core.sol must update the token and the router addresses from address(0)
 5. any other additional contract pointing to a router must be added to a router using setNewExternalContract
 
+## Contracts overview
+
+### General
+```SafeMath``` used for applying the basic math functions
+```Context``` used with the Ownable contract
+```IERC20``` interface to basic token functions
+```Context``` used mainly for the contract owner maintenance
+
+
+
+
 -work is in progress, please come back in a week or so. Thanks!
