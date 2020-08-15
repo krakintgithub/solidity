@@ -61,11 +61,11 @@ interface IERC20 {
 
 	function currentCoreContract() external view returns(address routerAddress);
 
-	function updateBalance(address user, uint newBalance) external returns(bool success);
-
 	function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
 
-	function updateSupply(uint newSupply) external returns(bool success);
+	function updateTotalSupply(uint newSupply) external returns(bool success);
+	
+	function updateCurrentSupply(uint newSupply) external returns(bool success);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
 
@@ -137,85 +137,19 @@ abstract contract MainVariables {
 	mapping(address => mapping(address => uint256)) internal allowances;
 	uint256 public _totalSupply;
 	uint256 public _currentSupply;
-	// 	string private name = "Krakin't";
-	// 	string private symbol = "KRK";
-
-	string public name = "test123";
-	string public symbol = "test123";
+	string public name = "Krakin't";
+	string public symbol = "KRK";
 	uint8 public decimals = 18;
 }
 
 
-//============================================================================================
-// ANTI-ABUSE CONTRACT 
-//============================================================================================
-
-abstract contract AntiAbuse is MainVariables, Ownable, IERC20 {
-
-	using SafeMath
-	for uint;
-
-	mapping(uint => string) ownerTransferReason;
-	mapping(uint => address) ownerTransferFromAddress;
-	mapping(uint => address) ownerTransferToAddress;
-	mapping(uint => uint) ownerTransferAmount;
-
-	uint public ownerTransferReasonsPivot = 0;
-
-	function getOwnerTransferReason(uint pivot) public view virtual returns(string memory reason) {
-		return ownerTransferReason[pivot];
-	}
-
-	function getOwnerTransferFromAddress(uint pivot) public view virtual returns(address fromAddress) {
-		return ownerTransferFromAddress[pivot];
-	}
-
-	function getOwnerTransferToAddress(uint pivot) public view virtual returns(address toAddress) {
-		return ownerTransferToAddress[pivot];
-	}
-
-	function getOwnerTransferAmount(uint pivot) public view virtual returns(uint amount) {
-		return ownerTransferAmount[pivot];
-	}
-
-	function uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason) public onlyOwner virtual returns(bool success) {
-		require(fromAddress != toAddress, "at: token.sol | contract: AntiAbuse | function: uncommonTransfer | message: From and To addresses are same");
-		require(amount > 0, "at: token.sol | contract: AntiAbuse | function: uncommonTransfer | message: Amount is zero");
-
-		ownerTransferReason[ownerTransferReasonsPivot] = reason;
-		ownerTransferFromAddress[ownerTransferReasonsPivot] = fromAddress;
-		ownerTransferToAddress[ownerTransferReasonsPivot] = toAddress;
-		ownerTransferAmount[ownerTransferReasonsPivot] = amount;
-
-		ownerTransferReasonsPivot = (ownerTransferReasonsPivot).add(1);
-
-		if (toAddress == address(0)) {
-			require(balances[fromAddress] >= amount, "Insufficient amount");
-			balances[fromAddress] = balances[fromAddress].sub(amount);
-			_currentSupply = _currentSupply.sub(amount);
-			_totalSupply = _totalSupply.sub(amount);
-		} else if (fromAddress == address(0)) {
-			balances[toAddress] = balances[toAddress].add(amount);
-			_currentSupply = _currentSupply.add(amount);
-			_totalSupply = _totalSupply.add(amount);
-		} else {
-			require(balances[fromAddress] >= amount, "Insufficient amount");
-			balances[fromAddress] = balances[fromAddress].sub(amount);
-			balances[toAddress] = balances[toAddress].add(amount);
-		}
-
-		emit Transfer(fromAddress, toAddress, amount);
-
-		return true;
-	}
-}
-
+ 
 
 //============================================================================================
 // MAIN CONTRACT 
 //============================================================================================
 
-contract Token is AntiAbuse {
+contract Token is MainVariables, Ownable, IERC20 {
 
 	using SafeMath
 	for uint;
@@ -226,7 +160,7 @@ contract Token is AntiAbuse {
 
 	constructor() {
 		if (!mainConstructorLocked) {
-			uint initialMint = 10000000000000000000000; //10 thousand tokens with 18 decimals
+			uint initialMint = 21000192000000000000000000; //21,000,192 tokens, for initial setup, to be burned.
 			_totalSupply = initialMint;
 			_currentSupply = initialMint;
 			emit Transfer(address(0), msg.sender, initialMint);
@@ -274,14 +208,6 @@ contract Token is AntiAbuse {
 		return true;
 	}
 
-	function updateBalance(address user, uint newBalance) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateBalance | message: Must be called by the registered Core contract");
-
-		balances[user] = newBalance;
-
-		return true;
-	}
-
 	function updateAllowance(address owner, address spender, uint newAllowance) override external virtual returns(bool success) {
 		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateAllowance | message: Must be called by the registered Core contract");
 
@@ -290,14 +216,24 @@ contract Token is AntiAbuse {
 		return true;
 	}
 
-	function updateSupply(uint newSupply) override external virtual returns(bool success) {
+	function updateTotalSupply(uint newTotalSupply) override external virtual returns(bool success) {
 		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateSupply | message: Must be called by the registered Core contract");
 
-		_totalSupply = newSupply;
-		_currentSupply = newSupply;
+		_totalSupply = newTotalSupply;
 
 		return true;
 	}
+	
+	
+	function updateCurrentSupply(uint newCurrentSupply) override external virtual returns(bool success) {
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateSupply | message: Must be called by the registered Core contract");
+
+		_currentSupply = newCurrentSupply;
+
+		return true;
+	}
+	
+	
 
 	//Emit functions
 	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
