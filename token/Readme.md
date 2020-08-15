@@ -212,16 +212,66 @@ bool private mainConstructorLocked = false;
 ```	
 Locks the constructor once it is initiated. Not necessary to implement, however, it ensures the contract cannot be initiated again.
 
-##### Functions
+##### Functions main
+```js
+constructor()
+```
+Sets the important data such as: circulating amount of tokens, mints the initial amount, sets the initial balances, locks itself.
+
+
+##### Functions views
+
+```js
+totalSupply()
+
+```
+Returns the totalSupply()
+
+```js
+currentSupply()
+```
+Returns the current supply
+
+```js
+balanceOf(address account)
+```
+Returns the balance of an account
+
+```js
+allowance(address owner, address spender)
+```
+Returns the allowance between owner and spender (how much is spender allowed to transfer from the owner)
+
+```js
+currentRouterContract()
+```
+Returns the address of the current Router contract
+
+```js
+currentCoreContract()
+```
+Returns the address of the current Core contract
+
+
+
+
+
+
+
+
+
 
 -work is in progress, please come back in a week or so. Thanks!
 
 //TODOs
 1. make the lock on the AntiAbuse
 
-2. separate total and current supply, but join it in the Core
+2. separate total and current supply [constructor,...], but join it in the Core
+
+2a. set the proper initial amount to be used for a buttcoin swap, etc.
 
 3. remove string public name = "test123"; string public symbol = "test123"; from token.sol
 
 4. double-check mapping(address => uint256) internal balances; is it public in original zeppelin contract?
+
 
