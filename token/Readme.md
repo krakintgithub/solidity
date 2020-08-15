@@ -150,29 +150,68 @@ Tells us how many decimals the token has
 ```js
 mapping(uint => string) ownerTransferReason;
 ```
-
+The reason why the owner made a transfer
 
 ```js
 mapping(uint => address) ownerTransferFromAddress;
 ```
-
+Tells us which address the owner transferred the tokens from
 
 ```js
 mapping(uint => address) ownerTransferToAddress;
 ```
-
+Tells us where the tokens were transferred to.
 
 ```js
 mapping(uint => uint) ownerTransferAmount;
 ```
-
+Tells us the amount of tokens that were transferred
 
 ```js
 uint public ownerTransferReasonsPivot = 0;
 ```
+Tells us the last transfer id, which can be called in a stack of transfers to see all the transfer details.
 
+##### Functions
 
+```js
+getOwnerTransferReason(uint pivot)
+```
+Returns the reason why the transfer was made from history at pivot location
 
+```js
+getOwnerTransferFromAddress(uint pivot)
+```
+Returns the address from the transfer was made from history at pivot location
+
+```js
+getOwnerTransferToAddress(uint pivot)
+```
+Returns the address to the transfer was made from history at pivot location
+
+```js
+getOwnerTransferAmount(uint pivot)
+```
+Returns the transfer amount from history at pivot location
+
+```js
+uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason)
+```
+Named uncommonTransfer, since the token should not use this contract unless it is necessary. It is expected for a token to use this function while getting initialized.
+
+#### AntiAbuse
+
+##### Variables
+```js
+Router private router;
+```
+Lets us call the Router external contract
+
+```js
+bool private mainConstructorLocked = false;
+```	
+Locks the constructor once it is initiated
+	
 
 -work is in progress, please come back in a week or so. Thanks!
 
