@@ -1,5 +1,4 @@
-For now, files will be encrypted
+For now, files will be encrypted 256-bits
 
-ECB, 128-bit
+https://encode-decode.com/aes256-encrypt-online/
 
-https://www.devglan.com/online-tools/aes-encryption-decryption
