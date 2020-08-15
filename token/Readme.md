@@ -42,7 +42,8 @@ This design is great for a simple use, however, there is a high danger of things
 
 ## Contracts overview
 
-### General
+### General, to be found anywhere
+
 ```SafeMath``` used for applying the basic math functions
 
 ```Context``` used with the Ownable contract
@@ -52,20 +53,26 @@ This design is great for a simple use, however, there is a high danger of things
 ```Context``` used mainly for the contract owner maintenance
 
 ### token.sol
+
 ```MainVariables``` this is where we define all the main variables that are used by the contract, for cleaner code only
 
-```Router``` this contract is made in order to make the calls to the external 
+```Router``` this contract is made in order to make the calls to the external Router contract
 
 ```AntiAbuse``` this is to be used only and if only it is necessary to use. In rare occassions, there could be attacks on the token such as token farms, exchanges not allowing the tokens to be transferred, users sending tokens to wrong addresses, and so on. Since this could be easily abused by the owner, we must provide a reason, addresses involved, amounts, while making this information available for everyone to see. However, if treasury of any kind is involved, this may make the token look like the ponzi scheme. For this reason, it is better NEVER to use this contract. Unfortunately, from a direct experience, this feature is necessary to implement. We have set a lock on this contract, should it ever jeopardize the trust. In the beginning, however, it may be necessary to mint the tokens for exchanges and liquidity and just the general maintenance. Otherwise, we may need a strong evidence and/or community support to use this contract.
 
-```Token``` this is the main contract, and is to be compiled when deployed. It contains all the other necessary functions we need for this token to work.
+```Token``` this is the main contract, and is to be compiled when deployed. It contains all other necessary functions we need for this token to work.
 
+### router.sol
 
+```Core``` this contract is made in order to make the call ro the external Core contract
+
+```Router``` this is the main contract, and is to be compiled when deployed. It contains all other necessary functions we need for this token to work.
 
 
 
 
 -work is in progress, please come back in a week or so. Thanks!
 
-//TODO
+//TODOs
 1. make the lock on the AntiAbuse
+2. separate total and current supply, but join it in the Core
