@@ -340,4 +340,7 @@ decreaseAllowance(address spender, uint256 subtractedValue)
 
 6. Remove anti-abuse, we can always do it with a router and a contract.
 
+7. add proper require messages to database contracts
+
+8. split the .sol files into folders and split the readme with them
  
