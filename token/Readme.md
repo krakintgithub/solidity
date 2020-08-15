@@ -212,14 +212,14 @@ bool private mainConstructorLocked = false;
 ```	
 Locks the constructor once it is initiated. Not necessary to implement, however, it ensures the contract cannot be initiated again.
 
-##### Functions main
+##### Functions-main
 ```js
 constructor()
 ```
 Sets the important data such as: circulating amount of tokens, mints the initial amount, sets the initial balances, locks itself.
 
 
-##### Functions views
+##### Functions-views
 
 ```js
 totalSupply()
@@ -252,8 +252,26 @@ currentCoreContract()
 ```
 Returns the address of the current Core contract
 
+##### Functions-updates
 
 
+```js
+updateTicker(string memory newSymbol)
+```
+If owner decides to change the ticker symbol (rebranding), however, it is meant never to be used
+
+```js
+updateName(string memory newName)
+```
+If owner decides to change the token name (rebranding), however, it is meant never to be used
+
+
+```js
+updateAllowance(address owner, address spender, uint newAllowance)
+```
+Is to be used by the anyone who wants to increase/decrease the allowance for a spender account knowing the exact new amount
+
+##### Functions-emits
 
 
 
@@ -272,6 +290,8 @@ Returns the address of the current Core contract
 
 3. remove string public name = "test123"; string public symbol = "test123"; from token.sol
 
-4. double-check mapping(address => uint256) internal balances; is it public in original zeppelin contract?
+4. updateSupply(uint newSupply) needs two separate functions
 
+5. updateBalance(address user, uint newBalance) should not exist, must be done in some other way by Core
 
+ 
