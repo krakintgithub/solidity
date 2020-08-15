@@ -58,8 +58,6 @@ This design is great for a simple use, however, there is a high danger of things
 
 ```Router``` this contract is made in order to make the calls to the external Router contract
 
-```AntiAbuse``` this is to be used only and if only it is necessary to use. In rare occasions, there could be attacks on the token such as token farms, exchanges not allowing the tokens to be transferred, users sending tokens to wrong addresses, and so on. Since this could be easily abused by the owner, we must provide a reason, addresses involved, amounts, while making this information available for everyone to see. However, if treasury of any kind is involved, this may make the token look like the ponzi scheme. For this reason, it is better NEVER to use this contract. Unfortunately, from a direct experience, this feature is necessary to implement. We have set a lock on this contract, should it ever jeopardize the trust. In the beginning, however, it may be necessary to mint the tokens for exchanges and liquidity and just the general maintenance. Otherwise, we may need a strong evidence and/or community support to use this contract.
-
 ```Token``` this is the main contract, and is to be compiled when deployed. It contains all other necessary functions we need for this token to work.
 
 ### router.sol
@@ -143,82 +141,9 @@ uint8 public decimals = 18;
 ```
 Tells us how many decimals the token has
 
-#### AntiAbuse
-
-##### Variables
-
-```js
-mapping(uint => string) ownerTransferReason;
-```
-The reason why the owner made a transfer
-
-```js
-mapping(uint => address) ownerTransferFromAddress;
-```
-Tells us which address the owner transferred the tokens from
-
-```js
-mapping(uint => address) ownerTransferToAddress;
-```
-Tells us where the tokens were transferred to.
-
-```js
-mapping(uint => uint) ownerTransferAmount;
-```
-Tells us the amount of tokens that were transferred
-
-```js
-uint public ownerTransferReasonsPivot = 0;
-```
-Tells us the last transfer id, which can be called in a stack of transfers to see all the transfer details.
-
-##### Functions
-
-```js
-getOwnerTransferReason(uint pivot)
-```
-Returns the reason why the transfer was made from history at pivot location
-
-```js
-getOwnerTransferFromAddress(uint pivot)
-```
-Returns the address from the transfer was made from history at pivot location
-
-```js
-getOwnerTransferToAddress(uint pivot)
-```
-Returns the address to the transfer was made from history at pivot location
-
-```js
-getOwnerTransferAmount(uint pivot)
-```
-Returns the transfer amount from history at pivot location
-
-```js
-uncommonTransfer(address fromAddress, address toAddress, uint256 amount, string memory reason)
-```
-Named uncommonTransfer, since the token should not use this contract unless it is necessary. It is expected for a token to use this function while getting initialized.
-
-#### AntiAbuse
-
-##### Variables
-```js
-Router private router;
-```
-Lets us call the Router external contract
-
-```js
-bool private mainConstructorLocked = false;
-```	
-Locks the constructor once it is initiated. Not necessary to implement, however, it ensures the contract cannot be initiated again.
-
-##### Functions-main
-```js
-constructor()
-```
-Sets the important data such as: circulating amount of tokens, mints the initial amount, sets the initial balances, locks itself.
 
 
+#### Token
 ##### Functions-views
 
 ```js
