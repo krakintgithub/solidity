@@ -68,7 +68,11 @@ This design is great for a simple use, however, there is a high danger of things
 
 ```Router``` this is the main contract, and is to be compiled when deployed. It contains all other necessary functions we need for this token to work.
 
+### core.sol
 
+```Token``` this contract is made in order to make the call ro the external Token contract
+
+```Core``` this is the main contract, and is to be compiled when deployed. It contains all other necessary functions we need for this token to work.
 
 
 -work is in progress, please come back in a week or so. Thanks!
