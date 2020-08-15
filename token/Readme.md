@@ -210,8 +210,9 @@ Lets us call the Router external contract
 ```js
 bool private mainConstructorLocked = false;
 ```	
-Locks the constructor once it is initiated
-	
+Locks the constructor once it is initiated. Not necessary to implement, however, it ensures the contract cannot be initiated again.
+
+##### Functions
 
 -work is in progress, please come back in a week or so. Thanks!
 
