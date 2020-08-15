@@ -74,9 +74,23 @@ This design is great for a simple use, however, there is a high danger of things
 
 ```Core``` this is the main contract, and is to be compiled when deployed. It contains all other necessary functions we need for this token to work.
 
+## Functions and their routes
+
+### token.sol
+
+#### Router
+
+```callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr)``` executes the callRouter function of the router.sol, assuming that each array has two elements. If array has no second element, it is a null or a zero.
+
+```_callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr)```  executes the callRouter function of the router.sol, assuming that each array has three elements. If array has no second or third element, it is a null or a zero.
+
+#### MainVariables
+
+
 
 -work is in progress, please come back in a week or so. Thanks!
 
 //TODOs
 1. make the lock on the AntiAbuse
 2. separate total and current supply, but join it in the Core
+3. remove string public name = "test123"; string public symbol = "test123"; from token.sol
