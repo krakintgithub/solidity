@@ -100,7 +100,7 @@ abstract contract Token {
 
 	function updateAllowance(address owner, address spender, uint newAllowance) external virtual returns(bool success);
 
-	function emitTransfer(address fromAddress, address toAddress, uint amount) external virtual returns(bool success);
+	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external virtual returns(bool success);
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) external virtual returns(bool success);
 
@@ -159,7 +159,7 @@ contract Core is IERC20, Ownable {
 
 		require(amount <= token.balanceOf(sender), "at: core.sol | contract: Core | function: _transfer | message: Insufficient amount");
 
-		token.emitTransfer(sender, recipient, amount);
+		token.emitTransfer(sender, recipient, amount, true);
 		return true;
 	}
 
@@ -228,7 +228,7 @@ contract Core is IERC20, Ownable {
 		address fromAddress = address(0);
 		address toAddress = addressArr[1];
 		uint amount = uintArr[0];
-		token.emitTransfer(fromAddress, toAddress, amount);
+		token.emitTransfer(fromAddress, toAddress, amount, true);
 		return true;
 	}
 
@@ -237,7 +237,7 @@ contract Core is IERC20, Ownable {
 		address fromAddress = addressArr[0];
 		address toAddress = address(0);
 		uint amount = uintArr[0];
-		token.emitTransfer(fromAddress, toAddress, amount);
+		token.emitTransfer(fromAddress, toAddress, amount,true);
 		return true;
 	}
 }
