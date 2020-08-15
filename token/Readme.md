@@ -273,7 +273,15 @@ Is to be used by the anyone who wants to increase/decrease the allowance for a s
 
 ##### Functions-emits
 
+```js
+emitTransfer(address fromAddress, address toAddress, uint amount)
+```
+Used by the Core only, is meant to transfer any amount of tokens to any address is allowed to burn and mint tokens too.
 
+```js
+emitApproval(address fromAddress, address toAddress, uint amount)
+```
+Used by the Core only, is meant to approve the token transfers from fromAddress to toAddress
 
 
 
@@ -293,5 +301,7 @@ Is to be used by the anyone who wants to increase/decrease the allowance for a s
 4. updateSupply(uint newSupply) needs two separate functions
 
 5. updateBalance(address user, uint newBalance) should not exist, must be done in some other way by Core
+
+6. Remove anti-abuse, we can always do it with a router and a contract.
 
  
