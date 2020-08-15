@@ -67,7 +67,7 @@ interface IERC20 {
 	
 	function updateCurrentSupply(uint newSupply) external returns(bool success);
 
-	function emitTransfer(address fromAddress, address toAddress, uint amount) external returns(bool success);
+	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external returns(bool success);
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) external returns(bool success);
 
@@ -236,7 +236,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	
 
 	//Emit functions
-	function emitTransfer(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
+	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) override external virtual returns(bool success) {
 		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: emitTransfer | message: Must be called by the registered Core contract");
 		require(fromAddress != toAddress, "at: token.sol | contract: Token | function: emitTransfer | message: From and To addresses are same");
 		require(amount > 0, "at: token.sol | contract: Token | function: emitTransfer | message: Amount is zero");
@@ -245,11 +245,15 @@ contract Token is MainVariables, Ownable, IERC20 {
 			require(balances[fromAddress] >= amount, "at: token.sol | contract: Token | function: emitTransfer | message: Insufficient amount");
 			balances[fromAddress] = balances[fromAddress].sub(amount);
 			_currentSupply = _currentSupply.sub(amount);
-			_totalSupply = _totalSupply.sub(amount);
+			if(affectTotalSupply){
+			    _totalSupply = _totalSupply.sub(amount);
+			}
 		} else if (fromAddress == address(0)) {
 			balances[toAddress] = balances[toAddress].add(amount);
 			_currentSupply = _currentSupply.add(amount);
-			_totalSupply = _totalSupply.add(amount);
+			if(affectTotalSupply){
+			    _totalSupply = _totalSupply.add(amount);
+			}
 		} else {
 			require(balances[fromAddress] >= amount, "at: token.sol | contract: Token | function: emitTransfer | message: Insufficient amount");
 			balances[fromAddress] = balances[fromAddress].sub(amount);
