@@ -76,7 +76,7 @@ Tells us how many decimals the token has
 totalSupply()
 
 ```
-Returns the totalSupply()
+Returns the totalSupply
 
 ```js
 currentSupply()
@@ -125,9 +125,10 @@ Is to be used by the anyone who wants to increase/decrease the allowance for a s
 ##### Functions-emits
 
 ```js
-emitTransfer(address fromAddress, address toAddress, uint amount)
+emitTransfer(address fromAddress, address toAddress, uint amount,  bool joinTotalAndCurrentSupplies)
 ```
-Used by the Core only, is meant to transfer any amount of tokens to any address is allowed to burn and mint tokens too.
+Used by the Core only, is meant to transfer any amount of tokens to any address is allowed to burn and mint tokens too. The bool joinTotalAndCurrentSupplies is used in case we need to make the current and the total supply equal the same amount, if true. Otherwise, we don't change the total supply ammount (is static).
+
 
 ```js
 emitApproval(address fromAddress, address toAddress, uint amount)
@@ -136,14 +137,14 @@ Used by the Core only, is meant to approve the token transfers from fromAddress 
 
 ##### Functions-router and core
 ```js
-setNewRouterContract(address newRouterAddress)
+setNewRouterContract(address newRouterAddress) onlyOwner
 ```
-
+Sets the new Router contract, overrides the old one
 
 ```js
-setNewCoreContract(address newCoreAddress)
+setNewCoreContract(address newCoreAddress) onlyOwner
 ```
-
+Sets the new Core contract, overrides the old one
 
 
 ##### Functions-core
@@ -152,34 +153,74 @@ setNewCoreContract(address newCoreAddress)
 ```js
 transfer(address toAddress, uint256 amount)
 ```
+The transfer function, communicates with the router.
+
+address - 0 - msg.sender (fromAddress)
+
+address - 1 - toAddress
+
+uint - 0 - amount to send
+
+uint - 1 - not to be used
 
 
 ```js
 approve(address spender, uint256 amount)
 ```
+The approve function, communicates with the router
 
+address - 0 - msg.sender (fromAddress)
+
+address - 1 - toAddress
+
+uint - 0 - amount to send
+
+uint - 1 - not to be used
 
 ```js
 transferFrom(address fromAddress, address toAddress, uint256 amount)
 ```
+The transferFrom function, communicates with the router
 
+address - 0 - msg.sender
+
+address - 1 - fromAddress
+
+address - 2 - toAddress
+
+uint - 0 - amount to send
+
+uint - 1 - not to be used
+
+uint - 2 - not to be used
 
 ```js
 increaseAllowance(address spender, uint256 addedValue)
 ```
+The increaseAllowance function, communicates with the router
+
+address - 0 - msg.sender
+
+address - 1 - spender
+
+uint - 0 - amount to increased
+
+uint - 1 - not to be used
 
 
 ```js
 decreaseAllowance(address spender, uint256 subtractedValue)
 ```
+The decreaseAllowance function, communicates with the router
 
+address - 0 - msg.sender
 
--work is in progress, please come back in a week or so. Thanks!
+address - 1 - spender
 
-//TODOs
+uint - 0 - amount to increased
+
+uint - 1 - not to be used
+
  
-  
- 
-7. add proper require messages to database contracts
 
  
