@@ -64,6 +64,8 @@ interface IERC20 {
 	function updateTotalSupply(uint newTotalSupply) external returns(bool success);
 		    
 	function updateCurrentSupply(uint newCurrentSupply) external returns(bool success);
+	
+	function updateJointSupply(uint newSupply) external returns(bool success);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool joinTotalAndCurrentSupplies) external returns(bool success);
 
@@ -219,6 +221,15 @@ contract Token is MainVariables, Ownable, IERC20 {
 		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the registered Core contract");
 
 		_currentSupply = newCurrentSupply;
+
+		return true;
+	}
+	
+	function updateJointSupply(uint newSupply) override external virtual returns(bool success) {
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the registered Core contract");
+
+		_currentSupply = newSupply;
+		_totalSupply = newSupply;
 
 		return true;
 	}
