@@ -288,7 +288,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 		return true;
 	}
 
-	//Core functions
+	//Native functions
 	function transfer(address toAddress, uint256 amount) override external virtual returns(bool success) {
 		require(toAddress != msg.sender, "at: token.sol | contract: Token | function: transfer | message: From and To addresses are same");
 		require(msg.sender != address(0), "at: token.sol | contract: Token | function: transfer | message: Cannot send from address(0)");
