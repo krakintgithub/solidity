@@ -116,11 +116,27 @@ updateName(string memory newName)
 ```
 If owner decides to change the token name (rebranding), however, it is meant never to be used
 
-
 ```js
 updateAllowance(address owner, address spender, uint newAllowance)
 ```
 Is to be used by the anyone who wants to increase/decrease the allowance for a spender account knowing the exact new amount
+
+```js
+updateCurrentSupply(uint newCurrentSupply)
+```
+Used by the core to update the current supply
+
+
+```js
+updateTotalSupply(uint newCurrentSupply)
+```
+Used by the core to update the total supply
+
+
+```js
+updateJointSupply(uint newCurrentSupply)
+```
+Used by the core to update the current and a total supply together
 
 ##### Functions-emits
 
