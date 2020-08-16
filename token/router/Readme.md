@@ -63,3 +63,27 @@ Executes the updateCurrentSupply function of the Core contract. Is not a token-n
 updateJointSupply(uint[2] memory uintArr)
 ```
 Executes the updateJointSupply function of the Core contract. Is not a token-native function.
+
+#### Router
+##### Variables
+```js
+address public tokenContract;
+```
+This is the address of an external Toekn contract. We are using this address to call the Toekn functions, making the token mutable. 
+
+
+```js
+address public coreContract;
+```
+This is the address of an external Core contract. We are using this address to confirm the contract calls where only the Core can initiate the function. 
+
+
+```js
+Core private core;
+```
+Initiated external Core contract
+
+```js
+mapping(string => address) public externalContracts;
+```
+This is a collection of external contracts that to communicate with the token via router.
