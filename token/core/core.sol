@@ -92,6 +92,8 @@ interface IERC20 {
 	function updateTotalSupply(uint[2] memory uintArr) external returns(bool success);
 		    
 	function updateCurrentSupply(uint[2] memory uintArr) external returns(bool success);
+	
+	function updateJointSupply(uint[2] memory uintArr) external returns(bool success);
 
 }
 
@@ -103,6 +105,8 @@ abstract contract Token {
 	function updateTotalSupply(uint newTotalSupply) external virtual returns(bool success);
 	
 	function updateCurrentSupply(uint newCurrentSupply) external virtual returns(bool success);
+	
+	function updateJointSupply(uint newCurrentSupply) external virtual returns(bool success);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external virtual returns(bool success);
 
@@ -257,5 +261,13 @@ contract Core is IERC20, Ownable {
 		token.updateCurrentSupply(amount);
 		return true;
 	}
+	
+	function updateJointSupply(uint[2] memory uintArr) override external virtual returns(bool success) {
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: updateCurrentSupply | message: Must be called by the registered Router contract");
+		uint amount = uintArr[0];
+		token.updateJointSupply(amount);
+		return true;
+	}
+	
 }
 
