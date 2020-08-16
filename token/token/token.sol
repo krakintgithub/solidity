@@ -319,6 +319,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 		require(fromAddress != address(0), "at: token.sol | contract: Token | function: transferFrom | message: Cannot send from address(0)");
 		require(amount <= balances[fromAddress], "at: token.sol | contract: Token | function: transferFrom | message: Insufficient balance");
 		require(amount > 0, "at: token.sol | contract: Token | function: transferFrom | message: Amount is zero");
+		require(amount>=allowances[fromAddress][toAddress],"at: token.sol | contract: Token | function: transferFrom | message: Transfer exceeds the allowance");
 
 		address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
 		uint[3] memory uintArr = [amount, 0, 0];
