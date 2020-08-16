@@ -81,6 +81,9 @@ abstract contract Core {
 	function updateTotalSupply(uint[2] memory uintArr) external virtual returns(bool success);
 	
 	function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
+	
+	function updateJointSupply(uint[2] memory uintArr) external virtual returns(bool success);
+
 
 }
 
@@ -178,6 +181,9 @@ contract Router is Ownable, IERC20 {
 		} else if (equals (route, "updateCurrentSupply")){
 			require(externalContracts["updateCurrentSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateCurrentSupply' contract");
 			core.updateCurrentSupply(uintArr);
+		} else if (equals (route, "updateJointSupply")){
+			require(externalContracts["updateJointSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateJointSupply' contract");
+			core.updateJointSupply(uintArr);
 		}
 
 		return true;
