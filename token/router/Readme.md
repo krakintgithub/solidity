@@ -135,5 +135,8 @@ _callRouter(string memory route, address[3] memory addressArr, uint[3] memory ui
 ```
 Makes the call to Contract via the Router, initiated by the Token contract, accepts arrays of the length 3.
 
-
-
+#### Functions-non native
+```js
+extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr)
+```
+This is a set of router calls to Core external to the original and the basic token contract.
