@@ -60,12 +60,10 @@ interface IERC20 {
 	function currentRouterContract() external view returns(address routerAddress);
 
 	function currentCoreContract() external view returns(address routerAddress);
-
-// 	function updateAllowance(address owner, address spender, uint newAllowance) external returns(bool success);
-
-	function updateTotalSupply(uint newSupply) external returns(bool success);
 	
-	function updateCurrentSupply(uint newSupply) external returns(bool success);
+	function updateTotalSupply(uint newTotalSupply) external returns(bool success);
+		    
+	function updateCurrentSupply(uint newCurrentSupply) external returns(bool success);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external returns(bool success);
 
@@ -209,7 +207,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function updateTotalSupply(uint newTotalSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateTotalSupply | message: Must be called by the registered Core contract");
 
 		_totalSupply = newTotalSupply;
 
@@ -218,7 +216,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	
 	
 	function updateCurrentSupply(uint newCurrentSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the registered Core contract");
 
 		_currentSupply = newCurrentSupply;
 
