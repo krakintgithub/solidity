@@ -99,7 +99,7 @@ contract Router is Ownable, IERC20 {
 
 	mapping(string => address) public externalContracts; //for non-core functions
 
-	//============== CORE FUNCTIONS START HERE ==================================================
+	//============== NATIVE FUNCTIONS START HERE ==================================================
 	//These functions should never change when introducing a new version of a router.
 	//Router is expected to constantly change, and the code should be written under 
 	//the "NON-CORE FUNCTIONS TO BE CODED BELOW".
@@ -161,10 +161,10 @@ contract Router is Ownable, IERC20 {
 		}
 		return true;
 	}
-	//============== CORE FUNCTIONS END HERE ==================================================
+	//============== NATIVE FUNCTIONS END HERE ==================================================
 
 
-	//=============== NON-CORE ROUTES TO BE CODED BELOW =======================================
+	//=============== NON-NATIVE ROUTES TO BE CODED BELOW =======================================
         // This code is a subject to a change, should we decide to alter anything.
         // We can also design another external router, possibilities are infinite.
     
