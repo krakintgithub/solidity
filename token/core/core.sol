@@ -88,6 +88,10 @@ interface IERC20 {
 	function mint(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
 
 	function burn(address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+	
+	function updateTotalSupply(uint[2] memory uintArr) external returns(bool success);
+		    
+	function updateCurrentSupply(uint[2] memory uintArr) external returns(bool success);
 
 }
 
@@ -95,10 +99,10 @@ abstract contract Token {
 	function balanceOf(address account) external view virtual returns(uint256 data);
 
 	function allowance(address owner, address spender) external view virtual returns(uint256 data);
-
-	function updateTotalSupply(uint newSupply) external virtual returns(bool success);
 	
-	function updateCurrentSupply(uint newSupply) external virtual returns(bool success);
+	function updateTotalSupply(uint newTotalSupply) external virtual returns(bool success);
+	
+	function updateCurrentSupply(uint newCurrentSupply) external virtual returns(bool success);
 
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external virtual returns(bool success);
 
@@ -237,6 +241,20 @@ contract Core is IERC20, Ownable {
 		address toAddress = address(0);
 		uint amount = uintArr[0];
 		token.emitTransfer(fromAddress, toAddress, amount,true);
+		return true;
+	}
+	
+	function updateTotalSupply(uint[2] memory uintArr) override external virtual returns(bool success) {
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: updateTotalSupply | message: Must be called by the registered Router contract");
+		uint amount = uintArr[0];
+		token.updateTotalSupply(amount);
+		return true;
+	}
+	
+	function updateCurrentSupply(uint[2] memory uintArr) override external virtual returns(bool success) {
+		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: updateCurrentSupply | message: Must be called by the registered Router contract");
+		uint amount = uintArr[0];
+		token.updateCurrentSupply(amount);
 		return true;
 	}
 }
