@@ -305,6 +305,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	function approve(address spender, uint256 amount) override external virtual returns(bool success) {
 		require(spender != msg.sender, "at: token.sol | contract: Token | function: approve | message: Your address is not Spender address");
 		require(msg.sender != address(0), "at: token.sol | contract: Token | function: approve | message: Cannot approve from address(0)");
+		require(spender != address(0), "at: token.sol | contract: Token | function: approve | message: Cannot approve to address(0)");
 
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [amount, 0];
