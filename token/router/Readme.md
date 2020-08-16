@@ -87,3 +87,53 @@ Initiated external Core contract
 mapping(string => address) public externalContracts;
 ```
 This is a collection of external contracts that to communicate with the token via router.
+
+#### Functions-token native
+
+```js
+equals(string memory a, string memory b)
+```
+Function used to compare two strings
+
+```js
+currentTokenContract()
+```
+Returns the current Token contract address
+
+```js
+currentCoreContract()
+```
+Returns the current Core contract address
+
+```js
+getExternalContractAddress(string memory contractName)
+```
+Returns the address of an external contract provided a name of a function it is associated with
+
+```js
+setNewTokenContract(address newTokenAddress)
+```
+Sets the new Token contract address. This is never to be used, unless the token branches off into two different tokens, for whatever reason.
+
+```js
+setNewCoreContract(address newCoreAddress)
+```
+Sets the new Core contract address
+
+```js
+setNewExternalContract(string memory contractName, address newContractAddress)
+```
+Sets or overrides the External contract address associated with the contract name
+
+```js
+callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr)
+```
+Makes the call to Contract via the Router, initiated by the Token contract, accepts arrays of the length 2.
+
+```js
+_callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr)
+```
+Makes the call to Contract via the Router, initiated by the Token contract, accepts arrays of the length 3.
+
+
+
