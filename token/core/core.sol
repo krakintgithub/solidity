@@ -158,16 +158,16 @@ contract Core is IERC20, Ownable {
 	}
 
 	function _transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-		address sender = addressArr[0];
-		address recipient = addressArr[1];
+		address fromAddress = addressArr[0];
+		address toAddress = addressArr[1];
 
-		require(sender != address(0), "at: core.sol | contract: Core | function: _transfer | message: Sender cannot be address(0)");
+		require(fromAddress != address(0), "at: core.sol | contract: Core | function: _transfer | message: Sender cannot be address(0)");
 
 		uint amount = uintArr[0];
 
-		require(amount <= token.balanceOf(sender), "at: core.sol | contract: Core | function: _transfer | message: Insufficient amount");
+		require(amount <= token.balanceOf(fromAddress), "at: core.sol | contract: Core | function: _transfer | message: Insufficient amount");
 
-		token.emitTransfer(sender, recipient, amount, true);
+		token.emitTransfer(fromAddress, toAddress, amount, true);
 		return true;
 	}
 
@@ -200,8 +200,11 @@ contract Core is IERC20, Ownable {
 
 		uint[2] memory tmpUint = [uintArr[0], uintArr[1]];
 
-		_approve(tmpAddresses2, tmpUint);
+		
 		_transfer(tmpAddresses1, tmpUint);
+		
+		tmpUint = [allowance.sub(uintArr[0]), uintArr[1]];
+		_approve(tmpAddresses2, tmpUint);
 
 		return true;
 	}
@@ -216,7 +219,7 @@ contract Core is IERC20, Ownable {
 
 	function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
 		require(msg.sender == routerContract, "at: core.sol | contract: Core | function: decreaseAllowance | message: Must be called by the registered Router contract");
-		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: core.sol | contract: Core | function: decreaseAllowance | message: ERC20: decreased allowance below zero");
+		uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: core.sol | contract: Core | function: decreaseAllowance | message: ERC20: decreases allowance below zero");
 		uintArr[0] = newAllowance;
 		_approve(addressArr, uintArr);
 		return true;
