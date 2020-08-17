@@ -1,20 +1,17 @@
 /*
-Please note, there are 3 native components to this token design. Token, Router, and Core. 
+There are 3 native components to this token design. Token, Router, and Core. 
 Each component is deployed separately as an external contract.
 
 This is the main code of a mutable token contract.
-The Token component is the only immutable part and it covers only the most-basic operations any token must have.
-Any other contract is also external and it must be additionally registered and routed within the native components.
-The reason for introducing a mutable token is to be able to add or remove the features, do the code updates, 
-... and to be able to run a business on the block-chain.
-The main idea of this design was to follow the adjusted Proxy and the MVC design patterns.
+Token component is the only immutable part and it covers only the most-basic operations any token must have.
+Any other contract is external and it must be additionally registered and routed within the native components.
 
 Registered addresses of the native components:
 Token: 
 Router:
 Core:
 
--This token design was developed and designed entirely by Damir Olejar, August 2020.
+-This token was developed and designed by Damir Olejar, August 2020.
 */
 
 // SPDX-License-Identifier: MIT
@@ -177,7 +174,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 
 	constructor() {
 		if (!mainConstructorLocked) {
-			uint initialMint = 21000192000000000000000000; //21,000,192 tokens, for initial setup only.
+			uint initialMint = 1000192000000000000000000; //1,000,192 tokens, for initial setup only.
 			_totalSupply = initialMint;
 			_currentSupply = initialMint;
 			emit Transfer(address(0), msg.sender, initialMint);
@@ -243,7 +240,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 	
 	function updateJointSupply(uint newSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateJointSupply | message: Must be called by the registered Core contract");
 
 		_currentSupply = newSupply;
 		_totalSupply = newSupply;
@@ -360,9 +357,9 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function decreaseAllowance(address spender, uint256 subtractedValue) override external virtual returns(bool success) {
-		require(spender != msg.sender, "at: token.sol | contract: Token | function: increaseAllowance | message: Your address cannot be the spender address");
-		require(msg.sender != address(0), "at: token.sol | contract: Token | function: increaseAllowance | message: Cannot decrease allowance from address(0)");
-		require(spender != address(0), "at: token.sol | contract: Token | function: increaseAllowance | message: Cannot decrease allowance for address(0)");
+		require(spender != msg.sender, "at: token.sol | contract: Token | function: decreaseAllowance | message: Your address cannot be the spender address");
+		require(msg.sender != address(0), "at: token.sol | contract: Token | function: decreaseAllowance | message: Cannot decrease allowance from address(0)");
+		require(spender != address(0), "at: token.sol | contract: Token | function: decreaseAllowance | message: Cannot decrease allowance for address(0)");
 		
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [subtractedValue, 0];
