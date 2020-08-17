@@ -160,7 +160,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 
 	constructor() {
 		if (!mainConstructorLocked) {
-			uint initialMint = 21000192000000000000000000; //21,000,192 tokens, for initial setup, to be burned.
+			uint initialMint = 21000192000000000000000000; //21,000,192 tokens, for initial setup only.
 			_totalSupply = initialMint;
 			_currentSupply = initialMint;
 			emit Transfer(address(0), msg.sender, initialMint);
@@ -268,6 +268,8 @@ contract Token is MainVariables, Ownable, IERC20 {
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
 		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: emitApproval | message: Must be called by the registered Core contract");
+		require(fromAddress != address(0), "at: token.sol | contract: Token | function: emitApproval | message: Cannot approve from address(0)");
+
         allowances[fromAddress][toAddress] = amount;
 		emit Approval(fromAddress, toAddress, amount);
 
@@ -293,7 +295,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 		require(toAddress != msg.sender, "at: token.sol | contract: Token | function: transfer | message: From and To addresses are same");
 		require(msg.sender != address(0), "at: token.sol | contract: Token | function: transfer | message: Cannot send from address(0)");
 		require(amount <= balances[msg.sender], "at: token.sol | contract: Token | function: transfer | message: Insufficient balance");
-		require(amount > 0, "at: token.sol | contract: Token | function: transfer | message: Amount is zero");
+		require(amount > 0, "at: token.sol | contract: Token | function: transfer | message: Zero transfer not allowed");
 
 		address[2] memory addresseArr = [msg.sender, toAddress];
 		uint[2] memory uintArr = [amount, 0];
@@ -303,7 +305,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function approve(address spender, uint256 amount) override external virtual returns(bool success) {
-		require(spender != msg.sender, "at: token.sol | contract: Token | function: approve | message: Your address is not Spender address");
+		require(spender != msg.sender, "at: token.sol | contract: Token | function: approve | message: Your address cannot be the spender address");
 		require(msg.sender != address(0), "at: token.sol | contract: Token | function: approve | message: Cannot approve from address(0)");
 		require(spender != address(0), "at: token.sol | contract: Token | function: approve | message: Cannot approve to address(0)");
 
@@ -318,7 +320,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 		require(fromAddress != toAddress, "at: token.sol | contract: Token | function: transferFrom | message: From and To addresses are same");
 		require(fromAddress != address(0), "at: token.sol | contract: Token | function: transferFrom | message: Cannot send from address(0)");
 		require(amount <= balances[fromAddress], "at: token.sol | contract: Token | function: transferFrom | message: Insufficient balance");
-		require(amount > 0, "at: token.sol | contract: Token | function: transferFrom | message: Amount is zero");
+		require(amount > 0, "at: token.sol | contract: Token | function: transferFrom | message: Zero transfer not allowed");
 		require(amount>=allowances[fromAddress][toAddress],"at: token.sol | contract: Token | function: transferFrom | message: Transfer exceeds the allowance");
 
 		address[3] memory addresseArr = [msg.sender, fromAddress, toAddress];
@@ -329,6 +331,10 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function increaseAllowance(address spender, uint256 addedValue) override external virtual returns(bool success) {
+		require(spender != msg.sender, "at: token.sol | contract: Token | function: increaseAllowance | message: Your address cannot be the spender address");
+		require(msg.sender != address(0), "at: token.sol | contract: Token | function: increaseAllowance | message: Cannot increase allowance from address(0)");
+		require(spender != address(0), "at: token.sol | contract: Token | function: increaseAllowance | message: Cannot increase allowance to address(0)");
+		
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [addedValue, 0];
 		router.callRouter("increaseAllowance", addresseArr, uintArr);
@@ -337,6 +343,10 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function decreaseAllowance(address spender, uint256 subtractedValue) override external virtual returns(bool success) {
+		require(spender != msg.sender, "at: token.sol | contract: Token | function: increaseAllowance | message: Your address cannot be the spender address");
+		require(msg.sender != address(0), "at: token.sol | contract: Token | function: increaseAllowance | message: Cannot decrease allowance from address(0)");
+		require(spender != address(0), "at: token.sol | contract: Token | function: increaseAllowance | message: Cannot decrease allowance for address(0)");
+		
 		address[2] memory addresseArr = [msg.sender, spender];
 		uint[2] memory uintArr = [subtractedValue, 0];
 		router.callRouter("decreaseAllowance", addresseArr, uintArr);
@@ -345,5 +355,3 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 }
-
- 
