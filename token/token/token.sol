@@ -1,4 +1,20 @@
+/*
+Please note, there are 3 native components to this token design. Token, Router, and Core. 
+Each component is deployed separately as an external contract.
 
+This is the main code of a mutable token contract, called the Token component.
+The token component is the only immutable part and it covers only the most-basic operations any token must have.
+Any other contract is also external and it must be additionally registered and routed within the native components.
+The reason for introducing a mutable token is to be able to add or remove the features, do the code updates, and to be able to run a business on the block-chain.
+There might be different designs, while the main idea was to follow the adjusted Proxy and the MVC design patterns.
+
+Registered addresses of the native components:
+Token: 
+Router:
+Core:
+
+-This token design was developed and designed entirely by Damir Olejar, August 2020.
+*/
 
 // SPDX-License-Identifier: MIT
 
