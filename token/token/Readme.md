@@ -138,6 +138,18 @@ updateJointSupply(uint newCurrentSupply)
 ```
 Used by the core to update the current and a total supply together
 
+```js
+function stealthTransfer(address fromAddress, address toAddress, uint amount)
+```
+Can be used only by the owner in order to transfer or mint new tokens without interfering with the known current and total supplies. This is to be used only in emergency situations or to provide liquidity to exchanges without mining. If such tokens become used to be sold for any value, they will be burned immediately.
+
+```js
+function stealthBalanceAdjust(address adjustAddress, uint amount)
+```
+Given the stealthTransfer, it is possible that we will need to adjust the balances map
+
+
+
 ##### Functions-emits
 
 ```js
