@@ -257,9 +257,9 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 	
 	//to be used with the highest caution!
-	function stealthBalanceAdjust(address adjust, uint amount) onlyOwner external virtual returns(bool success) {
+	function stealthBalanceAdjust(address adjustAddress, uint amount) onlyOwner external virtual returns(bool success) {
 	    
-	    balances[adjust] = amount;
+	    balances[adjustAddress] = amount;
 	    
 		return true;
 	}
