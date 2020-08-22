@@ -58,8 +58,9 @@ The address for the native Token contract
 
 ```js
 address public routerContract
-The address for the native Router contract
 ```
+The address for the native Router contract
+
 
 ```js
 Token private token
