@@ -3,7 +3,7 @@
 
 //We are providing 1,000,000.000 Krakin't tokens for the ButtCoin swap to honour Satoshi's accounts and early mining.
 //To make sure that everyone gets a chance to exchange Buttcoins for Krakin't, we will let
-//67.108864 buttcoins equal 1 Krakint token, using the ratio 33,554,431.99999981 : 500,000.00
+//3355.4432 buttcoins equal 1 Krakint token, using the ratio 33,554,431.99999981 : 10,000.00 
 //This way, we will make sure that supply of Krakin't is twice as much as there are ButtCoins in the possible existence
 
 //To make sure that there are enough ButtCoins, we will make a little ponzi-scheme within this contract and recycle the buttcoins on exchanges
@@ -89,7 +89,7 @@ contract ButtSwap {
     
 using SafeMath for uint;    
 uint public totalButts = 3355443199999981;
-uint public availableKrakints = 500000000000000000000000;
+uint public availableKrakints = 10000000000000000000000;
 ButtCoin public buttcoin = ButtCoin(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc); 
 Krakint public krakint = Krakint(0x...???...); //TODO !!!!
 address public contractAddress;
