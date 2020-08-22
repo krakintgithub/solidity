@@ -143,6 +143,7 @@ uintarr[1] - not used
 
 ```js
 decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr)
+```
 
 Makes a call to _approve function to decrease the existing allowance
 
@@ -157,3 +158,57 @@ uintarr[1] - not used
 ##### Non-native Functions
 
 
+```js
+mint(address[2] memory addressArr, uint[2] memory uintArr)
+```
+Makes a call to Token's emitTransfer from address(0) and mints tokens into a desired account
+
+address[0] - from address
+
+address[1] - to address
+
+uintarr[0] - amount transfered
+
+uintarr[1] - not used
+
+
+```js
+burn(address[2] memory addressArr, uint[2] memory uintArr)
+```
+Makes a call to Token't emitTransfer to address(0) and burns tokens
+
+address[0] - from address
+
+address[1] - to address
+
+uintarr[0] - amount transfered
+
+uintarr[1] - not used
+
+```js
+updateTotalSupply(uint[2] memory uintArr)
+```
+Makes a call to Token contract and updates the total supply number
+
+uintarr[0] - number
+
+uintarr[1] - not used
+
+```js
+updateCurrentSupply(uint[2] memory uintArr)
+```
+Makes a call to Token contract and updates the current supply number
+
+uintarr[0] - number
+
+uintarr[1] - not used
+
+
+```js
+updateJointSupply(uint[2] memory uintArr)
+```
+Makes a call to Token contract and updates total and current supplies with a same number
+
+uintarr[0] - number
+
+uintarr[1] - not used
