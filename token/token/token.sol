@@ -223,7 +223,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function updateTotalSupply(uint newTotalSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateTotalSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: updateTotalSupply | message: Must be called by the owner or registered Core contract or");
 
 		_totalSupply = newTotalSupply;
 
@@ -232,7 +232,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	
 	
 	function updateCurrentSupply(uint newCurrentSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the owner or registered Core contract");
 
 		_currentSupply = newCurrentSupply;
 
@@ -240,7 +240,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 	
 	function updateJointSupply(uint newSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract, "at: token.sol | contract: Token | function: updateJointSupply | message: Must be called by the registered Core contract");
+		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: updateJointSupply | message: Must be called by the owner or registered Core contract");
 
 		_currentSupply = newSupply;
 		_totalSupply = newSupply;
