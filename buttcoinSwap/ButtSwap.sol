@@ -11,6 +11,7 @@
 
 pragma solidity = 0.7 .0;
 
+//TODO!  INSERT THE KRAKINT COUNTER FOR REMAIN KRAKINT TOKENS !!!
 
 library SafeMath {
 
