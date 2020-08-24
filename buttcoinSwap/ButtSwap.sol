@@ -12,6 +12,7 @@
 pragma solidity = 0.7 .0;
 
 //TODO!  INSERT THE KRAKINT COUNTER FOR REMAIN KRAKINT TOKENS !!!
+//TODO! insert the delegatecall (bool success, bytes memory result) = tta.delegatecall(abi.encodeWithSignature("approve(address,uint256)", address(this), amount));
 
 library SafeMath {
 
