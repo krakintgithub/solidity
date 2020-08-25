@@ -3,7 +3,8 @@
 
 //We are providing 1,000,000.000 Krakin't tokens for the ButtCoin swap to honour Satoshi's accounts and early mining.
 //To make sure that everyone gets a chance to exchange Buttcoins for Krakin't, we will let
-//3355.4432 buttcoins equal 1 Krakint token, using the ratio 33,554,431.99999981 : 10,000.00 
+
+//NOTE: FOR 10,000.0 BUTTCOINS, The contract will get 9,800 Buttcoins, previous address will get 100 Buttcoins, 100 Buttcoins will be burned and you will get 3.355443199999981 Krakin't tokens !!!!
 
 //To make sure that there are enough ButtCoins, we will make a little ponzi-scheme within this contract and recycle the buttcoins on exchanges
 //I hope that the ponzi-scheme will be enough to pay-off the contract deployment at least, as I hope that it will also rise the buttcoin from its grave - a bit.
@@ -87,10 +88,10 @@ contract ButtSwap {
     Krakint private krakint;
     address public contractAddress;
     address public owner;
-    uint public krakints = 1000000000000000000000000;
+    uint public krakints = 1000000000000000000000000; //to be reduced from 
 
-    address buttcoinAddress = address(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc);
-    address krakintAddress = address(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc);
+    address buttcoinAddress = address(0x38b810BD9Bef140F3039AC78D68337705aF09259);
+    address krakintAddress = address(0x33F9613E80158247e35DA28E28b018edF3889BB8);
 
 	constructor() {
         contractAddress = address(this);
@@ -107,16 +108,16 @@ contract ButtSwap {
 
      function buttSwap(uint buttcoinAmount) public virtual returns (string memory message) {
          
-        (bool success, bytes memory result) = buttcoinAddress.delegatecall(abi.encodeWithSignature("approve(address,uint256)",address(this),buttcoinAmount));
+         //TODO, check if user has enough buttcoins, external call to view - balanceOf(msg.sender)
+         //TODO, check if approved (if possible)
          
-        uint amt = getApprovalAmount();
-        require(amt>0, "Please approve some buttcoins.");
-         
-        buttcoin.transferFrom(msg.sender, contractAddress, amt);
-        amt = calculateKrakints(amt);
-        krakint.transfer(msg.sender, amt);
+         uint amt2 = calculateKrakints(buttcoinAmount);
+         //TODO: check contract krakint amount versus amt2
+
+        buttcoin.transferFrom(msg.sender, contractAddress, buttcoinAmount);
+        krakint.transfer(msg.sender, amt2);
         
-        krakints = krakints.sub(amt);
+        krakints = krakints.sub(amt2);
 
         string memory mssg = "Done! Please wait for the Krakin't transfer to complete.";
         return mssg;
@@ -124,7 +125,7 @@ contract ButtSwap {
      
      function calculateKrakints(uint buttcoins) private  returns (uint amount) {
          
-         buttcoins = buttcoins.mul(10000000000); //adds 10 decimals
+         buttcoins = buttcoins.mul(10000000000000); //adds decimals
          uint ret = (buttcoins.mul(totalButts)).div(availableKrakints);
          return ret;
          
