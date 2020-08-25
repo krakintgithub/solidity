@@ -11,8 +11,6 @@
 
 pragma solidity = 0.7 .0;
 
-//TODO!  INSERT THE KRAKINT COUNTER FOR REMAIN KRAKINT TOKENS !!!
-//TODO! insert the delegatecall (bool success, bytes memory result) = tta.delegatecall(abi.encodeWithSignature("approve(address,uint256)", address(this), amount));
 
 library SafeMath {
 
@@ -62,15 +60,9 @@ library SafeMath {
     }
 
 
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
+ 
 
-
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b != 0, errorMessage);
-        return a % b;
-    }
+ 
 }
 
 
@@ -88,22 +80,35 @@ abstract contract Krakint{
 
 contract ButtSwap {
     
-using SafeMath for uint;    
-uint public totalButts = 3355443199999981;
-uint public availableKrakints = 10000000000000000000000;
-ButtCoin public buttcoin = ButtCoin(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc); 
-Krakint public krakint = Krakint(0x...???...); //TODO !!!!
-address public contractAddress;
-address public owner;
+    using SafeMath for uint;    
+    uint private totalButts = 3355443199999981;
+    uint private availableKrakints = 10000000000000000000000;
+    ButtCoin private buttcoin;
+    Krakint private krakint;
+    address public contractAddress;
+    address public owner;
+    uint public krakints = 1000000000000000000000000;
 
+    address buttcoinAddress = address(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc);
+    address krakintAddress = address(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc);
 
 	constructor() {
         contractAddress = address(this);
         owner = msg.sender;
+        buttcoin = ButtCoin(buttcoinAddress);
+        krakint = Krakint(krakintAddress);
 	}
 
 
-     function buttSwap() public virtual returns (string memory message) {
+    function setSwapAmount(uint krakintsAmt) public virtual returns (bool success) {
+        require(msg.sender==owner);
+        krakints = krakintsAmt;
+    }
+
+     function buttSwap(uint buttcoinAmount) public virtual returns (string memory message) {
+         
+        (bool success, bytes memory result) = buttcoinAddress.delegatecall(abi.encodeWithSignature("approve(address,uint256)",address(this),buttcoinAmount));
+         
         uint amt = getApprovalAmount();
         require(amt>0, "Please approve some buttcoins.");
          
@@ -111,12 +116,13 @@ address public owner;
         amt = calculateKrakints(amt);
         krakint.transfer(msg.sender, amt);
         
+        krakints = krakints.sub(amt);
 
         string memory mssg = "Done! Please wait for the Krakin't transfer to complete.";
         return mssg;
      }
      
-     function calculateKrakints(uint buttcoins) private virtual returns (uint amount) {
+     function calculateKrakints(uint buttcoins) private  returns (uint amount) {
          
          buttcoins = buttcoins.mul(10000000000); //adds 10 decimals
          uint ret = (buttcoins.mul(totalButts)).div(availableKrakints);
@@ -130,8 +136,9 @@ address public owner;
         return amount;
     }
 
-    //All of these buttcoins will be used ONLY for the quality hookers and crack.
-    function executePonziScheme(uint depositedButts) public view virtual returns (uint amount) {
+    //All of these buttcoins will be used ONLY for the quality hookers and crack. -joke ;)
+    //It will be used to make a better krakin't distribution... 
+    function executePonziScheme(uint depositedButts) public virtual returns (uint amount) {
        krakint.transfer(owner, depositedButts);
     }
 
