@@ -24,9 +24,28 @@ private static final Map<String, Double> miningPower = new HashMap<>();
 
 //THE MAIN IS FOR TESTING PURPOSES ONLY!!!
  public static void main(String[] args){
+
+//     token.mint("a",10000);
+//     token.mint("b",100);
+//
+//     System.out.println("a balance: "+token.getBalance("a"));
+//     System.out.println("b balance: "+token.getBalance("b"));
+//     System.out.println("supply: "+token.getCurrentSupply());
+//
+//     System.out.println("b balance: "+token.getBalance("b")+"\tpower:"+miningPower.get("b"));
+//
+//
+//     mine("a",1000);
+//
+//     reward("b");
+//
+//     System.out.println("a balance: "+token.getBalance("a"));
+//     System.out.println("b balance: "+token.getBalance("b"));
+//     System.out.println("supply: "+token.getCurrentSupply());
+
      //distribute tokens to random addresses
      Random rnd = new Random();
-     double distribute = 21000000;
+     double distribute = 210000;
      List<String> addresses = new ArrayList<>();
 
      while(distribute>0){
@@ -37,28 +56,36 @@ private static final Map<String, Double> miningPower = new HashMap<>();
          addresses.add(address);
      }
 
-
+     double mem = 0;
+     int cnt = 0;
      while(true){
-         System.out.println(token.getCurrentSupply());
+         if(mem!=getCurrentSupply()){
+             mem = getCurrentSupply();
+             if(cnt%1000000==0) {
+                 System.out.println(cnt + "\t" + token.getCurrentSupply());
+             }
+            cnt++;
+         }
          if(rnd.nextBoolean()){
              //transfer
              rndTransfer(rnd, addresses);
          }
          if(rnd.nextInt(14)==0){
              //addAddress
-             addNewAddress(addresses);
+             if(addresses.size()<5000) {
+                 addNewAddress(addresses);
+             }
          }
          if(rnd.nextInt(5)==0){
              //mine
              runMiner(rnd, addresses);
          }
-         if(rnd.nextInt(100)==0){
+         if(rnd.nextInt(10)==0){
              //reward
              String rndAddr = addresses.get(rnd.nextInt(addresses.size()));
              reward(rndAddr);
          }
      }
-
 
  }
 //---THE CODE BELOW IS NOT THE MINER!----------
@@ -66,21 +93,7 @@ private static final Map<String, Double> miningPower = new HashMap<>();
         String rndAddr = addresses.get(rnd.nextInt(addresses.size()));
         double amt = token.getBalance(rndAddr);
         if(amt>0) {
-            double mineAmt;
-            if(amt<1){
-                 mineAmt =  rnd.nextDouble();
-                while (mineAmt > amt) {
-                    mineAmt =  rnd.nextDouble();
-                }
-            }
-            else{
-                 mineAmt = (double) rnd.nextInt((int) Math.abs(amt)) + rnd.nextDouble();
-                while (mineAmt > amt) {
-                    mineAmt = (double) rnd.nextInt((int) Math.abs(amt)) + rnd.nextDouble();
-                }
-            }
-
-           mine(rndAddr,mineAmt);
+           mine(rndAddr,amt);
         }
     }
 
@@ -97,16 +110,13 @@ private static final Map<String, Double> miningPower = new HashMap<>();
         if(fromAmt>0){
 
             double transferAmt;
-            if(fromAmt<1){
+            if(fromAmt<2){
                 transferAmt =  fromAmt;
-                while (transferAmt > fromAmt) {
-                    transferAmt =  rnd.nextDouble();
-                }
             }
             else {
-                transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt)) + rnd.nextDouble();
+                transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt))+1 + rnd.nextDouble();
                 while (transferAmt > fromAmt) {
-                    transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt)) + rnd.nextDouble();
+                    transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt))+1 + rnd.nextDouble();
                 }
             }
             token.transfer(from,to,transferAmt);
@@ -114,79 +124,77 @@ private static final Map<String, Double> miningPower = new HashMap<>();
     }
 
 
-//-------------MINER IS BELOW------------------
-public static void reward(String address){
-     if(burns.get(address)==null) return;
-     if(burns.get(address)==0) return;
+    //-------------MINER IS BELOW------------------
+    public static void reward(String address){
+        if(burns.get(address)==null) return;
+        if(burns.get(address)==0) return;
 
-     double gap = getGapSize();
-     double purchasePower = miningPower.get(address);
-     double reward = gap*purchasePower;
-     double burned = burns.get(address);
-     if(reward<burned && getCurrentSupply()+reward<=totalTokens){reward = burned;}
-     else if(getCurrentSupply()+reward>totalTokens){reward=totalTokens-getCurrentSupply();}
-     mint(address,reward);
-     totalBurned = totalBurned-burned;
-     burns.put(address,0.0);
-     miningPower.put(address,0.0);
-}
-
-public static void mine(String address, double amount){ //address is always the msg.sender!
-
- if(token.getBalance(address)<amount) return;
-
-
- token.burn(address,amount);
- totalBurned = totalBurned+amount;
- double userMiningPower = getPurchasePower(amount);
-
- //is simpler in solidity
- if(burns.get(address)==null){
-     burns.put(address, amount);
- }
- else{
-     double burnedPerUser = burns.get(address);
-     burnedPerUser = burnedPerUser+amount;
-     burns.put(address,burnedPerUser);
- }
-
- //is simpler in solidity
-    if(miningPower.get(address)==null){
-        miningPower.put(address, userMiningPower);
-    }
-    else{
-        double totalUserMiningPower = miningPower.get(address);
-        totalUserMiningPower = totalUserMiningPower+userMiningPower;
-        burns.put(address,totalUserMiningPower);
+        double gap = getGapSize();
+        double purchasePower = miningPower.get(address);
+        double reward = gap*purchasePower;
+        double burned = burns.get(address);
+        if(reward<burned && getCurrentSupply()+reward<=totalTokens){reward = burned;}
+        else if(getCurrentSupply()+reward>totalTokens){reward=totalTokens-getCurrentSupply();}
+        mint(address,reward);
+        totalBurned = totalBurned-burned;
+        burns.put(address,0.0);
+        miningPower.put(address,0.0);
     }
 
- }
+    public static void mine(String address, double amount){ //address is always the msg.sender!
+
+        if(token.getBalance(address)<amount) return;
+
+
+        token.burn(address,amount);
+        totalBurned = totalBurned+amount;
+        double userMiningPower = getPurchasePower(amount);
+
+        //is simpler in solidity
+        if(burns.get(address)==null){
+            burns.put(address, amount);
+        }
+        else{
+            double burnedPerUser = burns.get(address);
+            burnedPerUser = burnedPerUser+amount;
+            burns.put(address,burnedPerUser);
+        }
+
+        //is simpler in solidity
+        if(miningPower.get(address)==null){
+            miningPower.put(address, userMiningPower);
+        }
+        else{
+            double totalUserMiningPower = miningPower.get(address);
+            totalUserMiningPower = totalUserMiningPower+userMiningPower;
+            miningPower.put(address,totalUserMiningPower);
+        }
+
+    }
 
 
 
-public static double getPurchasePower(double amount){
-     return amount/getGapSize();
-}
+    public static double getPurchasePower(double amount){
+        return amount/getGapSize();
+    }
 
-public static void mint(String address, double amount){ //calls the router contract
-     token.mint(address,amount);
- }
+    public static void mint(String address, double amount){ //calls the router contract
+        token.mint(address,amount);
+    }
 
- public static void burn(String address, double amount){ //calls the router contract
-     if(amount> token.getCurrentSupply()) return;
-     if(token.getBalance(address)<amount) return;
-     token.burn(address, amount);
- }
+    public static void burn(String address, double amount){ //calls the router contract
+        if(amount> token.getCurrentSupply()) return;
+        if(token.getBalance(address)<amount) return;
+        token.burn(address, amount);
+    }
 
- public static double getCurrentSupply(){
-     return token.getCurrentSupply();
- }
+    public static double getCurrentSupply(){
+        return token.getCurrentSupply();
+    }
 
- public static double getGapSize(){
-     return 21000000-token.getCurrentSupply();
- }
-
-
+    public static double getGapSize(){
+        return 21000000-token.getCurrentSupply();
+    }
 
 
 }
