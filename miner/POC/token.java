@@ -3,13 +3,28 @@ import java.util.Map;
 
 public class token {
 
-    public double currentSupply = 1000000;
+    public double currentSupply = 0;
 
     public final Map<String, Double> balances = new HashMap<>();
+
+    public double getMaximum(){
+        double ret = 0;
+        for(String key:balances.keySet()){
+            if(ret<balances.get(key)){
+                ret = balances.get(key);
+            }
+        }
+        return ret;
+    }
+
 
     public double getBalance(String address){
         if(balances.get(address)==null) return 0.0;
         return balances.get(address);
+    }
+
+    public int getAddressesSize(){
+        return balances.size();
     }
 
     public double getCurrentSupply() {
