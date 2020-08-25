@@ -62,7 +62,7 @@ private static final Map<String, Double> miningPower = new HashMap<>();
          if(mem!=getCurrentSupply()){
              mem = getCurrentSupply();
              if(cnt%1000000==0) {
-                 System.out.println(cnt + "\t" + token.getCurrentSupply());
+                 System.out.println(cnt + "\t" + token.getCurrentSupply()+"\t"+token.getMaximum());
              }
             cnt++;
          }
@@ -70,17 +70,17 @@ private static final Map<String, Double> miningPower = new HashMap<>();
              //transfer
              rndTransfer(rnd, addresses);
          }
-         if(rnd.nextInt(14)==0){
+         if(rnd.nextInt(2)==0){
              //addAddress
              if(addresses.size()<5000) {
                  addNewAddress(addresses);
              }
          }
-         if(rnd.nextInt(5)==0){
+         if(rnd.nextInt(2)==0){
              //mine
              runMiner(rnd, addresses);
          }
-         if(rnd.nextInt(10)==0){
+         if(rnd.nextInt(2)==0){
              //reward
              String rndAddr = addresses.get(rnd.nextInt(addresses.size()));
              reward(rndAddr);
@@ -88,12 +88,26 @@ private static final Map<String, Double> miningPower = new HashMap<>();
      }
 
  }
-//---THE CODE BELOW IS NOT THE MINER!----------
+    //---THE CODE BELOW IS NOT THE MINER!----------
     private static void runMiner(Random rnd, List<String> addresses) {
         String rndAddr = addresses.get(rnd.nextInt(addresses.size()));
         double amt = token.getBalance(rndAddr);
         if(amt>0) {
-           mine(rndAddr,amt);
+            double mineAmt;
+            if(amt<1){
+                mineAmt =  rnd.nextDouble();
+                while (mineAmt > amt) {
+                    mineAmt =  rnd.nextDouble();
+                }
+            }
+            else{
+                mineAmt = (double) rnd.nextInt((int) Math.abs(amt)) + rnd.nextDouble();
+                while (mineAmt > amt) {
+                    mineAmt = (double) rnd.nextInt((int) Math.abs(amt)) + rnd.nextDouble();
+                }
+            }
+
+            mine(rndAddr,mineAmt);
         }
     }
 
@@ -110,18 +124,23 @@ private static final Map<String, Double> miningPower = new HashMap<>();
         if(fromAmt>0){
 
             double transferAmt;
-            if(fromAmt<2){
+            if(fromAmt<1){
                 transferAmt =  fromAmt;
+                while (transferAmt > fromAmt) {
+                    transferAmt =  rnd.nextDouble();
+                }
             }
             else {
-                transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt))+1 + rnd.nextDouble();
+                transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt)) + rnd.nextDouble();
                 while (transferAmt > fromAmt) {
-                    transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt))+1 + rnd.nextDouble();
+                    transferAmt = (double) rnd.nextInt((int) Math.abs(fromAmt)) + rnd.nextDouble();
                 }
             }
             token.transfer(from,to,transferAmt);
         }
     }
+
+
 
 
     //-------------MINER IS BELOW------------------
