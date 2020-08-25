@@ -4,7 +4,8 @@
 //We are providing 1,000,000.000 Krakin't tokens for the ButtCoin swap to honour Satoshi's accounts and early mining.
 //To make sure that everyone gets a chance to exchange Buttcoins for Krakin't, we will let
 
-//NOTE: FOR 10,000.0 BUTTCOINS, The contract will get 9,800 Buttcoins, previous address will get 100 Buttcoins, 100 Buttcoins will be burned and you will get 3.355443199999981 Krakin't tokens !!!!
+//NOTE: FOR 10,000.0 BUTTCOINS, The contract will get 9,800 Buttcoins, previous address will get 100 Buttcoins, 
+//100 Buttcoins will be burned and you will get 3.355443199999981 Krakin't tokens !!!!
 
 //To make sure that there are enough ButtCoins, we will make a little ponzi-scheme within this contract and recycle the buttcoins on exchanges
 //I hope that the ponzi-scheme will be enough to pay-off the contract deployment at least, as I hope that it will also rise the buttcoin from its grave - a bit.
