@@ -95,7 +95,7 @@ interface IERC20 {
 contract Ownable is Context {
 	address private _owner;
 	address private _failsafeOwner; //failsafe
-	bool private setOwner2 = false;
+	bool private setFailsafeOwner = false;
 
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -131,9 +131,9 @@ contract Ownable is Context {
 // 	}
 
     function setSecondOwnerAddress(address newOwner) public virtual onlyOwner{
-        require(!setOwner2);
+        require(!setFailsafeOwner);
         _failsafeOwner = newOwner;
-        setOwner2 = false;
+        setFailsafeOwner = false;
     }
 
 	function transferOwnership(address newOwner) public virtual onlyOwner {
@@ -147,6 +147,12 @@ contract Ownable is Context {
 		emit OwnershipTransferred(_owner, newOwner);
 		_owner = newOwner;
 	}
+	
+	function changeFailsafeOwner(address newOwner) public virtual onlyFailsafeOwner {
+		require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _failsafeOwner = newOwner;
+	}
+	
 }
 
 abstract contract Router {
