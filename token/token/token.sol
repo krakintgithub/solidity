@@ -1,15 +1,8 @@
 /*
-There are 3 native components to this token design. Token, Router, and Core. 
-Each component is deployed separately as an external contract.
-
 This is the main code of a mutable token contract.
 Token component is the only immutable part and it covers only the most-basic operations any token must have.
 Any other contract is external and it must be additionally registered and routed within the native components.
 
-Registered addresses of the native components:
-Token: 
-Router:
-Core:
 
 -This token was developed and designed by Damir Olejar, August 2020.
 */
@@ -174,7 +167,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 
 	constructor() {
 		if (!mainConstructorLocked) {
-			uint initialMint = 1000192000000000000000000; //1,000,192 tokens, for initial setup only.
+			uint initialMint = 21000000000000000000000000; //just for an initial setup.
 			_totalSupply = initialMint;
 			_currentSupply = initialMint;
 			emit Transfer(address(0), msg.sender, initialMint);
