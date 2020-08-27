@@ -118,6 +118,11 @@ contract Ownable is Context {
 		_;
 	}
 	
+	modifier onlyOwner_2() {
+		require(_owner2 == _msgSender(), "Ownable: caller is not the owner");
+		_;
+	}
+	
 // We do not want to execute this, under any circumstances!
 // 	function renounceOwnership() public virtual onlyOwner {
 // 		emit OwnershipTransferred(_owner, address(0));
@@ -130,12 +135,14 @@ contract Ownable is Context {
 		_owner = newOwner;
 	}
 	
-	function transferSecondOwnership(address newOwner) public virtual onlyOwner {
+	function transferSecondOwnership(address newOwner) public virtual onlyOwner_2 {
 		require(newOwner != address(0), "Ownable: new owner is the zero address");
+		emit OwnershipTransferred(_owner, newOwner);
 		emit OwnershipTransferred(_owner2, newOwner);
+
+		_owner = newOwner;
 		_owner2 = newOwner;
 	}
-	
 }
 
 abstract contract Router {
