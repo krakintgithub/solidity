@@ -55,10 +55,11 @@ contract Ownable is Context {
     _;
   }
 
-  function renounceOwnership() public virtual onlyOwner {
-    emit OwnershipTransferred(_owner, address(0));
-    _owner = address(0);
-  }
+// We don't want to execute this, under any circumnstances
+//   function renounceOwnership() public virtual onlyOwner {
+//     emit OwnershipTransferred(_owner, address(0));
+//     _owner = address(0);
+//   }
 
   function transferOwnership(address newOwner) public virtual onlyOwner {
     require(newOwner != address(0), "Ownable: new owner is the zero address");
@@ -81,8 +82,6 @@ interface IERC20 {
 
 }
 
-//========HYBRID CALL-BACK TO token.sol==========
-
 abstract contract Token {
   function balanceOf(address account) external view virtual returns(uint256 data);
 
@@ -100,17 +99,125 @@ abstract contract Token {
 
 }
 
+contract Hybrid {
+    
+    using SafeMath
+    for uint256;
+    
+    Token internal token;
+    address public tokenContract;
+    
+
+  function core_transfer(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    _transfer(addressArr, uintArr);
+    return true;
+  }
+
+  function _transfer(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    address fromAddress = addressArr[0];
+    address toAddress = addressArr[1];
+
+    require(fromAddress != address(0), "at: hybrid.sol | contract: Hybrid| function: _transfer | message: Sender cannot be address(0)");
+
+    uint amount = uintArr[0];
+
+    require(amount <= token.balanceOf(fromAddress), "at: hybrid.sol | contract: Hybrid| function: _transfer | message: Insufficient amount");
+
+    token.emitTransfer(fromAddress, toAddress, amount, true);
+    return true;
+  }
+
+  function core_approve(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    _approve(addressArr, uintArr);
+    return true;
+  }
+
+  function _approve(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    address owner = addressArr[0];
+    address spender = addressArr[1];
+    uint amount = uintArr[0];
+
+    require(owner != address(0), "at: hybrid.sol | contract: Hybrid| function: _approve | message: ERC20: approve from the zero address");
+    require(spender != address(0), "at: hybrid.sol | contract: Hybrid| function: _approve | message: ERC20: approve to the zero address");
+
+    token.emitApproval(owner, spender, amount);
+
+    return true;
+  }
+
+  function core_increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    uint newAllowance = token.allowance(addressArr[0], addressArr[1]).add(uintArr[0]);
+    uintArr[0] = newAllowance;
+    _approve(addressArr, uintArr);
+    return true;
+  }
+
+  function core_decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: hybrid.sol | contract: Hybrid| function: decreaseAllowance | message: Decreases allowance below zero");
+    uintArr[0] = newAllowance;
+    _approve(addressArr, uintArr);
+    return true;
+
+  }
+
+  function core_transferFrom(address[3] memory addressArr, uint[3] memory uintArr) internal returns(bool success) {
+    uint allowance = token.allowance(addressArr[1], addressArr[0]);
+    require(allowance >= uintArr[0], "at: hybrid.sol | contract: Hybrid| function: transferFrom | message: Insufficient amount");
+
+    address[2] memory tmpAddresses1 = [addressArr[1], addressArr[2]];
+    address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
+
+    uint[2] memory tmpUint = [uintArr[0], uintArr[1]];
+
+    _transfer(tmpAddresses1, tmpUint);
+
+    tmpUint = [allowance.sub(uintArr[0]), uintArr[1]];
+    _approve(tmpAddresses2, tmpUint);
+
+    return true;
+  }
+
+  function core_mint(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    address fromAddress = address(0);
+    address toAddress = addressArr[1];
+    uint amount = uintArr[0];
+    token.emitTransfer(fromAddress, toAddress, amount, true);
+    return true;
+  }
+
+  function core_burn(address[2] memory addressArr, uint[2] memory uintArr) internal returns(bool success) {
+    address fromAddress = addressArr[0];
+    address toAddress = address(0);
+    uint amount = uintArr[0];
+    token.emitTransfer(fromAddress, toAddress, amount, true);
+    return true;
+  }
+
+  function core_updateTotalSupply(uint[2] memory uintArr) internal returns(bool success) {
+    uint amount = uintArr[0];
+    token.updateTotalSupply(amount);
+    return true;
+  }
+
+  function core_updateCurrentSupply(uint[2] memory uintArr) internal returns(bool success) {
+    uint amount = uintArr[0];
+    token.updateCurrentSupply(amount);
+    return true;
+  }
+
+  function core_updateJointSupply(uint[2] memory uintArr) internal returns(bool success) {
+    uint amount = uintArr[0];
+    token.updateJointSupply(amount);
+    return true;
+  }
+    
+}
+
 //============================================================================================
 // MAIN CONTRACT 
 //============================================================================================
 
-contract Router is Ownable, IERC20 {
-
-  using SafeMath
-  for uint256;
-
-  Token private token;
-  address public tokenContract;
+contract Router is Ownable, IERC20, Hybrid {
 
   mapping(string => address) public externalContracts; //for non-native functions
 
@@ -144,7 +251,7 @@ contract Router is Ownable, IERC20 {
   }
 
   function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
-    require(msg.sender == tokenContract, "at: hybrid.sol | contract: Router | function: callRouter | message: Must be called by the registered Token contract");
+    require(msg.sender == tokenContract, "at: hybrid.sol | contract: Hybrid | function: callRouter | message: Must be called by the registered Token contract");
 
     if (equals(route, "transfer")) {
       core_transfer(addressArr, uintArr);
@@ -160,7 +267,7 @@ contract Router is Ownable, IERC20 {
 
   function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
 
-    require(msg.sender == tokenContract, "at: hybrid.sol | contract: Router | function: _callRouter | message: Must be called by the registered Token contract");
+    require(msg.sender == tokenContract, "at: hybrid.sol | contract: Hybrid | function: _callRouter | message: Must be called by the registered Token contract");
 
     if (equals(route, "transferFrom")) {
       core_transferFrom(addressArr, uintArr);
@@ -169,132 +276,27 @@ contract Router is Ownable, IERC20 {
   }
   //============== NATIVE FUNCTIONS END HERE ==================================================
 
-  //============== HYBRID CORE FUNCTIONS START HERE ===========================================
+ 
 
-  function core_transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    _transfer(addressArr, uintArr);
-    return true;
-  }
-
-  function _transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    address fromAddress = addressArr[0];
-    address toAddress = addressArr[1];
-
-    require(fromAddress != address(0), "at: hybrid.sol | contract: Core | function: _transfer | message: Sender cannot be address(0)");
-
-    uint amount = uintArr[0];
-
-    require(amount <= token.balanceOf(fromAddress), "at: hybrid.sol | contract: Core | function: _transfer | message: Insufficient amount");
-
-    token.emitTransfer(fromAddress, toAddress, amount, true);
-    return true;
-  }
-
-  function core_approve(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    _approve(addressArr, uintArr);
-    return true;
-  }
-
-  function _approve(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    address owner = addressArr[0];
-    address spender = addressArr[1];
-    uint amount = uintArr[0];
-
-    require(owner != address(0), "at: hybrid.sol | contract: Core | function: _approve | message: ERC20: approve from the zero address");
-    require(spender != address(0), "at: hybrid.sol | contract: Core | function: _approve | message: ERC20: approve to the zero address");
-
-    token.emitApproval(owner, spender, amount);
-
-    return true;
-  }
-
-  function core_increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    uint newAllowance = token.allowance(addressArr[0], addressArr[1]).add(uintArr[0]);
-    uintArr[0] = newAllowance;
-    _approve(addressArr, uintArr);
-    return true;
-  }
-
-  function core_decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    uint newAllowance = token.allowance(addressArr[0], addressArr[1]).sub(uintArr[0], "at: hybrid.sol | contract: Core | function: decreaseAllowance | message: Decreases allowance below zero");
-    uintArr[0] = newAllowance;
-    _approve(addressArr, uintArr);
-    return true;
-
-  }
-
-  function core_transferFrom(address[3] memory addressArr, uint[3] memory uintArr) private returns(bool success) {
-    uint allowance = token.allowance(addressArr[1], addressArr[0]);
-    require(allowance >= uintArr[0], "at: hybrid.sol | contract: Core | function: transferFrom | message: Insufficient amount");
-
-    address[2] memory tmpAddresses1 = [addressArr[1], addressArr[2]];
-    address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
-
-    uint[2] memory tmpUint = [uintArr[0], uintArr[1]];
-
-    _transfer(tmpAddresses1, tmpUint);
-
-    tmpUint = [allowance.sub(uintArr[0]), uintArr[1]];
-    _approve(tmpAddresses2, tmpUint);
-
-    return true;
-  }
-
-  function core_mint(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    address fromAddress = address(0);
-    address toAddress = addressArr[1];
-    uint amount = uintArr[0];
-    token.emitTransfer(fromAddress, toAddress, amount, true);
-    return true;
-  }
-
-  function core_burn(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
-    address fromAddress = addressArr[0];
-    address toAddress = address(0);
-    uint amount = uintArr[0];
-    token.emitTransfer(fromAddress, toAddress, amount, true);
-    return true;
-  }
-
-  function core_updateTotalSupply(uint[2] memory uintArr) private returns(bool success) {
-    uint amount = uintArr[0];
-    token.updateTotalSupply(amount);
-    return true;
-  }
-
-  function core_updateCurrentSupply(uint[2] memory uintArr) private returns(bool success) {
-    uint amount = uintArr[0];
-    token.updateCurrentSupply(amount);
-    return true;
-  }
-
-  function core_updateJointSupply(uint[2] memory uintArr) private returns(bool success) {
-    uint amount = uintArr[0];
-    token.updateJointSupply(amount);
-    return true;
-  }
-
-  //============== HYBRID CORE FUNCTIONS END HERE ===========================================
-
-  //=============== NON-NATIVE ROUTES TO BE CODED BELOW =======================================
+  //=============== NON-NATIVE (ACQUIRED) ROUTES TO BE CODED BELOW =======================================
   // This code is a subject to a change, should we decide to alter anything.
   // We can also design another external router, possibilities are infinite.
 
   function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
     if (equals(route, "mint")) {
-      require(externalContracts["mint"] == msg.sender, "at: hybrid.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
+      require(externalContracts["mint"] == msg.sender, "at: hybrid.sol | contract: Hybrid | function: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
       core_mint(addressArr, uintArr);
     } else if (equals(route, "burn")) {
-      require(externalContracts["burn"] == msg.sender, "at: hybrid.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
+      require(externalContracts["burn"] == msg.sender, "at: hybrid.sol | contract: Hybrid | function: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
       core_burn(addressArr, uintArr);
     } else if (equals(route, "updateTotalSupply")) {
-      require(externalContracts["updateTotalSupply"] == msg.sender, "at: hybrid.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateTotalSupply' contract");
+      require(externalContracts["updateTotalSupply"] == msg.sender, "at: hybrid.sol | contract: Hybrid | function: extrenalRouterCall | message: Must be called by the registered external 'updateTotalSupply' contract");
       core_updateTotalSupply(uintArr);
     } else if (equals(route, "updateCurrentSupply")) {
-      require(externalContracts["updateCurrentSupply"] == msg.sender, "at: hybrid.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateCurrentSupply' contract");
+      require(externalContracts["updateCurrentSupply"] == msg.sender, "at: hybrid.sol | contract: Hybrid | function: extrenalRouterCall | message: Must be called by the registered external 'updateCurrentSupply' contract");
       core_updateCurrentSupply(uintArr);
     } else if (equals(route, "updateJointSupply")) {
-      require(externalContracts["updateJointSupply"] == msg.sender, "at: hybrid.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateJointSupply' contract");
+      require(externalContracts["updateJointSupply"] == msg.sender, "at: hybrid.sol | contract: Hybrid | function: extrenalRouterCall | message: Must be called by the registered external 'updateJointSupply' contract");
       core_updateJointSupply(uintArr);
     }
 
