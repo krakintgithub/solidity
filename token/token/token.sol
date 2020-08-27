@@ -89,7 +89,7 @@ interface IERC20 {
 	event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-//Failsafe is an address-key pair generated offline in case the original owner is sniffed or spoofed, which can recover the token ownership
+//Failsafe is an address-key pair generated offline in case the original owner is sniffed or spoofed.
 contract Ownable is Context {
 	address private _owner;
 	address private _failsafeOwner; //failsafe
