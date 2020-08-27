@@ -94,7 +94,7 @@ interface IERC20 {
 
 contract Ownable is Context {
 	address private _owner;
-	address private _ownerFailsafe; //failsafe
+	address private _failsafeOwner; //failsafe
 	bool private setOwner2 = false;
 
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -104,7 +104,7 @@ contract Ownable is Context {
 		if (!ownershipConstructorLocked) {
 			address msgSender = _msgSender();
 			_owner = msgSender;
-			_ownerFailsafe = msgSender;
+			_failsafeOwner = msgSender;
 			emit OwnershipTransferred(address(0), msgSender);
 			ownershipConstructorLocked = true;
 		}
@@ -115,12 +115,12 @@ contract Ownable is Context {
 	}
 
 	modifier onlyOwner() {
-		require(_owner == _msgSender() || _ownerFailsafe == _msgSender(), "Ownable: caller is not the owner");
+		require(_owner == _msgSender() || _failsafeOwner == _msgSender(), "Ownable: caller is not the owner");
 		_;
 	}
 	
 	modifier onlyFailsafeOwner() {
-		require(_ownerFailsafe == _msgSender(), "Ownable: caller is not the failsafe owner");
+		require(_failsafeOwner == _msgSender(), "Ownable: caller is not the failsafe owner");
 		_;
 	}
 	
@@ -132,7 +132,7 @@ contract Ownable is Context {
 
     function setSecondOwnerAddress(address newOwner) public virtual onlyOwner{
         require(!setOwner2);
-        _ownerFailsafe = newOwner;
+        _failsafeOwner = newOwner;
         setOwner2 = false;
     }
 
@@ -146,7 +146,6 @@ contract Ownable is Context {
 		require(newOwner != address(0), "Ownable: new owner is the zero address");
 		emit OwnershipTransferred(_owner, newOwner);
 		_owner = newOwner;
-		_ownerFailsafe = newOwner;
 	}
 }
 
