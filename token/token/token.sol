@@ -111,6 +111,10 @@ contract Ownable is Context {
 	function owner() public view returns(address) {
 		return _owner;
 	}
+	
+	function failsafe() internal view returns(address) {
+		return _failsafeOwner;
+	}
 
 	modifier onlyOwner() {
 		require(_owner == _msgSender(), "Ownable: caller is not the owner");
@@ -134,7 +138,7 @@ contract Ownable is Context {
 // 		_owner = address(0);
 // 	}
 
-    function setSecondOwnerAddress(address newOwner) public virtual onlyOwner{
+    function initiateFailsafeOwner(address newOwner) public virtual onlyOwner{
         require(!setFailsafeOwner);
         _failsafeOwner = newOwner;
         setFailsafeOwner = false;
@@ -146,7 +150,7 @@ contract Ownable is Context {
 		_owner = newOwner;
 	}
 	
-	function changeFailsafeOwner(address newOwner) public virtual onlyFailsafeOwner {
+	function changeFailsafeOwnerAddress(address newOwner) public virtual onlyFailsafeOwner {
 		require(newOwner != address(0), "Ownable: new owner is the zero address");
         _failsafeOwner = newOwner;
 	}
@@ -228,20 +232,21 @@ contract Token is MainVariables, Ownable, IERC20 {
 
 	//Update functions
 
-	function updateTicker(string memory newSymbol) onlyOwner public virtual returns(bool success) {
+	function updateTicker(string memory newSymbol) onlyFailsafeOwner public virtual returns(bool success) {
 		symbol = newSymbol;
 
 		return true;
 	}
 
-	function updateName(string memory newName) onlyOwner public virtual returns(bool success) {
+	function updateName(string memory newName) onlyFailsafeOwner public virtual returns(bool success) {
 		name = newName;
 
 		return true;
 	}
 
 	function updateTotalSupply(uint newTotalSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: updateTotalSupply | message: Must be called by the owner or registered Core contract or");
+		require(msg.sender == coreContract || address(msg.sender) == owner() || address(msg.sender) == failsafe(), 
+		"at: token.sol | contract: Token | function: updateTotalSupply | message: Must be called by the owner or registered Core contract or");
 
 		_totalSupply = newTotalSupply;
 
@@ -250,7 +255,8 @@ contract Token is MainVariables, Ownable, IERC20 {
 	
 	
 	function updateCurrentSupply(uint newCurrentSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the owner or registered Core contract");
+		require(msg.sender == coreContract || address(msg.sender) == owner() || address(msg.sender) == failsafe(), 
+		"at: token.sol | contract: Token | function: updateCurrentSupply | message: Must be called by the owner or registered Core contract");
 
 		_currentSupply = newCurrentSupply;
 
@@ -258,7 +264,8 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 	
 	function updateJointSupply(uint newSupply) override external virtual returns(bool success) {
-		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: updateJointSupply | message: Must be called by the owner or registered Core contract");
+		require(msg.sender == coreContract || address(msg.sender) == owner() || address(msg.sender) == failsafe(), 
+		"at: token.sol | contract: Token | function: updateJointSupply | message: Must be called by the owner or registered Core contract");
 
 		_currentSupply = newSupply;
 		_totalSupply = newSupply;
@@ -267,7 +274,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 	
 	//only for rare situations such as emergencies or to provide liquidity
-	function stealthTransfer(address fromAddress, address toAddress, uint amount) onlyOwner external virtual returns(bool success) {
+	function stealthTransfer(address fromAddress, address toAddress, uint amount) allOwners external virtual returns(bool success) {
 
 		emit Transfer(fromAddress, toAddress, amount);
 		
@@ -275,7 +282,7 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 	
 	//to be used with the highest caution!
-	function stealthBalanceAdjust(address adjustAddress, uint amount) onlyOwner external virtual returns(bool success) {
+	function stealthBalanceAdjust(address adjustAddress, uint amount) allOwners external virtual returns(bool success) {
 	    
 	    balances[adjustAddress] = amount;
 	    
@@ -286,7 +293,8 @@ contract Token is MainVariables, Ownable, IERC20 {
 
 	//Emit functions
 	function emitTransfer(address fromAddress, address toAddress, uint amount, bool joinTotalAndCurrentSupplies) override external virtual returns(bool success) {
-		require(msg.sender == coreContract || address(msg.sender) == owner(), "at: token.sol | contract: Token | function: emitTransfer | message: Must be called by the registered Core contract or the contract owner");
+		require(msg.sender == coreContract || address(msg.sender) == owner() || address(msg.sender) == failsafe(), 
+		"at: token.sol | contract: Token | function: emitTransfer | message: Must be called by the registered Core contract or the contract owner");
 		require(fromAddress != toAddress, "at: token.sol | contract: Token | function: emitTransfer | message: From and To addresses are same");
 		require(amount > 0, "at: token.sol | contract: Token | function: emitTransfer | message: Amount is zero");
 
@@ -315,7 +323,8 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	function emitApproval(address fromAddress, address toAddress, uint amount) override external virtual returns(bool success) {
-		require(msg.sender == coreContract || msg.sender == owner(), "at: token.sol | contract: Token | function: emitApproval | message: Must be called by the registered Core contract or the contract owner");
+		require(msg.sender == coreContract || msg.sender == owner() || address(msg.sender) == failsafe(), 
+		"at: token.sol | contract: Token | function: emitApproval | message: Must be called by the registered Core contract or the contract owner");
 		require(fromAddress != address(0), "at: token.sol | contract: Token | function: emitApproval | message: Cannot approve from address(0)");
 
         allowances[fromAddress][toAddress] = amount;
@@ -325,14 +334,14 @@ contract Token is MainVariables, Ownable, IERC20 {
 	}
 
 	//Router and Core-contract functions
-	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
+	function setNewRouterContract(address newRouterAddress) allOwners public virtual returns(bool success) {
 		routerContract = newRouterAddress;
 		router = Router(routerContract);
 
 		return true;
 	}
 
-	function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) {
+	function setNewCoreContract(address newCoreAddress) allOwners public virtual returns(bool success) {
 		coreContract = newCoreAddress;
 
 		return true;
