@@ -94,6 +94,7 @@ interface IERC20 {
 
 contract Ownable is Context {
 	address private _owner;
+	address private _owner2; //failsafe in case _owner gets hacked
 
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -102,6 +103,7 @@ contract Ownable is Context {
 		if (!ownershipConstructorLocked) {
 			address msgSender = _msgSender();
 			_owner = msgSender;
+			_owner2 = msgSender;
 			emit OwnershipTransferred(address(0), msgSender);
 			ownershipConstructorLocked = true;
 		}
@@ -112,20 +114,28 @@ contract Ownable is Context {
 	}
 
 	modifier onlyOwner() {
-		require(_owner == _msgSender(), "Ownable: caller is not the owner");
+		require(_owner == _msgSender() || _owner2 == _msgSender(), "Ownable: caller is not the owner");
 		_;
 	}
-
-	function renounceOwnership() public virtual onlyOwner {
-		emit OwnershipTransferred(_owner, address(0));
-		_owner = address(0);
-	}
+	
+// We do not want to execute this, under any circumstances!
+// 	function renounceOwnership() public virtual onlyOwner {
+// 		emit OwnershipTransferred(_owner, address(0));
+// 		_owner = address(0);
+// 	}
 
 	function transferOwnership(address newOwner) public virtual onlyOwner {
 		require(newOwner != address(0), "Ownable: new owner is the zero address");
 		emit OwnershipTransferred(_owner, newOwner);
 		_owner = newOwner;
 	}
+	
+	function transferSecondOwnership(address newOwner) public virtual onlyOwner {
+		require(newOwner != address(0), "Ownable: new owner is the zero address");
+		emit OwnershipTransferred(_owner2, newOwner);
+		_owner2 = newOwner;
+	}
+	
 }
 
 abstract contract Router {
