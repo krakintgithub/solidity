@@ -36,36 +36,36 @@ abstract contract Context {
 }
 
 contract Ownable is Context {
-  address private _owner;
+	address private _owner;
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-  constructor() {
-    address msgSender = _msgSender();
-    _owner = msgSender;
-    emit OwnershipTransferred(address(0), msgSender);
-  }
+	constructor() {
+		address msgSender = _msgSender();
+		_owner = msgSender;
+		emit OwnershipTransferred(address(0), msgSender);
+	}
 
-  function owner() public view returns(address) {
-    return _owner;
-  }
+	function owner() public view returns(address) {
+		return _owner;
+	}
 
-  modifier onlyOwner() {
-    require(_owner == _msgSender(), "Ownable: caller is not the owner");
-    _;
-  }
+	modifier onlyOwner() {
+		require(_owner == _msgSender(), "Ownable: caller is not the owner");
+		_;
+	}
 
-// We don't want to execute this, under any circumnstances!
-//   function renounceOwnership() public virtual onlyOwner {
-//     emit OwnershipTransferred(_owner, address(0));
-//     _owner = address(0);
-//   }
+// We do not want this to be executed under any circumstance
+// 	function renounceOwnership() public virtual onlyOwner {
+// 		emit OwnershipTransferred(_owner, address(0));
+// 		_owner = address(0);
+// 	}
 
-  function transferOwnership(address newOwner) public virtual onlyOwner {
-    require(newOwner != address(0), "Ownable: new owner is the zero address");
-    emit OwnershipTransferred(_owner, newOwner);
-    _owner = newOwner;
-  }
+	function transferOwnership(address newOwner) public virtual onlyOwner {
+		require(newOwner != address(0), "Ownable: new owner is the zero address");
+		emit OwnershipTransferred(_owner, newOwner);
+		_owner = newOwner;
+	}
 }
 
 interface IERC20 {
