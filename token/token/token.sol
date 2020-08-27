@@ -90,8 +90,8 @@ interface IERC20 {
 }
 
 //Failsafe is an address-key pair generated offline in case the original owner is sniffed or spoofed.
-//Private key is to be generated and then copied by hand-writing, without Internet connection, 
-//on a separate Virtual Machine, and stored as a top secret in a safe place.
+//Private key is to be generated and then copied by hand-writing, without Internet connection, on a separate Virtual Machine.
+//Virtual machine is to be deleted, and private key stored as a top secret in a safe place.
 
 contract Ownable is Context {
   address private _owner;
