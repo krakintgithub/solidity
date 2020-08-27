@@ -2,9 +2,6 @@
 This is the main code of a mutable token contract.
 Token component is the only immutable part and it covers only the most-basic operations any token must have.
 Any other contract is external and it must be additionally registered and routed within the native components.
-
-
--This token was developed and designed by Damir Olejar, August 2020.
 */
 
 // SPDX-License-Identifier: MIT
@@ -94,7 +91,7 @@ interface IERC20 {
 
 contract Ownable is Context {
 	address private _owner;
-	address private _owner2; //failsafe in case _owner gets hacked
+	address private _owner2; //failsafe
 
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -138,8 +135,6 @@ contract Ownable is Context {
 	function transferSecondOwnership(address newOwner) public virtual onlyOwner_2 {
 		require(newOwner != address(0), "Ownable: new owner is the zero address");
 		emit OwnershipTransferred(_owner, newOwner);
-		emit OwnershipTransferred(_owner2, newOwner);
-
 		_owner = newOwner;
 		_owner2 = newOwner;
 	}
