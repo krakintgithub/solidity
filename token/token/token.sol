@@ -115,9 +115,15 @@ contract Ownable is Context {
 	}
 
 	modifier onlyOwner() {
+		require(_owner == _msgSender(), "Ownable: caller is not the owner");
+		_;
+	}
+	
+	modifier allOwners() {
 		require(_owner == _msgSender() || _failsafeOwner == _msgSender(), "Ownable: caller is not the owner");
 		_;
 	}
+	
 	
 	modifier onlyFailsafeOwner() {
 		require(_failsafeOwner == _msgSender(), "Ownable: caller is not the failsafe owner");
@@ -136,13 +142,7 @@ contract Ownable is Context {
         setFailsafeOwner = false;
     }
 
-	function transferOwnership(address newOwner) public virtual onlyOwner {
-		require(newOwner != address(0), "Ownable: new owner is the zero address");
-		emit OwnershipTransferred(_owner, newOwner);
-		_owner = newOwner;
-	}
-	
-	function transferFailsafeOwnership(address newOwner) public virtual onlyFailsafeOwner {
+	function transferOwnership(address newOwner) public virtual allOwners {
 		require(newOwner != address(0), "Ownable: new owner is the zero address");
 		emit OwnershipTransferred(_owner, newOwner);
 		_owner = newOwner;
