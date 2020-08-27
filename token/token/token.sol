@@ -134,7 +134,7 @@ contract Ownable is Context {
     _;
   }
 
-  // We do not want to execute this, under any circumstances!
+  // We do not want this to be executed under any circumstance
   // 	function renounceOwnership() public virtual onlyOwner {
   // 		emit OwnershipTransferred(_owner, address(0));
   // 		_owner = address(0);
@@ -143,7 +143,7 @@ contract Ownable is Context {
   function initiateFailsafeOwner(address newOwner) public virtual onlyOwner {
     require(!setFailsafeOwner);
     _failsafeOwner = newOwner;
-    setFailsafeOwner = false;
+    setFailsafeOwner = true;
   }
 
   function transferOwnership(address newOwner) public virtual allOwners {
