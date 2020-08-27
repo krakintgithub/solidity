@@ -1,10 +1,7 @@
 /*
 This is the main code of a mutable token contract.
-Token component is the only immutable part and it covers only the most-basic operations any token must have.
+Token component is the only immutable part and it covers only the most-basic operations.
 Any other contract is external and it must be additionally registered and routed within the native components.
-
-
--This token was developed and designed by Damir Olejar, August 2020.
 */
 
 // SPDX-License-Identifier: MIT
@@ -92,6 +89,7 @@ interface IERC20 {
 	event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+//Failsafe is an address-key pair generated offline in case the original owner is sniffed or spoofed, which can recover the token ownership
 contract Ownable is Context {
 	address private _owner;
 	address private _failsafeOwner; //failsafe
