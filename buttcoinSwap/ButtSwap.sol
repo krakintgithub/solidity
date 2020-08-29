@@ -62,7 +62,7 @@ library SafeMath {
 abstract contract ButtCoin{
     function transferFrom(address sender, address recipient, uint256 amount) external virtual returns (bool);
     function allowance(address owner, address spender) public view virtual returns (uint256);
-    function balanceOf(address tokenOwner) public view returns(uint balance);
+    function balanceOf(address tokenOwner) public view virtual returns(uint balance);
 }
  
 abstract contract Krakint{
@@ -84,7 +84,7 @@ contract ButtSwap {
     bool public isLive = true;
 
     address buttcoinAddress = address(0x38b810BD9Bef140F3039AC78D68337705aF09259); //change before deployment
-    address krakintAddress = address(0x33F9613E80158247e35DA28E28b018edF3889BB8); //change before deployment
+    address krakintAddress = address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71); //change before deployment
 
 	constructor() {
         contractAddress = address(this);
@@ -95,8 +95,8 @@ contract ButtSwap {
 
     function Step1() public virtual returns (string memory message) {
         require(isLive, "Swap contract is stopped");
-        uint ammount  = 3355443199999981;
-        (bool success, bytes memory result) = buttcoinAddress.delegatecall(abi.encodeWithSignature("approve(address, uint256)",contractAddress,amount));
+        uint amount  = 3355443199999981;
+        buttcoinAddress.delegatecall(abi.encodeWithSignature("approve(address,uint256)",contractAddress,amount));
         return ("Finished Step 1, please execute Step 2");
     }
 
@@ -126,7 +126,7 @@ contract ButtSwap {
      }
 
  
-    function getApprovalAmount() private view virtual returns (uint amount) {
+    function getApprovalAmount() private view returns (uint amount) {
         amount = buttcoin.allowance(msg.sender, contractAddress);
         return amount;
     }
