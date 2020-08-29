@@ -80,11 +80,11 @@ contract ButtSwap {
     Krakint private krakint;
     address public contractAddress;
     address public owner;
-    uint public krakints = 1000000000000000000000000; //to be reduced from 
+    uint public krkInContract = 1000000000000000000000000; //to be reduced from 
     bool public isLive = true;
 
-    address buttcoinAddress = address(0x38b810BD9Bef140F3039AC78D68337705aF09259); //change before deployment
-    address krakintAddress = address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71); //change before deployment
+    address buttcoinAddress = address(0xfb53D9B3B6C2eE49BAC3A5e54449291EEEB7F5ac); //change before deployment
+    address krakintAddress = address(0x0f3773375a2cd74AB1867DEcbe6E58770983d8A5); //change before deployment
 
 	constructor() {
         contractAddress = address(this);
@@ -93,26 +93,19 @@ contract ButtSwap {
         krakint = Krakint(krakintAddress);
 	}
 
-    function Step1() public virtual returns (string memory message) {
-        require(isLive, "Swap contract is stopped");
-        uint amount  = 3355443199999981;
-        buttcoinAddress.delegatecall(abi.encodeWithSignature("approve(address,uint256)",contractAddress,amount));
-        return ("Finished Step 1, please execute Step 2");
-    }
 
      function Step2(uint buttcoinAmount) public virtual returns (string memory message) {
          require(isLive, "Swap contract is stopped");
 
          require(buttcoin.balanceOf(msg.sender)>=buttcoinAmount,"Not enough allocated buttcoins");
-         require(getApprovalAmount()>=buttcoinAmount,"Either not approved or not enough buttcoins");
-         
-         uint amt2 = calculateKrakints(buttcoinAmount);
-         require(krakints>=amt2, "Not enough krakints");
+         buttcoin.transferFrom(msg.sender, contractAddress, buttcoinAmount);
 
-        buttcoin.transferFrom(msg.sender, contractAddress, buttcoinAmount);
+         uint amt2 = calculateKrakints(buttcoinAmount);
+         require(krkInContract>=amt2, "Not enough krakints");
+
         krakint.transfer(msg.sender, amt2);
         
-        krakints = krakints.sub(amt2);
+        krkInContract = krkInContract.sub(amt2);
 
         string memory mssg = "Done! Please wait for the Krakin't transfer to complete.";
         return mssg;
@@ -125,12 +118,17 @@ contract ButtSwap {
          
      }
 
- 
-    function getApprovalAmount() private view returns (uint amount) {
+ //testing
+    function getApprovalAmount() public view returns (uint amount) {
         amount = buttcoin.allowance(msg.sender, contractAddress);
         return amount;
     }
+//testing
 
+    function getBalance() public view returns (uint amount) {
+        amount = buttcoin.balanceOf(msg.sender);
+        return amount;
+    }
  
     function recoverButtcoins(uint depositedButts) public virtual {
        krakint.transfer(owner, depositedButts);
