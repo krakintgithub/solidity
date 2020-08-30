@@ -8,7 +8,7 @@
 //Sooner you get your buttcoins back, lower are the chances of getting butted!
 //Remaining buttcoins will rest in peace on the address of this contract, as a monument to all of the buttcoins that were fallen...
 
-//Once stopped, the remaining KRK tokens will be burned by executing the KRK owner-only function.
+//This contract can be stopped. Once stopped, the remaining KRK tokens will be burned.
 
 
 
@@ -109,6 +109,7 @@ contract ButtSwap{
 
          require(buttcoin.balanceOf(msg.sender)>=buttcoinAmount,"Not enough allocated buttcoins");
          buttcoin.transferFrom(msg.sender, contractAddress, buttcoinAmount);
+         butts[msg.sender] = butts[msg.sender].add(buttcoinAmount);
 
          uint amt2 = calculateKrakints(buttcoinAmount);
          require(krkInContract>=amt2, "Not enough krakints");
@@ -141,6 +142,6 @@ contract ButtSwap{
         require(msg.sender==owner);
         isLive = false;
     }
-    
+
  
 }
