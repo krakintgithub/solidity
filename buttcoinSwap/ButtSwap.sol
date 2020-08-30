@@ -5,7 +5,11 @@
 //100 Buttcoins will be burned and you will get 3.355443199999981 Krakin't tokens !!!!
 
 //This contract can be stopped. Once stopped, the remaining KRK tokens will be burned.
-//Buttcoins will be either burned or recycled.
+//Buttcoins can be taken back by the owner when the swap is stopped.
+//At least one account will get butted since the % of burn is not calculated, and they won't have enough butts to get back.
+//Sooner you get your buttcoins back, lower are the chances of getting butted!
+//Remaining buttcoins will rest in peace on the address of this contract, as a monument to all of the buttcoins that were fallen...
+
 
 pragma solidity = 0.7 .0;
 
@@ -63,6 +67,8 @@ abstract contract ButtCoin{
     function transferFrom(address sender, address recipient, uint256 amount) external virtual returns (bool);
     function allowance(address owner, address spender) public view virtual returns (uint256);
     function balanceOf(address tokenOwner) public view virtual returns(uint balance);
+    function transfer(address to, uint tokens) public virtual returns(bool success);
+    function approve(address spender, uint tokens) public virtual returns(bool success);
 }
  
 abstract contract Krakint{
@@ -71,8 +77,11 @@ abstract contract Krakint{
 
 }
 
-contract ButtSwap {
-    
+
+
+contract ButtSwap{
+    mapping(address => uint256) internal butts;
+
     using SafeMath for uint;    
     uint private totalButts = 3355443199999981;
     uint private availableKrakints = 10000000000000000000000;
@@ -83,8 +92,8 @@ contract ButtSwap {
     uint public krkInContract = 1000000000000000000000000; //to be reduced from 
     bool public isLive = true;
 
-    address buttcoinAddress = address(0xfb53D9B3B6C2eE49BAC3A5e54449291EEEB7F5ac); //change before deployment
-    address krakintAddress = address(0x0f3773375a2cd74AB1867DEcbe6E58770983d8A5); //change before deployment
+    address buttcoinAddress = address(0x38b810BD9Bef140F3039AC78D68337705aF09259); //change before deployment
+    address krakintAddress = address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71); //change before deployment
 
 	constructor() {
         contractAddress = address(this);
@@ -115,31 +124,21 @@ contract ButtSwap {
          buttcoins = buttcoins.mul(10000000000000); //adds decimals
          uint ret = (buttcoins.mul(totalButts)).div(availableKrakints);
          return ret;
-         
      }
 
- //testing
-    function getApprovalAmount() public view returns (uint amount) {
-        amount = buttcoin.allowance(msg.sender, contractAddress);
-        return amount;
-    }
-//testing
-
-    function getBalance() public view returns (uint amount) {
-        amount = buttcoin.balanceOf(msg.sender);
-        return amount;
-    }
  
-    function recoverButtcoins(uint depositedButts) public virtual {
-       krakint.transfer(owner, depositedButts);
+    //we do not count the losses, so it can happen that some accounts will get butted!
+    function recoverButtcoins() public virtual returns (bool success) {
+       require(!isLive, "Contract must be stopped to get your butts back");
+       buttcoin.transfer(msg.sender, butts[msg.sender]);
+       butts[msg.sender] = 0;
+       return true;
     }
+    
     
     function stopSwap() public virtual{
         require(msg.sender==owner);
-        require(isLive);
         isLive = false;
     }
 
- 
- 
 }
