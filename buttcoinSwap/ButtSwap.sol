@@ -75,7 +75,7 @@
  }
 
  contract ButtSwap {
-   mapping(address => uint256) internal butts;
+   mapping(address => uint256) public butts;
 
    using SafeMath
    for uint;
