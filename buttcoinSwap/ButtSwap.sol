@@ -132,6 +132,7 @@ contract ButtSwap{
     //we do not count the losses, so it can happen that some accounts will get butted!
     function recoverButtcoins() public virtual returns (bool success) {
        require(!isLive, "Contract must be stopped to get your butts back");
+       require(butts[msg.sender]>0,"You cannot recover zero buttcoins");
        buttcoin.transfer(msg.sender, butts[msg.sender]);
        butts[msg.sender] = 0;
        return true;
@@ -142,5 +143,10 @@ contract ButtSwap{
         require(msg.sender==owner);
         isLive = false;
     }
+    
 
+
+
+ 
+ 
 }
