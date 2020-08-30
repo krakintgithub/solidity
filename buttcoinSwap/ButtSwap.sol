@@ -3,12 +3,13 @@
 
 //NOTE: FOR 10,000.0 BUTTCOINS, The contract will get 9,800 Buttcoins, previous address will get 100 Buttcoins, 
 //100 Buttcoins will be burned and you will get 3.355443199999981 Krakin't tokens !!!!
-
-//This contract can be stopped. Once stopped, the remaining KRK tokens will be burned.
-//Buttcoins can be taken back by the owner when the swap is stopped.
+//The contract will keep a track of 10,000.0 Buttcoins, and you will get 9,800 back once the swap is stopped.
 //At least one account will get butted since the % of burn is not calculated, and they won't have enough butts to get back.
 //Sooner you get your buttcoins back, lower are the chances of getting butted!
 //Remaining buttcoins will rest in peace on the address of this contract, as a monument to all of the buttcoins that were fallen...
+
+//This contract can be stopped. Once stopped, the remaining KRK tokens will be burned.
+
 
 
 pragma solidity = 0.7 .0;
@@ -140,5 +141,6 @@ contract ButtSwap{
         require(msg.sender==owner);
         isLive = false;
     }
-
+    
+ 
 }
