@@ -8,7 +8,7 @@
 //Sooner you get your buttcoins back, lower are the chances of getting butted!
 //Remaining buttcoins will rest in peace on the address of this contract, as a monument to all of the buttcoins that were fallen...
 
-//This contract can be stopped. Once stopped, the remaining KRK tokens will be burned.
+//Once stopped, the remaining KRK tokens will be burned by executing the KRK owner-only function.
 
 
 
