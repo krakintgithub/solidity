@@ -26,3 +26,4 @@ swap:		0xb00a3B51A166e03356D1B354a124Ae622cF75cb4
 - Switch to account with 0 butts, nothing should work - OK
 - Switch back, recover buttcoin - https://ropsten.etherscan.io/tx/0xa458996227dd49c6ba541f5e17c0662b2ad519b42dff41f13b915032b8fc5bef -OK
 - Recover again, nothing happens - OK
+- Burn the remaining KRKs with the owner address - OK
