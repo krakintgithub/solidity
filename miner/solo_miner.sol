@@ -124,9 +124,10 @@ contract SoloMiner is Ownable{
     
     address public tokenContract;
 	address public routerContract;
+	uint public totalBurned;
+	
 	Token private token;
 	Router private router;
-	
 	mapping(address=>uint) private numerator; //for calculating the reward
     mapping(address=>uint) private denominator; //for calculating the reward
 	
@@ -154,8 +155,15 @@ contract SoloMiner is Ownable{
     }
     
     function showMyReward() public view virtual returns (uint reward){
+        require(denominator[msg.sender]>0,
+        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: Not enough mining was processed");
         uint gapSize = getGapSize();
         uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+        
+        if(rewardSize.add(token.currentSupply())>token.totalSupply()){
+            rewardSize = token.totalSupply().sub(token.currentSupply());
+        }
+        
         return rewardSize;
     }
     
@@ -183,7 +191,7 @@ contract SoloMiner is Ownable{
         address[2] memory addresseArr = [msg.sender, toAddress];
         uint[2] memory uintArr = [burnAmount, 0];
         router.burn(addresseArr, uintArr);
-
+        totalBurned = totalBurned.add(burnAmount);
         return true;
     }
     
@@ -200,4 +208,25 @@ contract SoloMiner is Ownable{
     
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
