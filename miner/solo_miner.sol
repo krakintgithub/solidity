@@ -127,6 +127,9 @@ contract SoloMiner is Ownable{
 	Token private token;
 	Router private router;
 	
+	mapping(address=>uint) private numerator; //for calculating the reward
+    mapping(address=>uint) private denominator; //for calculating the reward
+	
 	function currentTokenContract() external view virtual returns(address tokenAddress) {
 		return tokenContract;
 	}
@@ -150,9 +153,24 @@ contract SoloMiner is Ownable{
         return token.totalSupply().sub(token.currentSupply());
     }
     
-    //TODO, save as a fraction!
-    function getPurchasePower(uint amount) public view virtual returns (uint gapSize){
-        return token.totalSupply().sub(token.currentSupply());
+    function showMyReward() public view virtual returns (uint reward){
+        uint gapSize = getGapSize();
+        uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+        return rewardSize;
+    }
+    
+    function mine(uint depositAmount) public virtual returns(bool success) {
+        burn(depositAmount);
+        uint reward = showMyReward();
+        uint usrBurn = reward.add(depositAmount);
+        numerator[msg.sender] = usrBurn;
+        denominator[msg.sender] = getGapSize();
+        return true;
+    }
+    
+    function getReward() public virtual returns(bool success) {
+        mint(showMyReward());
+        return true;
     }
 	
     function burn(uint burnAmount) private returns (bool success){
@@ -180,7 +198,6 @@ contract SoloMiner is Ownable{
     }
  
     
- 
-
+    
 }
 
