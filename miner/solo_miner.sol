@@ -203,7 +203,7 @@
    }
 
    //-----------EXTERNAL----------------
-   function increaseMyReward() external virtual returns(bool success) {
+   function increaseMyReward() public virtual returns(bool success) {
      require(denominator[msg.sender]>0,
      "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");  
        
@@ -232,11 +232,17 @@
      return true;
    }
 
-   function getReward() external virtual returns(bool success) {
+   function getReward() public virtual returns(bool success) {
      mint(showMyCurrentRewardTotal());
      numerator[msg.sender] = 0;
      denominator[msg.sender] = 0;
      return true;
+   }
+   
+   function claimMaximumReward() external virtual returns(bool success) {
+       increaseMyReward();
+       getReward();
+       return true;
    }
 
    //-----------ONLY OWNER----------------
