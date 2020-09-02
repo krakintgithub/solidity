@@ -1,5 +1,6 @@
- //This miner has an on/off switch, and also a feature to get the tokens back once it is turned off.
- 
+ //This miner has an on/off switch.
+ //This miner is meant to run for about 15000000 blocks, which is approximately 10 years.
+
  // SPDX-License-Identifier: MIT
 
  pragma solidity = 0.7 .0;
@@ -125,6 +126,7 @@
    address private routerContract;
    uint private totalBurned;
    uint private lastBlockNumber;
+   uint private stopAt;
    bool private active = true;
 
    Token private token;
@@ -137,14 +139,14 @@
 
    constructor() {
      lastBlockNumber = getCurrentBlockNumber();
+     stopAt = lastBlockNumber.add(15000000);
      contractAddress = address(this);
-     
+
      //todo: for testing only, remove or change when done!
      setNewTokenContract(address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71));
      setNewRouterContract(address(0xfaA85A16cE2c0CD089e0Dc1c44A7A39e6AB4dE7F));
    }
-   
-   
+
    modifier isActive() {
      require(active, "Miner is not active.");
      _;
@@ -181,27 +183,35 @@
 
    function showMyCurrentRewardTotal() isActive public view virtual returns(uint reward) {
 
-     if(denominator[msg.sender]==0){ return 0; }
-     
+     if (denominator[msg.sender] == 0) {
+       return 0;
+     }
+
      uint gapSize = getGapSize();
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
 
-     if(rewardSize<minimumReturn[msg.sender]){rewardSize=minimumReturn[msg.sender];}
-     if(rewardSize>getGapSize()){rewardSize=getGapSize();}
-     
+     if (rewardSize < minimumReturn[msg.sender]) {
+       rewardSize = minimumReturn[msg.sender];
+     }
+     if (rewardSize > getGapSize()) {
+       rewardSize = getGapSize();
+     }
+
      return rewardSize;
    }
-   
+
    function estimateMyIncreaseRewardTotal() isActive public view virtual returns(uint reward) {
-     if(denominator[msg.sender]==0){ return 0; }
-       
+     if (denominator[msg.sender] == 0) {
+       return 0;
+     }
+
      uint previousBlock = lastBlockNumber;
      uint currentBlock = getCurrentBlockNumber();
      uint diff = currentBlock.sub(previousBlock);
      uint burnAmount = diff.mul(burnConstant);
      uint gapSize = getGapSize().add(burnAmount);
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
-     
+
      if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
        rewardSize = token.totalSupply().sub(token.currentSupply());
      }
@@ -211,9 +221,11 @@
 
    //-----------EXTERNAL----------------
    function increaseMyReward() isActive public virtual returns(bool success) {
-     require(denominator[msg.sender]>0,
-     "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");  
-       
+     switchControl();
+
+     require(denominator[msg.sender] > 0,
+       "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");
+
      uint previousBlock = lastBlockNumber;
      uint currentBlock = getCurrentBlockNumber();
      uint diff = currentBlock.sub(previousBlock);
@@ -222,15 +234,17 @@
      address toAddress = address(0);
      address[2] memory addresseArr = [contractAddress, toAddress];
      uint[2] memory uintArr = [burnAmount, 0];
-     
-     router.extrenalRouterCall("burn",addresseArr, uintArr);
-     
+
+     router.extrenalRouterCall("burn", addresseArr, uintArr);
+
      totalBurned = totalBurned.add(burnAmount);
      lastBlockNumber = currentBlock;
      return true;
    }
 
    function mine(uint depositAmount) isActive external virtual returns(bool success) {
+     switchControl();
+
      burn(depositAmount);
      minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
      uint reward = showMyCurrentRewardTotal();
@@ -241,23 +255,25 @@
    }
 
    function getReward() isActive public virtual returns(bool success) {
+     switchControl();
+
      uint amt = showMyCurrentRewardTotal();
 
-     
-     require(amt>0,
-     "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give"); 
-     
+     require(amt > 0,
+       "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give");
+
      mint(amt);
      numerator[msg.sender] = 0;
      denominator[msg.sender] = 0;
      minimumReturn[msg.sender] = 0;
      return true;
    }
-   
+
    function claimMaximumReward() isActive external virtual returns(bool success) {
-       increaseMyReward();
-       getReward();
-       return true;
+     switchControl();
+     increaseMyReward();
+     getReward();
+     return true;
    }
 
    //-----------ONLY OWNER----------------
@@ -272,33 +288,39 @@
      router = Router(newRouterAddress);
      return true;
    }
-   
-   function flipSwitch() onlyOwner public virtual returns(bool success) {
+
+   //-----------PRIVATE--------------------   
+   function switchControl() private {
+     if (getCurrentBlockNumber() > stopAt) {
+       flipSwitch();
+     }
+   }
+
+   function flipSwitch() private returns(bool success) {
      active = !active;
      return true;
    }
 
-   //-----------PRIVATE--------------------
    function burn(uint burnAmount) isActive private returns(bool success) {
      require(burnAmount <= token.currentSupply(),
-      "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
+       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
      require(burnAmount <= token.balanceOf(msg.sender),
-      "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
+       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
 
      address toAddress = address(0);
      address[2] memory addresseArr = [msg.sender, toAddress];
      uint[2] memory uintArr = [burnAmount, 0];
-     router.extrenalRouterCall("burn",addresseArr, uintArr);
+     router.extrenalRouterCall("burn", addresseArr, uintArr);
      totalBurned = totalBurned.add(burnAmount);
 
-	 return true;
+     return true;
    }
 
    function mint(uint mintAmount) isActive private returns(bool success) {
      address fromAddress = address(0);
      address[2] memory addresseArr = [fromAddress, msg.sender];
      uint[2] memory uintArr = [mintAmount, 0];
-     router.extrenalRouterCall("mint",addresseArr, uintArr);
+     router.extrenalRouterCall("mint", addresseArr, uintArr);
 
      return true;
    }
