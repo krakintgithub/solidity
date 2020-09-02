@@ -164,7 +164,7 @@
      return token.totalSupply().sub(token.currentSupply());
    }
 
-   function showMyCurrentReward() public view virtual returns(uint reward) {
+   function showMyCurrentRewardTotal() public view virtual returns(uint reward) {
      require(denominator[msg.sender] > 0,
        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
      uint gapSize = getGapSize();
@@ -177,7 +177,7 @@
      return rewardSize;
    }
    
-   function estimateMyAfterburnAward() public view virtual returns(uint reward) {
+   function estimateMyIncreaseRewardTotal() public view virtual returns(uint reward) {
     require(denominator[msg.sender] > 0,
        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
        
@@ -213,7 +213,7 @@
 
    function mine(uint depositAmount) external virtual returns(bool success) {
      burn(depositAmount);
-     uint reward = showMyCurrentReward();
+     uint reward = showMyCurrentRewardTotal();
      uint usrBurn = reward.add(depositAmount);
      numerator[msg.sender] = usrBurn;
      denominator[msg.sender] = getGapSize();
@@ -221,7 +221,7 @@
    }
 
    function getReward() external virtual returns(bool success) {
-     mint(showMyCurrentReward());
+     mint(showMyCurrentRewardTotal());
      return true;
    }
 
