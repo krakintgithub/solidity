@@ -123,6 +123,7 @@
    address private routerContract;
    uint private totalBurned;
    uint private lastBlockNumber;
+   bool private active = true;
 
    Token private token;
    Router private router;
@@ -135,42 +136,47 @@
      lastBlockNumber = getCurrentBlockNumber();
      contractAddress = address(this);
      
-     //for testing only, remove or change when done!
+     //todo: for testing only, remove or change when done!
      setNewTokenContract(address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71));
      setNewRouterContract(address(0xfaA85A16cE2c0CD089e0Dc1c44A7A39e6AB4dE7F));
    }
+   
+   
+   modifier isActive() {
+     require(active, "Miner is not active.");
+     _;
+   }
 
    //-----------VIEWS----------------
-
-   function getMinerAddress() external view virtual returns(address tokenAddress) {
+   function getMinerAddress() isActive external view virtual returns(address tokenAddress) {
      return contractAddress;
    }
 
-   function getTokenContract() external view virtual returns(address tokenAddress) {
+   function getTokenContract() isActive external view virtual returns(address tokenAddress) {
      return tokenContract;
    }
 
-   function getTotalBurned() external view virtual returns(uint burned) {
+   function getTotalBurned() isActive external view virtual returns(uint burned) {
      return totalBurned;
    }
 
-   function getLastBlockNumber() external view virtual returns(uint lastBlock) {
+   function getLastBlockNumber() isActive external view virtual returns(uint lastBlock) {
      return lastBlockNumber;
    }
 
-   function getRouterContract() external view virtual returns(address routerAddress) {
+   function getRouterContract() isActive external view virtual returns(address routerAddress) {
      return routerContract;
    }
 
-   function getCurrentBlockNumber() public view returns(uint256) {
+   function getCurrentBlockNumber() isActive public view returns(uint256) {
      return block.number;
    }
 
-   function getGapSize() public view virtual returns(uint gapSize) {
+   function getGapSize() isActive public view virtual returns(uint gapSize) {
      return token.totalSupply().sub(token.currentSupply());
    }
 
-   function showMyCurrentRewardTotal() public view virtual returns(uint reward) {
+   function showMyCurrentRewardTotal() isActive public view virtual returns(uint reward) {
 
      if(denominator[msg.sender]==0){ return 0; }
      
@@ -184,8 +190,7 @@
      return rewardSize;
    }
    
-   function estimateMyIncreaseRewardTotal() public view virtual returns(uint reward) {
-
+   function estimateMyIncreaseRewardTotal() isActive public view virtual returns(uint reward) {
      if(denominator[msg.sender]==0){ return 0; }
        
      uint previousBlock = lastBlockNumber;
@@ -203,7 +208,7 @@
    }
 
    //-----------EXTERNAL----------------
-   function increaseMyReward() public virtual returns(bool success) {
+   function increaseMyReward() isActive public virtual returns(bool success) {
      require(denominator[msg.sender]>0,
      "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");  
        
@@ -223,7 +228,7 @@
      return true;
    }
 
-   function mine(uint depositAmount) external virtual returns(bool success) {
+   function mine(uint depositAmount) isActive external virtual returns(bool success) {
      burn(depositAmount);
      uint reward = showMyCurrentRewardTotal();
      uint usrBurn = reward.add(depositAmount);
@@ -232,21 +237,27 @@
      return true;
    }
 
-   function getReward() public virtual returns(bool success) {
-     mint(showMyCurrentRewardTotal());
+   function getReward() isActive public virtual returns(bool success) {
+     uint amt = showMyCurrentRewardTotal();
+     
+     require(amt>0,
+     "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give"); 
+     
+     if(amt>getGapSize()){amt=getGapSize();}
+     
+     mint(amt);
      numerator[msg.sender] = 0;
      denominator[msg.sender] = 0;
      return true;
    }
    
-   function claimMaximumReward() external virtual returns(bool success) {
+   function claimMaximumReward() isActive external virtual returns(bool success) {
        increaseMyReward();
        getReward();
        return true;
    }
 
    //-----------ONLY OWNER----------------
-
    function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
      tokenContract = newTokenAddress;
      token = Token(newTokenAddress);
@@ -258,9 +269,14 @@
      router = Router(newRouterAddress);
      return true;
    }
+   
+   function flipSwitch() onlyOwner public virtual returns(bool success) {
+     active = !active;
+     return true;
+   }
 
    //-----------PRIVATE--------------------
-   function burn(uint burnAmount) private returns(bool success) {
+   function burn(uint burnAmount) isActive private returns(bool success) {
      require(burnAmount <= token.currentSupply(),
       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
      require(burnAmount <= token.balanceOf(msg.sender),
@@ -275,7 +291,7 @@
 	 return true;
    }
 
-   function mint(uint mintAmount) private returns(bool success) {
+   function mint(uint mintAmount) isActive private returns(bool success) {
      address fromAddress = address(0);
      address[2] memory addresseArr = [fromAddress, msg.sender];
      uint[2] memory uintArr = [mintAmount, 0];
