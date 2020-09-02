@@ -192,7 +192,7 @@
      uint currentBlock = getCurrentBlockNumber();
      uint diff = currentBlock.sub(previousBlock);
      uint burnAmount = diff.mul(burnConstant);
-     uint gapSize = getGapSize().sub(burnAmount);
+     uint gapSize = getGapSize().add(burnAmount);
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
      
      if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
@@ -204,6 +204,9 @@
 
    //-----------EXTERNAL----------------
    function increaseMyReward() external virtual returns(bool success) {
+     require(denominator[msg.sender]>0,
+     "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");  
+       
      uint previousBlock = lastBlockNumber;
      uint currentBlock = getCurrentBlockNumber();
      uint diff = currentBlock.sub(previousBlock);
