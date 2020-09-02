@@ -275,6 +275,18 @@
      getReward();
      return true;
    }
+   
+   function recoverOnly() external virtual returns(bool success) {
+      require(!active, 
+      "at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: Contract must be deactivated");
+      require(minimumReturn[msg.sender]>0,
+      "at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: You cannot recover a zero amount");
+
+      mint(minimumReturn[msg.sender]);
+      minimumReturn[msg.sender] = 0;
+
+   }
+  
 
    //-----------ONLY OWNER----------------
    function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
@@ -291,7 +303,7 @@
 
    //-----------PRIVATE--------------------   
    function switchControl() private {
-     if (getCurrentBlockNumber() > stopAt) {
+     if (getCurrentBlockNumber() >= stopAt) {
        flipSwitch();
      }
    }
