@@ -1,3 +1,5 @@
+ //This miner has an on/off switch, and also a feature to get the tokens back once it is turned off.
+ 
  // SPDX-License-Identifier: MIT
 
  pragma solidity = 0.7 .0;
@@ -129,6 +131,7 @@
    Router private router;
    mapping(address => uint) private numerator; //for calculating the reward
    mapping(address => uint) private denominator; //for calculating the reward
+   mapping(address => uint) private minimumReturn; //to keep a track of burned tokens
    uint private burnConstant = 100000000000000000; // we are burning 0.1 KRK tokens per mined block.
    address private contractAddress;
 
@@ -183,10 +186,9 @@
      uint gapSize = getGapSize();
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
 
-     if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
-       rewardSize = token.totalSupply().sub(token.currentSupply());
-     }
-
+     if(rewardSize<minimumReturn[msg.sender]){rewardSize=minimumReturn[msg.sender];}
+     if(rewardSize>getGapSize()){rewardSize=getGapSize();}
+     
      return rewardSize;
    }
    
@@ -230,6 +232,7 @@
 
    function mine(uint depositAmount) isActive external virtual returns(bool success) {
      burn(depositAmount);
+     minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
      uint reward = showMyCurrentRewardTotal();
      uint usrBurn = reward.add(depositAmount);
      numerator[msg.sender] = usrBurn;
@@ -239,15 +242,15 @@
 
    function getReward() isActive public virtual returns(bool success) {
      uint amt = showMyCurrentRewardTotal();
+
      
      require(amt>0,
      "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give"); 
      
-     if(amt>getGapSize()){amt=getGapSize();}
-     
      mint(amt);
      numerator[msg.sender] = 0;
      denominator[msg.sender] = 0;
+     minimumReturn[msg.sender] = 0;
      return true;
    }
    
