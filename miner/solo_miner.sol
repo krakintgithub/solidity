@@ -164,12 +164,30 @@
      return token.totalSupply().sub(token.currentSupply());
    }
 
-   function showMyReward() public view virtual returns(uint reward) {
+   function showMyCurrentReward() public view virtual returns(uint reward) {
      require(denominator[msg.sender] > 0,
        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
      uint gapSize = getGapSize();
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
 
+     if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
+       rewardSize = token.totalSupply().sub(token.currentSupply());
+     }
+
+     return rewardSize;
+   }
+   
+   function estimateMyAfterburnAward() public view virtual returns(uint reward) {
+    require(denominator[msg.sender] > 0,
+       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
+       
+     uint previousBlock = lastBlockNumber;
+     uint currentBlock = getCurrentBlockNumber();
+     uint diff = currentBlock.sub(previousBlock);
+     uint burnAmount = diff.mul(burnConstant);
+     uint gapSize = getGapSize().sub(burnAmount);
+     uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+     
      if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
        rewardSize = token.totalSupply().sub(token.currentSupply());
      }
@@ -195,7 +213,7 @@
 
    function mine(uint depositAmount) external virtual returns(bool success) {
      burn(depositAmount);
-     uint reward = showMyReward();
+     uint reward = showMyCurrentReward();
      uint usrBurn = reward.add(depositAmount);
      numerator[msg.sender] = usrBurn;
      denominator[msg.sender] = getGapSize();
@@ -203,7 +221,7 @@
    }
 
    function getReward() external virtual returns(bool success) {
-     mint(showMyReward());
+     mint(showMyCurrentReward());
      return true;
    }
 
