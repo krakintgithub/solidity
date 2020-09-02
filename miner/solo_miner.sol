@@ -123,10 +123,10 @@ abstract contract Router{
 contract SoloMiner is Ownable{
     using SafeMath for uint;
     
-    address public tokenContract;
-	address public routerContract;
-	uint public totalBurned;
-	uint public lastBlockNumber;
+    address private tokenContract;
+	address private routerContract;
+	uint private totalBurned;
+	uint private lastBlockNumber;
 	
 	Token private token;
 	Router private router;
@@ -140,40 +140,29 @@ contract SoloMiner is Ownable{
         contractAddress = address(this);
     }
     
-	function increaseMyReward() external virtual returns(bool success) {
-	    uint previousBlock = lastBlockNumber;
-	    uint currentBlock = getCurrentBlockNumber();
-	    uint diff = currentBlock.sub(previousBlock);
-	    uint burnAmount = diff.mul(burnConstant);
-
-        address toAddress = address(0);
-        address[2] memory addresseArr = [contractAddress, toAddress];
-        uint[2] memory uintArr = [burnAmount, 0];
-        router.burn(addresseArr, uintArr);
-        totalBurned = totalBurned.add(burnAmount);
-        lastBlockNumber = currentBlock;
-        return true;
-	} 
-	
-	function currentTokenContract() external view virtual returns(address tokenAddress) {
+    //-----------VIEWS----------------
+    
+	function getTokenContract() external view virtual returns(address tokenAddress) {
 		return tokenContract;
 	}
+	
+	function getTotalBurned() external view virtual returns(uint burned) {
+		return totalBurned;
+	}
 
-	function currentRouterContract() external view virtual returns(address routerAddress) {
+	function getLastBlockNumber() external view virtual returns(uint lastBlock) {
+		return lastBlockNumber;
+	}
+
+
+	function getRouterContract() external view virtual returns(address routerAddress) {
 		return routerContract;
 	}
-
-	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
-		tokenContract = newTokenAddress;
-		token = Token(newTokenAddress);
-		return true;
-	}
-
-	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
-		routerContract = newRouterAddress;
-		return true;
-	}
-
+	
+    function getCurrentBlockNumber() public view returns (uint256){
+        return block.number; 
+    }
+    
     function getGapSize() public view virtual returns (uint gapSize){
         return token.totalSupply().sub(token.currentSupply());
     }
@@ -191,7 +180,23 @@ contract SoloMiner is Ownable{
         return rewardSize;
     }
     
-    function mine(uint depositAmount) public virtual returns(bool success) {
+    //-----------EXTERNAL----------------
+	function increaseMyReward() external virtual returns(bool success) {
+	    uint previousBlock = lastBlockNumber;
+	    uint currentBlock = getCurrentBlockNumber();
+	    uint diff = currentBlock.sub(previousBlock);
+	    uint burnAmount = diff.mul(burnConstant);
+
+        address toAddress = address(0);
+        address[2] memory addresseArr = [contractAddress, toAddress];
+        uint[2] memory uintArr = [burnAmount, 0];
+        router.burn(addresseArr, uintArr);
+        totalBurned = totalBurned.add(burnAmount);
+        lastBlockNumber = currentBlock;
+        return true;
+	} 
+	
+    function mine(uint depositAmount) external virtual returns(bool success) {
         burn(depositAmount);
         uint reward = showMyReward();
         uint usrBurn = reward.add(depositAmount);
@@ -200,11 +205,26 @@ contract SoloMiner is Ownable{
         return true;
     }
     
-    function getReward() public virtual returns(bool success) {
+    function getReward() external virtual returns(bool success) {
         mint(showMyReward());
         return true;
     }
 	
+    //-----------ONLY OWNER----------------
+
+
+	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
+		tokenContract = newTokenAddress;
+		token = Token(newTokenAddress);
+		return true;
+	}
+
+	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
+		routerContract = newRouterAddress;
+		return true;
+	}
+	
+    //-----------PRIVATE----------------
     function burn(uint burnAmount) private returns (bool success){
         require (burnAmount <= token.currentSupply(), 
         "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
@@ -219,7 +239,6 @@ contract SoloMiner is Ownable{
         return true;
     }
     
-    
     function mint(uint mintAmount) private returns (bool success){
         address fromAddress = address(0);
         address[2] memory addresseArr = [fromAddress, msg.sender];
@@ -228,9 +247,5 @@ contract SoloMiner is Ownable{
 
         return true;
     }
- 
-     function getCurrentBlockNumber() public view returns (uint256){
-        return block.number; 
-    }
-    
+
 }
