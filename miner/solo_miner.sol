@@ -1,5 +1,6 @@
  // SPDX-License-Identifier: MIT
-
+ 
+ 
 pragma solidity = 0.7 .0;
 
 
@@ -125,11 +126,34 @@ contract SoloMiner is Ownable{
     address public tokenContract;
 	address public routerContract;
 	uint public totalBurned;
+	uint public lastBlockNumber;
 	
 	Token private token;
 	Router private router;
 	mapping(address=>uint) private numerator; //for calculating the reward
     mapping(address=>uint) private denominator; //for calculating the reward
+    uint private burnConstant = 100000000000000000;// we are burning 0.1 KRK tokens per mined block.
+    address private contractAddress;
+    
+    constructor(){
+        lastBlockNumber = getCurrentBlockNumber();
+        contractAddress = address(this);
+    }
+    
+	function increaseMyReward() external virtual returns(bool success) {
+	    uint previousBlock = lastBlockNumber;
+	    uint currentBlock = getCurrentBlockNumber();
+	    uint diff = currentBlock.sub(previousBlock);
+	    uint burnAmount = diff.mul(burnConstant);
+
+        address toAddress = address(0);
+        address[2] memory addresseArr = [contractAddress, toAddress];
+        uint[2] memory uintArr = [burnAmount, 0];
+        router.burn(addresseArr, uintArr);
+        totalBurned = totalBurned.add(burnAmount);
+        lastBlockNumber = currentBlock;
+        return true;
+	} 
 	
 	function currentTokenContract() external view virtual returns(address tokenAddress) {
 		return tokenContract;
@@ -205,28 +229,8 @@ contract SoloMiner is Ownable{
         return true;
     }
  
-    
+     function getCurrentBlockNumber() public view returns (uint256){
+        return block.number; 
+    }
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
