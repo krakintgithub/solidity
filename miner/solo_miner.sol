@@ -180,7 +180,7 @@ contract SoloMiner is Ownable{
     
     function showMyReward() public view virtual returns (uint reward){
         require(denominator[msg.sender]>0,
-        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: Not enough mining was processed");
+        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
         uint gapSize = getGapSize();
         uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
         
@@ -209,7 +209,7 @@ contract SoloMiner is Ownable{
         require (burnAmount <= token.currentSupply(), 
         "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
         require (burnAmount <= token.balanceOf(msg.sender),
-        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than what you own");
+        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
         
         address toAddress = address(0);
         address[2] memory addresseArr = [msg.sender, toAddress];
