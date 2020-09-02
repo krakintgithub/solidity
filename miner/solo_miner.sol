@@ -109,9 +109,7 @@
 
  abstract contract Router {
 
-   function mint(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
-
-   function burn(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+   function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
    function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
 
@@ -136,9 +134,17 @@
    constructor() {
      lastBlockNumber = getCurrentBlockNumber();
      contractAddress = address(this);
+     
+     //for testing only, remove or change when done!
+     setNewTokenContract(address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71));
+     setNewRouterContract(address(0xfaA85A16cE2c0CD089e0Dc1c44A7A39e6AB4dE7F));
    }
 
    //-----------VIEWS----------------
+
+   function getMinerAddress() external view virtual returns(address tokenAddress) {
+     return contractAddress;
+   }
 
    function getTokenContract() external view virtual returns(address tokenAddress) {
      return tokenContract;
@@ -165,8 +171,9 @@
    }
 
    function showMyCurrentRewardTotal() public view virtual returns(uint reward) {
-     require(denominator[msg.sender] > 0,
-       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
+
+     if(denominator[msg.sender]==0){ return 0; }
+     
      uint gapSize = getGapSize();
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
 
@@ -178,8 +185,8 @@
    }
    
    function estimateMyIncreaseRewardTotal() public view virtual returns(uint reward) {
-    require(denominator[msg.sender] > 0,
-       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: uint division by zero");
+
+     if(denominator[msg.sender]==0){ return 0; }
        
      uint previousBlock = lastBlockNumber;
      uint currentBlock = getCurrentBlockNumber();
@@ -205,7 +212,9 @@
      address toAddress = address(0);
      address[2] memory addresseArr = [contractAddress, toAddress];
      uint[2] memory uintArr = [burnAmount, 0];
-     router.burn(addresseArr, uintArr);
+     
+     router.extrenalRouterCall("burn",addresseArr, uintArr);
+     
      totalBurned = totalBurned.add(burnAmount);
      lastBlockNumber = currentBlock;
      return true;
@@ -235,29 +244,31 @@
 
    function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
      routerContract = newRouterAddress;
+     router = Router(newRouterAddress);
      return true;
    }
 
    //-----------PRIVATE--------------------
    function burn(uint burnAmount) private returns(bool success) {
      require(burnAmount <= token.currentSupply(),
-       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
+      "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
      require(burnAmount <= token.balanceOf(msg.sender),
-       "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
+      "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
 
      address toAddress = address(0);
      address[2] memory addresseArr = [msg.sender, toAddress];
      uint[2] memory uintArr = [burnAmount, 0];
-     router.burn(addresseArr, uintArr);
+     router.extrenalRouterCall("burn",addresseArr, uintArr);
      totalBurned = totalBurned.add(burnAmount);
-     return true;
+
+	 return true;
    }
 
    function mint(uint mintAmount) private returns(bool success) {
      address fromAddress = address(0);
      address[2] memory addresseArr = [fromAddress, msg.sender];
      uint[2] memory uintArr = [mintAmount, 0];
-     router.mint(addresseArr, uintArr);
+     router.extrenalRouterCall("mint",addresseArr, uintArr);
 
      return true;
    }
