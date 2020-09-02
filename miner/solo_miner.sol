@@ -234,6 +234,8 @@
 
    function getReward() external virtual returns(bool success) {
      mint(showMyCurrentRewardTotal());
+     numerator[msg.sender] = 0;
+     denominator[msg.sender] = 0;
      return true;
    }
 
