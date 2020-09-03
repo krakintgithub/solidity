@@ -247,13 +247,18 @@
 
    function mine(uint depositAmount) isActive external virtual returns(bool success) {
      switchControl();
+     uint gapSize = getGapSize();
+     uint reward = showMyCurrentRewardTotal();
+     reward = reward.add(depositAmount);
 
      burn(depositAmount);
+     
+     gapSize = getGapSize();
+     
+     numerator[msg.sender] = reward;
+     denominator[msg.sender] = gapSize;
      minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
-     uint reward = showMyCurrentRewardTotal();
-     uint usrBurn = reward.add(depositAmount);
-     numerator[msg.sender] = usrBurn;
-     denominator[msg.sender] = getGapSize();
+
      return true;
    }
 
