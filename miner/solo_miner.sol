@@ -215,6 +215,9 @@
      if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
        rewardSize = token.totalSupply().sub(token.currentSupply());
      }
+     if(rewardSize<showMyCurrentRewardTotal()){
+         rewardSize=showMyCurrentRewardTotal();
+     }
 
      return rewardSize;
    }
@@ -284,7 +287,7 @@
 
       mint(minimumReturn[msg.sender]);
       minimumReturn[msg.sender] = 0;
-
+      return true;
    }
   
 
