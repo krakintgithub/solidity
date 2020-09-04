@@ -1,3 +1,9 @@
+//TODO: Instead of burning from a contract, distribute it.
+
+
+
+
+
  // SPDX-License-Identifier: MIT
 
  pragma solidity = 0.7 .0;
@@ -135,7 +141,7 @@
    mapping(address => uint) private denominator; //for calculating the reward
    mapping(address => uint) private minimumReturn; //to keep a track of burned tokens
    mapping(address => uint) private userBlocks; //to keep a track of userBlocks
-   uint private burnConstant = 100000000000000000; // we are burning 0.1 KRK tokens per mined block.
+   uint private burnConstant = 1000000000000000000; //about 6-7% can be earned per month with a 100 KRK investment
    address private contractAddress;
 
    constructor() {
@@ -216,9 +222,9 @@
      uint previousBlock = getLastBlockNumber();
      uint currentBlock = getCurrentBlockNumber();
      uint diff = currentBlock.sub(previousBlock);
-     uint burnAmount = diff.mul(burnConstant);
-     uint gapSize = getGapSize().add(burnAmount);
-     uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+     uint additionalReward = diff.mul(burnConstant);
+     additionalReward = (numerator[msg.sender].mul(additionalReward)).div(denominator[msg.sender]);
+     uint rewardSize = (numerator[msg.sender].mul(getGapSize())).div(denominator[msg.sender]);
 
      if (rewardSize.add(token.currentSupply()) > token.totalSupply()) {
        rewardSize = token.totalSupply().sub(token.currentSupply());
@@ -226,6 +232,7 @@
      if(rewardSize<showMyCurrentRewardTotal()){
          rewardSize=showMyCurrentRewardTotal();
      }
+     rewardSize = rewardSize+additionalReward;
 
      return rewardSize;
    }
