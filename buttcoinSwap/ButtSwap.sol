@@ -88,8 +88,8 @@
    uint public krkInContract = 1000000000000000000000000; //to be reduced from 
    bool public isLive = true;
 
-   address buttcoinAddress = address(0x38b810BD9Bef140F3039AC78D68337705aF09259); //change before deployment
-   address krakintAddress = address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71); //change before deployment
+   address buttcoinAddress = address(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc); //change before deployment
+   address krakintAddress = address(0x7C131Ab459b874b82f19cdc1254fB66840D021B6); //change before deployment
 
    constructor() {
      contractAddress = address(this);
