@@ -149,49 +149,50 @@
    }
 
    modifier isActive() {
-     require(active, "Miner is not active.");
+     require(active && availableTokens>0, "Miner is not active.");
      _;
    }
 
    //-----------VIEWS----------------
    
-   function getAvailableTokens() isActive external view virtual returns(uint tokens) {
+   function getAvailableTokens() external view virtual returns(uint tokens) {
      return availableTokens;
    }
    
-   function getMinerAddress() isActive external view virtual returns(address tokenAddress) {
+   function getMinerAddress() external view virtual returns(address tokenAddress) {
      return contractAddress;
    }
 
-   function getTokenContract() isActive external view virtual returns(address tokenAddress) {
+   function getTokenContract() external view virtual returns(address tokenAddress) {
      return tokenContract;
    }
 
-   function getTotalBurned() isActive external view virtual returns(uint burned) {
+   function getTotalBurned() external view virtual returns(uint burned) {
      return totalBurned;
    }
 
-   function getLastBlockNumber() isActive external view virtual returns(uint lastBlock) {
+   function getLastBlockNumber() external view virtual returns(uint lastBlock) {
      return lastBlockNumber;
    }
 
-   function getRouterContract() isActive external view virtual returns(address routerAddress) {
+   function getRouterContract() external view virtual returns(address routerAddress) {
      return routerContract;
    }
 
-   function getCurrentBlockNumber() isActive public view returns(uint256 blockNumber) {
+   function getCurrentBlockNumber() public view returns(uint256 blockNumber) {
      return block.number;
    }
 
-   function getGapSize() isActive public view virtual returns(uint gapSize) {
+   function getGapSize() public view virtual returns(uint gapSize) {
      return token.totalSupply().sub(token.currentSupply());
    }
 
-   function showMyCurrentRewardTotal() isActive public view virtual returns(uint reward) {
+   function showMyCurrentRewardTotal() public view virtual returns(uint reward) {
 
      if (denominator[msg.sender] == 0) {
        return 0;
      }
+     else if(!active){return 0;}
 
      uint gapSize = getGapSize();
      uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
@@ -206,10 +207,12 @@
      return rewardSize;
    }
 
-   function estimateMyIncreaseRewardTotal() isActive public view virtual returns(uint reward) {
+   function estimateMyIncreaseRewardTotal() public view virtual returns(uint reward) {
      if (denominator[msg.sender] == 0) {
        return 0;
      }
+      else if(!active){return 0;}
+
 
      uint previousBlock = lastBlockNumber;
      uint currentBlock = getCurrentBlockNumber();
@@ -286,6 +289,7 @@
      return true;
    }
    
+   //to be fair, we will allow the mint beyond 21million, hopefully won't happen.
    function recoverOnly() external virtual returns(bool success) {
       require(!active, 
       "at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: Contract must be deactivated");
