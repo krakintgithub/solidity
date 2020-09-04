@@ -186,7 +186,7 @@
 
 
 
-   function estimateMyIncreaseRewardTotal() public view virtual returns(uint reward) {
+   function showReward() public view virtual returns(uint reward) {
      if (denominator[msg.sender] == 0) {
        return 0;
      }
@@ -219,7 +219,7 @@
      
      
      uint gapSize = getGapSize();
-     uint reward = estimateMyIncreaseRewardTotal();
+     uint reward = showReward();
      reward = reward.add(depositAmount);
 
      burn(depositAmount);
@@ -235,7 +235,7 @@
    }
 
    function getReward() isActive public virtual returns(bool success) {
-     uint amt = estimateMyIncreaseRewardTotal();
+     uint amt = showReward();
 
      require(amt > 0,
      "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give");
@@ -247,6 +247,7 @@
      numerator[msg.sender] = 0;
      denominator[msg.sender] = 0;
      minimumReturn[msg.sender] = 0;
+     userBlocks[msg.sender] = 0;
      return true;
    }
 
