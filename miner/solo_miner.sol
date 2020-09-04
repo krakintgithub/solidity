@@ -1,6 +1,3 @@
- //This miner has an on/off switch.
- //This miner is meant to run for about 15000000 blocks, which is approximately 10 years.
-
  // SPDX-License-Identifier: MIT
 
  pragma solidity = 0.7 .0;
