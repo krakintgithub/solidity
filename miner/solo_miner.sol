@@ -118,6 +118,9 @@
 
  }
 
+//===============================================================
+//MAIN CONTRACT
+//===============================================================
  contract SoloMiner is Ownable {
    using SafeMath
    for uint;
@@ -224,8 +227,6 @@
 
    //-----------EXTERNAL----------------
    function increaseMyReward() isActive public virtual returns(bool success) {
-     switchControl();
-
      require(denominator[msg.sender] > 0,
        "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");
 
@@ -246,7 +247,6 @@
    }
 
    function mine(uint depositAmount) isActive external virtual returns(bool success) {
-     switchControl();
      uint gapSize = getGapSize();
      uint reward = showMyCurrentRewardTotal();
      reward = reward.add(depositAmount);
@@ -263,8 +263,6 @@
    }
 
    function getReward() isActive public virtual returns(bool success) {
-     switchControl();
-
      uint amt = showMyCurrentRewardTotal();
 
      require(amt > 0,
@@ -278,7 +276,6 @@
    }
 
    function claimMaximumReward() isActive external virtual returns(bool success) {
-     switchControl();
      increaseMyReward();
      getReward();
      return true;
@@ -308,19 +305,13 @@
      router = Router(newRouterAddress);
      return true;
    }
-
-   //-----------PRIVATE--------------------   
-   function switchControl() private {
-     if (getCurrentBlockNumber() >= stopAt) {
-       flipSwitch();
-     }
-   }
-
-   function flipSwitch() private returns(bool success) {
+   
+   function flipSwitch() external onlyOwner returns(bool success) {
      active = !active;
      return true;
    }
 
+   //-----------PRIVATE--------------------   
    function burn(uint burnAmount) isActive private returns(bool success) {
      require(burnAmount <= token.currentSupply(),
        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
