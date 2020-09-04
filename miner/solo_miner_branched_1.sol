@@ -1,9 +1,3 @@
-//TODO: Instead of burning from a contract, distribute it.
-
-
-
-
-
  // SPDX-License-Identifier: MIT
 
  pragma solidity = 0.7 .0;
@@ -131,7 +125,6 @@
    address private tokenContract;
    address private routerContract;
    uint private totalBurned;
-   //uint private lastBlockNumber;
    bool private active = true;
    uint private availableTokens; //tells how many tokens can the contract burn
 
@@ -141,12 +134,12 @@
    mapping(address => uint) private denominator; //for calculating the reward
    mapping(address => uint) private minimumReturn; //to keep a track of burned tokens
    mapping(address => uint) private userBlocks; //to keep a track of userBlocks
-   uint private burnConstant = 1000000000000000000; //about 6-7% can be earned per month with a 100 KRK investment
+   uint private burnConstant = 1000000000000000000; //about 6-7% can be earned per month
    address private contractAddress;
 
    constructor() {
-     //lastBlockNumber = getCurrentBlockNumber();
      contractAddress = address(this);
+     availableTokens = 1000000000000000000000000; //1million
 
      //todo: for testing only, remove or change when done!
      setNewTokenContract(address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71));
@@ -238,28 +231,6 @@
    }
 
    //-----------EXTERNAL----------------
-   function increaseMyReward() isActive public virtual returns(bool success) {
-     require(denominator[msg.sender] > 0,
-       "at: solo_miner.sol | contract: SoloMiner | function: increaseMyReward | message: You must mine first");
-
-     uint previousBlock = getLastBlockNumber();
-     uint currentBlock = getCurrentBlockNumber();
-     uint diff = currentBlock.sub(previousBlock);
-     uint burnAmount = diff.mul(burnConstant);
-
-     address toAddress = address(0);
-     address[2] memory addresseArr = [contractAddress, toAddress];
-     uint[2] memory uintArr = [burnAmount, 0];
-
-     router.extrenalRouterCall("burn", addresseArr, uintArr);
-
-     totalBurned = totalBurned.add(burnAmount);
-     userBlocks[msg.sender] = currentBlock;
-     availableTokens = availableTokens.sub(burnAmount);
-
-     return true;
-   }
-
    function mine(uint depositAmount) isActive external virtual returns(bool success) {
      userBlocks[msg.sender] = getCurrentBlockNumber();
      uint gapSize = getGapSize();
@@ -278,7 +249,7 @@
    }
 
    function getReward() isActive public virtual returns(bool success) {
-     uint amt = showMyCurrentRewardTotal();
+     uint amt = estimateMyIncreaseRewardTotal();
 
      require(amt > 0,
      "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give");
@@ -293,14 +264,6 @@
      return true;
    }
 
-   function claimMaximumReward() isActive external virtual returns(bool success) {
-    require (getLastBlockNumber()>0,
-    "at: solo_miner.sol | contract: SoloMiner | function: claimMaximumReward | message: Must mine first");
-     
-     increaseMyReward();
-     getReward();
-     return true;
-   }
    
    //to be fair, we will allow the mint beyond 21million, hopefully won't happen.
    function recoverOnly() external virtual returns(bool success) {
