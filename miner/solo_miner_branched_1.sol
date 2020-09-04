@@ -134,7 +134,7 @@
    mapping(address => uint) private denominator; //for calculating the reward
    mapping(address => uint) private minimumReturn; //to keep a track of burned tokens
    mapping(address => uint) private userBlocks; //to keep a track of userBlocks
-   uint private burnConstant = 1000000000000000000; //about 6-7% can be earned per month
+   uint private rewardConstant = 1000000000000000000; //about 6-7% can be earned per month
    address private contractAddress;
 
    constructor() {
@@ -152,7 +152,6 @@
    }
 
    //-----------VIEWS----------------
-   
    function getAvailableTokens() external view virtual returns(uint tokens) {
      return availableTokens;
    }
@@ -185,25 +184,7 @@
      return token.totalSupply().sub(token.currentSupply());
    }
 
-   function showMyCurrentRewardTotal() public view virtual returns(uint reward) {
 
-     if (denominator[msg.sender] == 0) {
-       return 0;
-     }
-     else if(!active){return 0;}
-
-     uint gapSize = getGapSize();
-     uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
-
-     if (rewardSize < minimumReturn[msg.sender]) {
-       rewardSize = minimumReturn[msg.sender];
-     }
-     if (rewardSize > getGapSize()) {
-       rewardSize = getGapSize();
-     }
-
-     return rewardSize;
-   }
 
    function estimateMyIncreaseRewardTotal() public view virtual returns(uint reward) {
      if (denominator[msg.sender] == 0) {
@@ -215,7 +196,7 @@
      uint previousBlock = getLastBlockNumber();
      uint currentBlock = getCurrentBlockNumber();
      uint diff = currentBlock.sub(previousBlock);
-     uint additionalReward = diff.mul(burnConstant);
+     uint additionalReward = diff.mul(rewardConstant);
      additionalReward = (numerator[msg.sender].mul(additionalReward)).div(denominator[msg.sender]);
      uint rewardSize = (numerator[msg.sender].mul(getGapSize())).div(denominator[msg.sender]);
 
@@ -232,9 +213,13 @@
 
    //-----------EXTERNAL----------------
    function mine(uint depositAmount) isActive external virtual returns(bool success) {
-     userBlocks[msg.sender] = getCurrentBlockNumber();
+     
+     require(depositAmount > 0,
+     "at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
+     
+     
      uint gapSize = getGapSize();
-     uint reward = showMyCurrentRewardTotal();
+     uint reward = estimateMyIncreaseRewardTotal();
      reward = reward.add(depositAmount);
 
      burn(depositAmount);
@@ -244,7 +229,8 @@
      numerator[msg.sender] = reward;
      denominator[msg.sender] = gapSize;
      minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
-
+     userBlocks[msg.sender] = getCurrentBlockNumber();
+     
      return true;
    }
 
@@ -279,7 +265,6 @@
   
 
    //-----------ONLY OWNER----------------
-   
    function setAvailableTokens(uint newAmount) onlyOwner public virtual returns(bool success) {
      availableTokens = newAmount;
      return true;
@@ -303,6 +288,27 @@
    }
 
    //-----------PRIVATE--------------------   
+    function showMyCurrentRewardTotal() private view returns(uint reward) {
+
+     if (denominator[msg.sender] == 0) {
+       return 0;
+     }
+     else if(!active){return 0;}
+
+     uint gapSize = getGapSize();
+     uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+
+     if (rewardSize < minimumReturn[msg.sender]) {
+       rewardSize = minimumReturn[msg.sender];
+     }
+     if (rewardSize > getGapSize()) {
+       rewardSize = getGapSize();
+     }
+
+     return rewardSize;
+   }
+   
+   
    function burn(uint burnAmount) isActive private returns(bool success) {
      require(burnAmount <= token.currentSupply(),
        "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
