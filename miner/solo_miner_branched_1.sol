@@ -134,9 +134,9 @@
  	function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
  }
 
-	//===============================================================
-	//MAIN CONTRACT
-	//===============================================================
+//===============================================================
+//MAIN CONTRACT
+//===============================================================
  contract SoloMiner is Ownable
  {
  	using SafeMath
@@ -173,7 +173,7 @@
  		_;
  	}
 
- 	//-----------VIEWS----------------
+//-----------VIEWS----------------
  	function getAvailableTokens() external view virtual returns(uint tokens)
  	{
  		return availableTokens;
@@ -245,7 +245,7 @@
  		return rewardSize;
  	}
 
- 	//-----------EXTERNAL----------------
+//-----------EXTERNAL----------------
  	function mine(uint depositAmount) isActive external virtual returns(bool success)
  	{
 
@@ -299,7 +299,7 @@
  		return true;
  	}
 
- 	//-----------ONLY OWNER----------------
+//-----------ONLY OWNER----------------
  	function setAvailableTokens(uint newAmount) onlyOwner public virtual returns(bool success)
  	{
  		availableTokens = newAmount;
@@ -326,7 +326,7 @@
  		return true;
  	}
 
- 	//-----------PRIVATE--------------------   
+//-----------PRIVATE--------------------   
  	function showMyCurrentRewardTotal() private view returns(uint reward)
  	{
 
