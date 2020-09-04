@@ -131,6 +131,7 @@
    uint private lastBlockNumber;
    uint private stopAt;
    bool private active = true;
+   uint private availableTokens; //tells how many tokens can the contract burn
 
    Token private token;
    Router private router;
@@ -156,6 +157,11 @@
    }
 
    //-----------VIEWS----------------
+   
+   function getAvailableTokens() isActive external view virtual returns(uint tokens) {
+     return availableTokens;
+   }
+   
    function getMinerAddress() isActive external view virtual returns(address tokenAddress) {
      return contractAddress;
    }
@@ -176,7 +182,7 @@
      return routerContract;
    }
 
-   function getCurrentBlockNumber() isActive public view returns(uint256) {
+   function getCurrentBlockNumber() isActive public view returns(uint256 blockNumber) {
      return block.number;
    }
 
@@ -243,6 +249,8 @@
 
      totalBurned = totalBurned.add(burnAmount);
      lastBlockNumber = currentBlock;
+     availableTokens = availableTokens.sub(burnAmount);
+
      return true;
    }
 
@@ -294,6 +302,12 @@
   
 
    //-----------ONLY OWNER----------------
+   
+   function setAvailableTokens(uint newAmount) onlyOwner public virtual returns(bool success) {
+     availableTokens = newAmount;
+     return true;
+   }
+   
    function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
      tokenContract = newTokenAddress;
      token = Token(newTokenAddress);
