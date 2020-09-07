@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2020-08-27
-*/
-
 /*
 Please note, there are 3 native components to this token design. Token, Router, and Core. 
 Each component is deployed separately as an external contract.
@@ -211,12 +207,10 @@ contract Core is IERC20, Ownable {
 		address[2] memory tmpAddresses2 = [addressArr[1], addressArr[0]];
 
 		uint[2] memory tmpUint = [uintArr[0], uintArr[1]];
-
+		uint[2] memory tmpUint2 = [allowance.sub(uintArr[0]), uintArr[1]];
 		
 		_transfer(tmpAddresses1, tmpUint);
-		
-		tmpUint = [allowance.sub(uintArr[0]), uintArr[1]];
-		_approve(tmpAddresses2, tmpUint);
+		_approve(tmpAddresses2, tmpUint2);
 
 		return true;
 	}
