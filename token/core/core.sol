@@ -118,9 +118,7 @@ contract Router is Ownable, IERC20 {
 
 	mapping(string => address) public externalContracts; //for non-native functions
 	
-	
-	//Fix for the ERC20 short address attack.
-    modifier onlyPayloadSize(uint size) {
+	modifier onlyPayloadSize(uint size) {
       if(msg.data.length < size + 4) {
         revert();
       }
