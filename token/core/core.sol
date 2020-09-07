@@ -1,20 +1,15 @@
+/**
+ *Submitted for verification at Etherscan.io on 2020-08-27
+*/
+
 /*
 Please note, there are 3 native components to this token design. Token, Router, and Core. 
 Each component is deployed separately as an external contract.
 
-This is the Core component of a mutable token contract.
-The Core component is the mutable part and it can be re-routed should there be any code updates.
-Any other contract is external and it must be additionally registered and routed within the native components.
-The reason for introducing a mutable token is to be able to add or remove the features, do the code updates, 
-... and to be able to run a business on the block-chain.
+This is the main code of a mutable token contract.
+The Router component is the mutable part and it can be re-routed should there be any code updates.
+Any other contract is also external and it must be additionally registered and routed within the native components.
 The main idea of this design was to follow the adjusted Proxy and the MVC design patterns.
-
-Registered addresses of the native components:
-Token: 
-Router:
-Core:
-
--This token design was developed and designed entirely by Damir Olejar, August 2020.
 */
 
 // SPDX-License-Identifier: MIT
@@ -290,5 +285,3 @@ contract Core is IERC20, Ownable {
 	}
 	
 }
-
-
