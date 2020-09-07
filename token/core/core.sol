@@ -209,9 +209,9 @@ contract Core is IERC20, Ownable {
 		uint[2] memory tmpUint = [uintArr[0], uintArr[1]];
 		uint[2] memory tmpUint2 = [allowance.sub(uintArr[0]), uintArr[1]];
 		
-		_transfer(tmpAddresses1, tmpUint);
 		_approve(tmpAddresses2, tmpUint2);
-
+        _transfer(tmpAddresses1, tmpUint);
+        
 		return true;
 	}
 
