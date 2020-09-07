@@ -5,16 +5,7 @@ Each component is deployed separately as an external contract.
 This is the main code of a mutable token contract.
 The Router component is the mutable part and it can be re-routed should there be any code updates.
 Any other contract is also external and it must be additionally registered and routed within the native components.
-The reason for introducing a mutable token is to be able to add or remove the features, do the code updates, 
-... and to be able to run a business on the block-chain.
 The main idea of this design was to follow the adjusted Proxy and the MVC design patterns.
-
-Registered addresses of the native components:
-Token: 
-Router:
-Core:
-
--This token design was developed and designed entirely by Damir Olejar, August 2020.
 */
 
 // SPDX-License-Identifier: MIT
@@ -109,6 +100,11 @@ abstract contract Core {
 
 }
 
+
+abstract contract Token {
+	function allowance(address owner, address spender) external view virtual returns(uint256 data);
+}
+
 //============================================================================================
 // MAIN CONTRACT 
 //============================================================================================
@@ -118,8 +114,17 @@ contract Router is Ownable, IERC20 {
 	address public tokenContract;
 	address public coreContract;
 	Core private core;
+	Token private token;
 
 	mapping(string => address) public externalContracts; //for non-native functions
+	
+	modifier onlyPayloadSize(uint size) {
+      if(msg.data.length < size + 4) {
+        revert();
+      }
+      _;
+    }
+	
 
 	//============== NATIVE FUNCTIONS START HERE ==================================================
 	//These functions should never change when introducing a new version of a router.
@@ -145,6 +150,7 @@ contract Router is Ownable, IERC20 {
 	//function is not needed if token address is hard-coded in a constructor
 	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
 		tokenContract = newTokenAddress;
+		token = Token(tokenContract);
 		return true;
 	}
 
@@ -159,30 +165,49 @@ contract Router is Ownable, IERC20 {
 		return true;
 	}
 
-	function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
+	function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual onlyPayloadSize(2 * 32) returns(bool success) {
 		require(msg.sender == tokenContract, "at: router.sol | contract: Router | function: callRouter | message: Must be called by the registered Token contract");
 
+        require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;
+
 		if (equals(route, "transfer")) {
-			core.transfer(addressArr, uintArr);
+			if(!core.transfer(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "approve")) {
-			core.approve(addressArr, uintArr);
+		    require(token.allowance(addressArr[0],addressArr[1])==0 || (uintArr[0] == 0), "at: router.sol | contract: Router | function: callRouter | message: You must reset allowance to 0 first");
+			if(!core.approve(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "increaseAllowance")) {
-			core.increaseAllowance(addressArr, uintArr);
+			if(!core.increaseAllowance(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "decreaseAllowance")) {
-			core.decreaseAllowance(addressArr, uintArr);
+			if(!core.decreaseAllowance(addressArr, uintArr)) revertWithMutex();
 		}
+		
+        mutex[msg.sender] = false;
+
 		return true;
 	}
 
-	function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
+	function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual onlyPayloadSize(2 * 32) returns(bool success) {
 
 		require(msg.sender == tokenContract, "at: router.sol | contract: Router | function: _callRouter | message: Must be called by the registered Token contract");
+		
+        require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;
 
 		if (equals(route, "transferFrom")) {
-			core.transferFrom(addressArr, uintArr);
+			if(!core.transferFrom(addressArr, uintArr)) revertWithMutex();
 		}
+		
+        mutex[msg.sender] = false;
+
 		return true;
 	}
+	
+	function revertWithMutex() private{
+        mutex[msg.sender] = false;
+        revert();
+	}
+	
 	//============== NATIVE FUNCTIONS END HERE ==================================================
 
 
@@ -190,23 +215,37 @@ contract Router is Ownable, IERC20 {
         // This code is a subject to a change, should we decide to alter anything.
         // We can also design another external router, possibilities are infinite.
     
-	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
+    
+    mapping(address => bool) mutex; //against reentrancy attacks
+	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual onlyPayloadSize(2 * 32) returns(bool success) {
+	    
+        require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;
+	    
 		if (equals(route, "mint")) {
 			require(externalContracts["mint"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
-			core.mint(addressArr, uintArr);
+			if(!core.mint(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "burn")) {
 			require(externalContracts["burn"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
-			core.burn(addressArr, uintArr);
+			if(!core.burn(addressArr, uintArr)) revertWithMutex();
+		} else if (equals(route, "mint2")) {
+			require(externalContracts["mint"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
+			if(!core.mint(addressArr, uintArr)) revertWithMutex();
+		} else if (equals(route, "burn2")) {
+			require(externalContracts["burn"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
+			if(!core.burn(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "updateTotalSupply")){
 			require(externalContracts["updateTotalSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateTotalSupply' contract");
-			core.updateTotalSupply(uintArr);
+			if(!core.updateTotalSupply(uintArr)) revertWithMutex();
 		} else if (equals (route, "updateCurrentSupply")){
 			require(externalContracts["updateCurrentSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateCurrentSupply' contract");
-			core.updateCurrentSupply(uintArr);
+			if(!core.updateCurrentSupply(uintArr)) revertWithMutex();
 		} else if (equals (route, "updateJointSupply")){
 			require(externalContracts["updateJointSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateJointSupply' contract");
-			core.updateJointSupply(uintArr);
+			if(!core.updateJointSupply(uintArr)) revertWithMutex();
 		}
+
+        mutex[msg.sender] = false;
 
 		return true;
 	}
