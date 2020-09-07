@@ -174,7 +174,6 @@ contract Router is Ownable, IERC20 {
 		if (equals(route, "transfer")) {
 			if(!core.transfer(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "approve")) {
-		    require(token.allowance(addressArr[0],addressArr[1])==0 || (uintArr[0] == 0), "at: router.sol | contract: Router | function: callRouter | message: You must reset allowance to 0 first");
 			if(!core.approve(addressArr, uintArr)) revertWithMutex();
 		} else if (equals(route, "increaseAllowance")) {
 			if(!core.increaseAllowance(addressArr, uintArr)) revertWithMutex();
@@ -205,7 +204,7 @@ contract Router is Ownable, IERC20 {
 	
 	function revertWithMutex() private{
         mutex[msg.sender] = false;
-        revert();
+        require(mutex[msg.sender], "at: router.sol | contract: Router | function: revertWithMutex | message: Prevented multiple calls with the mutex, your previous call must end or cancel");
 	}
 	
 	//============== NATIVE FUNCTIONS END HERE ==================================================
