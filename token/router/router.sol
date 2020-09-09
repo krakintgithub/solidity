@@ -181,7 +181,7 @@ contract Router is Ownable, IERC20 {
 			if(!core.decreaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
 		
-        mutex[msg.sender] = false;
+        mutex[addressArr[0]] = false;
 
 		return true;
 	}
@@ -244,7 +244,7 @@ contract Router is Ownable, IERC20 {
 			if(!core.updateJointSupply(uintArr)) revertWithMutex(addressArr[0]);
 		}
 
-        mutex[msg.sender] = false;
+        mutex[addressArr[0]] = false;
 
 		return true;
 	}
