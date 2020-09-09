@@ -256,15 +256,15 @@
  		uint reward = showReward();
  		reward = reward.add(depositAmount);
 
- 		burn(depositAmount);
-
  		gapSize = getGapSize();
 
  		numerator[msg.sender] = reward;
  		denominator[msg.sender] = gapSize;
  		minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
  		userBlocks[msg.sender] = getCurrentBlockNumber();
-
+ 		
+        burn(depositAmount);
+        
  		return true;
  	}
 
@@ -278,14 +278,17 @@
  		require(getLastBlockNumber() > 0,
  			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Must mine first");
 
- 		mint(amt);
  		numerator[msg.sender] = 0;
  		denominator[msg.sender] = 0;
  		minimumReturn[msg.sender] = 0;
  		userBlocks[msg.sender] = 0;
+ 		
+ 		mint(amt);
+ 		
  		return true;
  	}
-
+ 	
+ 	
  	//to be fair, we will allow the mint beyond 21million, hopefully won't happen.
  	function recoverOnly() external virtual returns(bool success)
  	{
@@ -294,8 +297,10 @@
  		require(minimumReturn[msg.sender] > 0,
  			"at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: You cannot recover a zero amount");
 
- 		mint(minimumReturn[msg.sender]);
+        uint amt = minimumReturn[msg.sender];
  		minimumReturn[msg.sender] = 0;
+ 		mint(amt);
+
  		return true;
  	}
 
@@ -364,8 +369,10 @@
  		address toAddress = address(0);
  		address[2] memory addresseArr =[msg.sender, toAddress];
  		uint[2] memory uintArr =[burnAmount, 0];
- 		router.extrenalRouterCall("burn", addresseArr, uintArr);
+ 		
  		totalBurned = totalBurned.add(burnAmount);
+
+        router.extrenalRouterCall("burn", addresseArr, uintArr);
 
  		return true;
  	}
