@@ -1,389 +1,431 @@
-	// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 
- pragma solidity = 0.7 .0;
+pragma solidity = 0.7 .0;
 
- library SafeMath
- {
- 	function add(uint256 a, uint256 b) internal pure returns(uint256)
- 	{
- 		uint256 c = a + b;
- 		require(c >= a, "SafeMath: addition overflow");
+library SafeMath
+{
+	function add(uint256 a, uint256 b) internal pure returns(uint256)
+	{
+		uint256 c = a + b;
+		require(c >= a, "SafeMath: addition overflow");
 
- 		return c;
- 	}
+		return c;
+	}
 
- 	function sub(uint256 a, uint256 b) internal pure returns(uint256)
- 	{
- 		return sub(a, b, "SafeMath: subtraction overflow");
- 	}
+	function sub(uint256 a, uint256 b) internal pure returns(uint256)
+	{
+		return sub(a, b, "SafeMath: subtraction overflow");
+	}
 
- 	function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256)
- 	{
- 		require(b <= a, errorMessage);
- 		uint256 c = a - b;
+	function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256)
+	{
+		require(b <= a, errorMessage);
+		uint256 c = a - b;
 
- 		return c;
- 	}
+		return c;
+	}
 
- 	function mul(uint256 a, uint256 b) internal pure returns(uint256)
- 	{
- 		if (a == 0)
- 		{
- 			return 0;
- 		}
+	function mul(uint256 a, uint256 b) internal pure returns(uint256)
+	{
+		if (a == 0)
+		{
+			return 0;
+		}
 
- 		uint256 c = a * b;
- 		require(c / a == b, "SafeMath: multiplication overflow");
+		uint256 c = a * b;
+		require(c / a == b, "SafeMath: multiplication overflow");
 
- 		return c;
- 	}
+		return c;
+	}
 
- 	function div(uint256 a, uint256 b) internal pure returns(uint256)
- 	{
- 		return div(a, b, "SafeMath: division by zero");
- 	}
+	function div(uint256 a, uint256 b) internal pure returns(uint256)
+	{
+		return div(a, b, "SafeMath: division by zero");
+	}
 
- 	function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256)
- 	{
- 		require(b > 0, errorMessage);
- 		uint256 c = a / b;
- 		// assert(a == b *c + a % b);	// There is no case in which this doesn't hold
+	function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256)
+	{
+		require(b > 0, errorMessage);
+		uint256 c = a / b;
+		// assert(a == b *c + a % b);	// There is no case in which this doesn't hold
 
- 		return c;
- 	}
+		return c;
+	}
 
- 	function mod(uint256 a, uint256 b) internal pure returns(uint256)
- 	{
- 		return mod(a, b, "SafeMath: modulo by zero");
- 	}
+	function mod(uint256 a, uint256 b) internal pure returns(uint256)
+	{
+		return mod(a, b, "SafeMath: modulo by zero");
+	}
 
- 	function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256)
- 	{
- 		require(b != 0, errorMessage);
- 		return a % b;
- 	}
- }
+	function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256)
+	{
+		require(b != 0, errorMessage);
+		return a % b;
+	}
+}
 
- abstract contract Context
- {
- 	function _msgSender() internal view virtual returns(address payable)
- 	{
- 		return msg.sender;
- 	}
+abstract contract Context
+{
+	function _msgSender() internal view virtual returns(address payable)
+	{
+		return msg.sender;
+	}
 
- 	function _msgData() internal view virtual returns(bytes memory)
- 	{
- 		this;
- 		return msg.data;
- 	}
- }
+	function _msgData() internal view virtual returns(bytes memory)
+	{
+		this;
+		return msg.data;
+	}
+}
 
- contract Ownable is Context
- {
- 	address private _owner;
+contract Ownable is Context
+{
+	address private _owner;
 
- 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
- 	constructor()
- 	{
- 		address msgSender = _msgSender();
- 		_owner = msgSender;
- 		emit OwnershipTransferred(address(0), msgSender);
- 	}
+	constructor()
+	{
+		address msgSender = _msgSender();
+		_owner = msgSender;
+		emit OwnershipTransferred(address(0), msgSender);
+	}
 
- 	function owner() public view returns(address)
- 	{
- 		return _owner;
- 	}
+	function owner() public view returns(address)
+	{
+		return _owner;
+	}
 
- 	modifier onlyOwner()
- 	{
- 		require(_owner == _msgSender(), "Ownable: caller is not the owner");
- 		_;
- 	}
+	modifier onlyOwner()
+	{
+		require(_owner == _msgSender(), "Ownable: caller is not the owner");
+		_;
+	}
 
- 	function renounceOwnership() public virtual onlyOwner
- 	{
- 		emit OwnershipTransferred(_owner, address(0));
- 		_owner = address(0);
- 	}
+	function renounceOwnership() public virtual onlyOwner
+	{
+		emit OwnershipTransferred(_owner, address(0));
+		_owner = address(0);
+	}
 
- 	function transferOwnership(address newOwner) public virtual onlyOwner
- 	{
- 		require(newOwner != address(0), "Ownable: new owner is the zero address");
- 		emit OwnershipTransferred(_owner, newOwner);
- 		_owner = newOwner;
- 	}
- }
+	function transferOwnership(address newOwner) public virtual onlyOwner
+	{
+		require(newOwner != address(0), "Ownable: new owner is the zero address");
+		emit OwnershipTransferred(_owner, newOwner);
+		_owner = newOwner;
+	}
+}
 
- abstract contract Token
- {
+abstract contract Token
+{
 
- 	function balanceOf(address account) external view virtual returns(uint256 data);
+	function balanceOf(address account) external view virtual returns(uint256 data);
 
- 	function totalSupply() external virtual view returns(uint256 data);
+	function totalSupply() external virtual view returns(uint256 data);
 
- 	function currentSupply() external virtual view returns(uint256 data);
- }
+	function currentSupply() external virtual view returns(uint256 data);
+}
 
- abstract contract Router
- {
+abstract contract Router
+{
 
- 	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
- 	function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
- }
+	function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
+}
 
 //===============================================================
 //MAIN CONTRACT
 //===============================================================
- contract SoloMiner is Ownable
- {
- 	using SafeMath
- 	for uint;
+contract SoloMiner is Ownable
+{
+	using SafeMath
+	for uint;
 
- 	address private tokenContract;
- 	address private routerContract;
- 	uint private totalBurned;
- 	bool private active = true;
- 	uint private availableTokens;	//tells how many tokens can the contract burn
+	address private tokenContract;
+	address private routerContract;
+	uint private totalBurned;
+	bool private active = true;
+	uint private availableTokens;	//tells how many tokens can the contract burn
 
- 	Token private token;
- 	Router private router;
- 	mapping(address => uint) private numerator;	//for calculating the reward
- 	mapping(address => uint) private denominator;	//for calculating the reward
- 	mapping(address => uint) private minimumReturn;	//to keep a track of burned tokens
- 	mapping(address => uint) private userBlocks;	//to keep a track of userBlocks
- 	uint private rewardConstant = 1000000000000000000;	//about 6-7% can be earned per month
- 	address private contractAddress;
+	Token private token;
+	Router private router;
+	mapping(address => uint) private numerator;	//for calculating the reward
+	mapping(address => uint) private denominator;	//for calculating the reward
+	mapping(address => uint) private minimumReturn;	//to keep a track of burned tokens
+	mapping(address => uint) private userBlocks;	//to keep a track of userBlocks
+	mapping(address => uint) private miners;
+	mapping(uint => address) private addressFromId;
 
- 	constructor()
- 	{
- 		contractAddress = address(this);
- 		availableTokens = 1000000000000000000000000;	//1million
+	uint public pivot = 0;
+	uint private rewardConstant = 1000000000000000000;	//about 6-7% can be earned per month
+	address private contractAddress;
 
- 		//todo: for testing only, remove or change when done!
- 		setNewTokenContract(address(0xf61cc2A22D2Ee34e2eF7802EdCc5268cfB1c4A71));
- 		setNewRouterContract(address(0xfaA85A16cE2c0CD089e0Dc1c44A7A39e6AB4dE7F));
- 	}
+	constructor()
+	{
+		contractAddress = address(this);
+		availableTokens = 1000000000000000000000000;	//1million
 
- 	modifier isActive()
- 	{
- 		require(active && availableTokens > 0, "Miner is not active.");
- 		_;
- 	}
+		//todo: for testing only, remove or change when done!
+		setNewTokenContract(address(0x6317a0AfE602eBAbb04E09349313920caA7E6f45));
+		setNewRouterContract(address(0x5871981B02FFd852269dc8c2fB25E82B5c299c2C));
+	}
 
-//-----------VIEWS----------------
- 	function getAvailableTokens() external view virtual returns(uint tokens)
- 	{
- 		return availableTokens;
- 	}
+	modifier isActive()
+	{
+		require(active && availableTokens > 0, "Miner is not active.");
+		_;
+	}
 
- 	function getMinerAddress() external view virtual returns(address tokenAddress)
- 	{
- 		return contractAddress;
- 	}
+	//-----------VIEWS----------------
 
- 	function getTokenContract() external view virtual returns(address tokenAddress)
- 	{
- 		return tokenContract;
- 	}
+	function getLastPivot() external view virtual returns(uint lastPivot)
+	{
+		return pivot;
+	}
 
- 	function getTotalBurned() external view virtual returns(uint burned)
- 	{
- 		return totalBurned;
- 	}
+	function getAddressFromId(uint id) external view virtual returns(address minerAddress)
+	{
+		return addressFromId[id];
+	}
 
- 	function getLastBlockNumber() public view virtual returns(uint lastBlock)
- 	{
- 		return userBlocks[msg.sender];
- 	}
+	function getUserNumerator(address minerAddress) external view virtual returns(uint minerNumerator)
+	{
+		return numerator[minerAddress];
+	}
 
- 	function getRouterContract() external view virtual returns(address routerAddress)
- 	{
- 		return routerContract;
- 	}
+	function getUserDenominator(address minerAddress) external view virtual returns(uint minerDenominator)
+	{
+		return denominator[minerAddress];
+	}
 
- 	function getCurrentBlockNumber() public view returns(uint256 blockNumber)
- 	{
- 		return block.number;
- 	}
+	function getUserBlocks(address minerAddress) external view virtual returns(uint minerBlocks)
+	{
+		return userBlocks[minerAddress];
+	}
 
- 	function getGapSize() public view virtual returns(uint gapSize)
- 	{
- 		return token.totalSupply().sub(token.currentSupply());
- 	}
+	function getAvailableTokens() external view virtual returns(uint tokens)
+	{
+		return availableTokens;
+	}
 
- 	function showReward() public view virtual returns(uint reward)
- 	{
- 		if (denominator[msg.sender] == 0)
- 		{
- 			return 0;
- 		}
- 		else if (!active)
- 		{
- 			return 0;
- 		}
+	function getMinerAddress() external view virtual returns(address tokenAddress)
+	{
+		return contractAddress;
+	}
 
- 		uint previousBlock = getLastBlockNumber();
- 		uint currentBlock = getCurrentBlockNumber();
- 		uint diff = currentBlock.sub(previousBlock);
- 		uint additionalReward = diff.mul(rewardConstant);
- 		additionalReward = (numerator[msg.sender].mul(additionalReward)).div(denominator[msg.sender]);
- 		uint rewardSize = (numerator[msg.sender].mul(getGapSize())).div(denominator[msg.sender]);
+	function getTokenContract() external view virtual returns(address tokenAddress)
+	{
+		return tokenContract;
+	}
 
- 		if (rewardSize.add(token.currentSupply()) > token.totalSupply())
- 		{
- 			rewardSize = token.totalSupply().sub(token.currentSupply());
- 		}
- 		if (rewardSize < showMyCurrentRewardTotal())
- 		{
- 			rewardSize = showMyCurrentRewardTotal();
- 		}
- 		rewardSize = rewardSize + additionalReward;
+	function getTotalBurned() external view virtual returns(uint burned)
+	{
+		return totalBurned;
+	}
 
- 		return rewardSize;
- 	}
+	function getLastBlockNumber() public view virtual returns(uint lastBlock)
+	{
+		return userBlocks[msg.sender];
+	}
 
-//-----------EXTERNAL----------------
- 	function mine(uint depositAmount) isActive external virtual returns(bool success)
- 	{
+	function getRouterContract() external view virtual returns(address routerAddress)
+	{
+		return routerContract;
+	}
 
- 		require(depositAmount > 0,
- 			"at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
+	function getCurrentBlockNumber() public view returns(uint256 blockNumber)
+	{
+		return block.number;
+	}
 
- 		uint gapSize = getGapSize();
- 		uint reward = showReward();
- 		reward = reward.add(depositAmount);
+	function getGapSize() public view virtual returns(uint gapSize)
+	{
+		return token.totalSupply().sub(token.currentSupply());
+	}
 
- 		gapSize = getGapSize();
+	function showReward() public view virtual returns(uint reward)
+	{
+		if (denominator[msg.sender] == 0)
+		{
+			return 0;
+		}
+		else if (!active)
+		{
+			return 0;
+		}
 
- 		numerator[msg.sender] = reward;
- 		denominator[msg.sender] = gapSize;
- 		minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
- 		userBlocks[msg.sender] = getCurrentBlockNumber();
- 		
-        burn(depositAmount);
-        
- 		return true;
- 	}
+		uint previousBlock = getLastBlockNumber();
+		uint currentBlock = getCurrentBlockNumber();
+		uint diff = currentBlock.sub(previousBlock);
+		uint additionalReward = diff.mul(rewardConstant);
+		additionalReward = (numerator[msg.sender].mul(additionalReward)).div(denominator[msg.sender]);
+		uint rewardSize = (numerator[msg.sender].mul(getGapSize())).div(denominator[msg.sender]);
 
- 	function getReward() isActive public virtual returns(bool success)
- 	{
- 		uint amt = showReward();
+		if (rewardSize.add(token.currentSupply()) > token.totalSupply())
+		{
+			rewardSize = token.totalSupply().sub(token.currentSupply());
+		}
+		if (rewardSize < showMyCurrentRewardTotal())
+		{
+			rewardSize = showMyCurrentRewardTotal();
+		}
+		rewardSize = rewardSize + additionalReward;
 
- 		require(amt > 0,
- 			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give");
+		return rewardSize;
+	}
 
- 		require(getLastBlockNumber() > 0,
- 			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Must mine first");
+	//-----------EXTERNAL----------------
+	function mine(uint depositAmount) isActive external virtual returns(bool success)
+	{
 
- 		numerator[msg.sender] = 0;
- 		denominator[msg.sender] = 0;
- 		minimumReturn[msg.sender] = 0;
- 		userBlocks[msg.sender] = 0;
- 		
- 		mint(amt);
- 		
- 		return true;
- 	}
- 	
- 	
- 	//to be fair, we will allow the mint beyond 21million, hopefully won't happen.
- 	function recoverOnly() external virtual returns(bool success)
- 	{
- 		require(!active,
- 			"at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: Contract must be deactivated");
- 		require(minimumReturn[msg.sender] > 0,
- 			"at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: You cannot recover a zero amount");
+		require(depositAmount > 0,
+			"at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
 
-        uint amt = minimumReturn[msg.sender];
- 		minimumReturn[msg.sender] = 0;
- 		mint(amt);
+		uint gapSize = getGapSize();
+		uint reward = showReward();
+		reward = reward.add(depositAmount);
 
- 		return true;
- 	}
+		gapSize = getGapSize();
 
-//-----------ONLY OWNER----------------
- 	function setAvailableTokens(uint newAmount) onlyOwner public virtual returns(bool success)
- 	{
- 		availableTokens = newAmount;
- 		return true;
- 	}
+		numerator[msg.sender] = reward;
+		denominator[msg.sender] = gapSize;
+		minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
+		userBlocks[msg.sender] = getCurrentBlockNumber();
 
- 	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success)
- 	{
- 		tokenContract = newTokenAddress;
- 		token = Token(newTokenAddress);
- 		return true;
- 	}
+		registerMiner();
 
- 	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success)
- 	{
- 		routerContract = newRouterAddress;
- 		router = Router(newRouterAddress);
- 		return true;
- 	}
+		burn(depositAmount);
 
- 	function flipSwitch() external onlyOwner returns(bool success)
- 	{
- 		active = !active;
- 		return true;
- 	}
+		return true;
+	}
 
-//-----------PRIVATE--------------------   
- 	function showMyCurrentRewardTotal() private view returns(uint reward)
- 	{
+	function getReward() isActive public virtual returns(bool success)
+	{
+		uint amt = showReward();
 
- 		if (denominator[msg.sender] == 0)
- 		{
- 			return 0;
- 		}
- 		else if (!active)
- 		{
- 			return 0;
- 		}
+		require(amt > 0,
+			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give");
 
- 		uint gapSize = getGapSize();
- 		uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+		require(getLastBlockNumber() > 0,
+			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Must mine first");
 
- 		if (rewardSize < minimumReturn[msg.sender])
- 		{
- 			rewardSize = minimumReturn[msg.sender];
- 		}
- 		if (rewardSize > getGapSize())
- 		{
- 			rewardSize = getGapSize();
- 		}
+		numerator[msg.sender] = 0;
+		denominator[msg.sender] = 0;
+		minimumReturn[msg.sender] = 0;
+		userBlocks[msg.sender] = 0;
 
- 		return rewardSize;
- 	}
+		mint(amt);
 
- 	function burn(uint burnAmount) isActive private returns(bool success)
- 	{
- 		require(burnAmount <= token.currentSupply(),
- 			"at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
- 		require(burnAmount <= token.balanceOf(msg.sender),
- 			"at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
+		return true;
+	}
 
- 		address toAddress = address(0);
- 		address[2] memory addresseArr =[msg.sender, toAddress];
- 		uint[2] memory uintArr =[burnAmount, 0];
- 		
- 		totalBurned = totalBurned.add(burnAmount);
+	//to be fair, we will allow the mint beyond 21million, hopefully won't happen.
+	function recoverOnly() external virtual returns(bool success)
+	{
+		require(!active,
+			"at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: Contract must be deactivated");
+		require(minimumReturn[msg.sender] > 0,
+			"at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: You cannot recover a zero amount");
 
-        router.extrenalRouterCall("burn", addresseArr, uintArr);
+		uint amt = minimumReturn[msg.sender];
+		minimumReturn[msg.sender] = 0;
+		mint(amt);
 
- 		return true;
- 	}
+		return true;
+	}
 
- 	function mint(uint mintAmount) isActive private returns(bool success)
- 	{
- 		address fromAddress = address(0);
- 		address[2] memory addresseArr =[fromAddress, msg.sender];
- 		uint[2] memory uintArr =[mintAmount, 0];
- 		router.extrenalRouterCall("mint", addresseArr, uintArr);
+	//-----------ONLY OWNER----------------
+	function setAvailableTokens(uint newAmount) onlyOwner public virtual returns(bool success)
+	{
+		availableTokens = newAmount;
+		return true;
+	}
 
- 		return true;
- 	}
- }
+	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success)
+	{
+		tokenContract = newTokenAddress;
+		token = Token(newTokenAddress);
+		return true;
+	}
+
+	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success)
+	{
+		routerContract = newRouterAddress;
+		router = Router(newRouterAddress);
+		return true;
+	}
+
+	function flipSwitch() external onlyOwner returns(bool success)
+	{
+		active = !active;
+		return true;
+	}
+
+	//-----------PRIVATE--------------------   
+
+	function registerMiner() private
+	{
+		if (miners[msg.sender] == 0)
+		{
+			pivot = pivot.add(1);
+			miners[msg.sender] = pivot;
+			addressFromId[pivot] = msg.sender;
+		}
+	}
+
+	function showMyCurrentRewardTotal() private view returns(uint reward)
+	{
+
+		if (denominator[msg.sender] == 0)
+		{
+			return 0;
+		}
+		else if (!active)
+		{
+			return 0;
+		}
+
+		uint gapSize = getGapSize();
+		uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
+
+		if (rewardSize < minimumReturn[msg.sender])
+		{
+			rewardSize = minimumReturn[msg.sender];
+		}
+		if (rewardSize > getGapSize())
+		{
+			rewardSize = getGapSize();
+		}
+
+		return rewardSize;
+	}
+
+	function burn(uint burnAmount) isActive private returns(bool success)
+	{
+		require(burnAmount <= token.currentSupply(),
+			"at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
+		require(burnAmount <= token.balanceOf(msg.sender),
+			"at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
+
+		address toAddress = address(0);
+		address[2] memory addresseArr =[msg.sender, toAddress];
+		uint[2] memory uintArr =[burnAmount, 0];
+
+		totalBurned = totalBurned.add(burnAmount);
+
+		router.extrenalRouterCall("burn", addresseArr, uintArr);
+
+		return true;
+	}
+
+	function mint(uint mintAmount) isActive private returns(bool success)
+	{
+		address fromAddress = address(0);
+		address[2] memory addresseArr =[fromAddress, msg.sender];
+		uint[2] memory uintArr =[mintAmount, 0];
+		router.extrenalRouterCall("mint", addresseArr, uintArr);
+
+		return true;
+	}
+}
