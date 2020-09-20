@@ -121,9 +121,6 @@ abstract contract Token
 
 	function balanceOf(address account) external view virtual returns(uint256 data);
 
-	function totalSupply() external virtual view returns(uint256 data);
-
-	function currentSupply() external virtual view returns(uint256 data);
 }
 
 abstract contract Router
@@ -146,7 +143,6 @@ contract SoloMiner is Ownable
 	address private routerContract;
 	uint private totalBurned;
 	bool private active = true;
-	uint private availableTokens;	//tells how many tokens can the contract burn
 
 	Token private token;
 	Router private router;
@@ -159,12 +155,14 @@ contract SoloMiner is Ownable
 
 	uint public pivot = 0;
 	uint private rewardConstant = 1000000000000000000;	//about 6-7% can be earned per month
+	uint private totalConstant  = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
+	uint private currentConstant  = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
+
 	address private contractAddress;
 
 	constructor()
 	{
 		contractAddress = address(this);
-		availableTokens = 1000000000000000000000000;	//1million
 
 		//todo: for testing only, remove or change when done!
 		setNewTokenContract(address(0x6317a0AfE602eBAbb04E09349313920caA7E6f45));
@@ -173,7 +171,7 @@ contract SoloMiner is Ownable
 
 	modifier isActive()
 	{
-		require(active && availableTokens > 0, "Miner is not active.");
+		require(active, "Miner is not active.");
 		_;
 	}
 
@@ -202,11 +200,6 @@ contract SoloMiner is Ownable
 	function getUserBlocks(address minerAddress) external view virtual returns(uint minerBlocks)
 	{
 		return userBlocks[minerAddress];
-	}
-
-	function getAvailableTokens() external view virtual returns(uint tokens)
-	{
-		return availableTokens;
 	}
 
 	function getMinerAddress() external view virtual returns(address tokenAddress)
@@ -241,7 +234,7 @@ contract SoloMiner is Ownable
 
 	function getGapSize() public view virtual returns(uint gapSize)
 	{
-		return token.totalSupply().sub(token.currentSupply());
+		return totalConstant.sub(currentConstant);
 	}
 
 	function showReward() public view virtual returns(uint reward)
@@ -262,9 +255,9 @@ contract SoloMiner is Ownable
 		additionalReward = (numerator[msg.sender].mul(additionalReward)).div(denominator[msg.sender]);
 		uint rewardSize = (numerator[msg.sender].mul(getGapSize())).div(denominator[msg.sender]);
 
-		if (rewardSize.add(token.currentSupply()) > token.totalSupply())
+		if (rewardSize.add(currentConstant) > totalConstant)
 		{
-			rewardSize = token.totalSupply().sub(token.currentSupply());
+			rewardSize = totalConstant.sub(currentConstant);
 		}
 		if (rewardSize < showMyCurrentRewardTotal())
 		{
@@ -336,11 +329,6 @@ contract SoloMiner is Ownable
 	}
 
 	//-----------ONLY OWNER----------------
-	function setAvailableTokens(uint newAmount) onlyOwner public virtual returns(bool success)
-	{
-		availableTokens = newAmount;
-		return true;
-	}
 
 	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success)
 	{
@@ -403,7 +391,7 @@ contract SoloMiner is Ownable
 
 	function burn(uint burnAmount) isActive private returns(bool success)
 	{
-		require(burnAmount <= token.currentSupply(),
+		require(burnAmount <= currentConstant,
 			"at: solo_miner.sol | contract: SoloMiner | function: burn | message: You cannot burn more tokens than the existing current supply");
 		require(burnAmount <= token.balanceOf(msg.sender),
 			"at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
@@ -413,6 +401,7 @@ contract SoloMiner is Ownable
 		uint[2] memory uintArr =[burnAmount, 0];
 
 		totalBurned = totalBurned.add(burnAmount);
+		currentConstant = currentConstant.sub(burnAmount);
 
 		router.extrenalRouterCall("burn", addresseArr, uintArr);
 
@@ -424,6 +413,9 @@ contract SoloMiner is Ownable
 		address fromAddress = address(0);
 		address[2] memory addresseArr =[fromAddress, msg.sender];
 		uint[2] memory uintArr =[mintAmount, 0];
+		
+		currentConstant = currentConstant.add(mintAmount);
+		
 		router.extrenalRouterCall("mint", addresseArr, uintArr);
 
 		return true;
