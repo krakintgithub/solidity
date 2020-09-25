@@ -176,13 +176,7 @@ contract SoloMiner is Ownable
 		_;
 	}
 	
-	
-	modifier onlyPayloadSize(uint size) {
-      if(msg.data.length < size + 4) {
-        revert();
-      }
-      _;
-    }
+ 
 	
 
 	//-----------VIEWS----------------
@@ -279,7 +273,7 @@ contract SoloMiner is Ownable
 	}
 
 	//-----------EXTERNAL----------------
-	function mine(uint depositAmount) isActive onlyPayloadSize(2 * 32)  external virtual returns(bool success)
+	function mine(uint depositAmount) isActive external virtual returns(bool success)
 	{
         require(!mutex[msg.sender]);
         mutex[msg.sender] = true;
@@ -307,7 +301,7 @@ contract SoloMiner is Ownable
 	}
 
 
-	function getReward(uint tokenAmount) isActive onlyPayloadSize(2 * 32)  public virtual returns(bool success)
+	function getReward(uint tokenAmount) isActive public virtual returns(bool success)
 	{
 	    
 	    require(!mutex[msg.sender]);
@@ -342,7 +336,7 @@ contract SoloMiner is Ownable
 		return true;
 	}
 
-	function getFullReward() isActive onlyPayloadSize(2 * 32) public virtual returns(bool success)
+	function getFullReward() isActive public virtual returns(bool success)
 	{
 	    
 	    require(!mutex[msg.sender]);
@@ -369,7 +363,7 @@ contract SoloMiner is Ownable
 	}
 
 	//to be fair, we will allow the mint beyond 21million, hopefully won't happen.
-	function recoverOnly() onlyPayloadSize(2 * 32) external virtual returns(bool success)
+	function recoverOnly() external virtual returns(bool success)
 	{
 	    
         require(!mutex[msg.sender]);
@@ -391,7 +385,7 @@ contract SoloMiner is Ownable
 	
 	
 	//in case you want to burn tokens and reflect it on the miner
-	function burnMyTokens(uint tokenAmount) onlyPayloadSize(2 * 32)  isActive public virtual returns(bool success)
+	function burnMyTokens(uint tokenAmount) isActive public virtual returns(bool success)
 	{
 	    
         require(!mutex[msg.sender]);
