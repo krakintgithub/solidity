@@ -165,8 +165,8 @@ contract SoloMiner is Ownable
 		contractAddress = address(this);
 
 		//todo: for testing only, remove or change when done!
-		setNewTokenContract(address(0x6317a0AfE602eBAbb04E09349313920caA7E6f45));
-		setNewRouterContract(address(0x5871981B02FFd852269dc8c2fB25E82B5c299c2C));
+		setNewTokenContract(address(0xA26196670488cC09224Ed41F42dA98e90329A3C3));
+		setNewRouterContract(address(0x16726f0Ba5123A2B8dd1e2c94b85Ea768765c60b));
 	}
 
 	modifier isActive()
@@ -278,7 +278,7 @@ contract SoloMiner is Ownable
 		uint reward = showReward();
 		reward = reward.add(depositAmount);
 
-		uint gapSize = getGapSize().add(depositAmount); //TEST THIS!
+		uint gapSize = getGapSize().add(depositAmount);
 
 		numerator[msg.sender] = reward;
 		denominator[msg.sender] = gapSize;
@@ -303,12 +303,12 @@ contract SoloMiner is Ownable
 
 		reward = reward.sub(tokenAmount);
 
-		uint gapSize = getGapSize().sub(tokenAmount); //TEST THIS!
+		uint gapSize = getGapSize().sub(tokenAmount);
 
 		numerator[msg.sender] = reward;
 		denominator[msg.sender] = gapSize;
 		if(minimumReturn[msg.sender]>=tokenAmount){
-		    minimumReturn[msg.sender] = minimumReturn[msg.sender].add(tokenAmount);
+		    minimumReturn[msg.sender] = minimumReturn[msg.sender].sub(tokenAmount);
 		}
 		else{
 		    minimumReturn[msg.sender] = 0;
