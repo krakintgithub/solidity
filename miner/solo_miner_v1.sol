@@ -152,6 +152,7 @@ contract SoloMiner is Ownable
 	mapping(address => uint) private userBlocks;	//to keep a track of userBlocks
 	mapping(address => uint) private miners;
 	mapping(uint => address) private addressFromId;
+	mapping(address => bool) mutex; //against reentrancy attacks
 
 	uint public pivot = 0;
 	uint private rewardConstant = 1000000000000000000;	//about 6-7% can be earned per month
@@ -174,6 +175,15 @@ contract SoloMiner is Ownable
 		require(active, "Miner is not active.");
 		_;
 	}
+	
+	
+	modifier onlyPayloadSize(uint size) {
+      if(msg.data.length < size + 4) {
+        revert();
+      }
+      _;
+    }
+	
 
 	//-----------VIEWS----------------
 
@@ -269,8 +279,10 @@ contract SoloMiner is Ownable
 	}
 
 	//-----------EXTERNAL----------------
-	function mine(uint depositAmount) isActive external virtual returns(bool success)
+	function mine(uint depositAmount) isActive onlyPayloadSize(2 * 32)  external virtual returns(bool success)
 	{
+        require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;
 
 		require(depositAmount > 0,
 			"at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
@@ -288,13 +300,19 @@ contract SoloMiner is Ownable
 		registerMiner();
 
 		burn(depositAmount);
+		
+		mutex[msg.sender] = false;
 
 		return true;
 	}
 
 
-	function getReward(uint tokenAmount) isActive public virtual returns(bool success)
+	function getReward(uint tokenAmount) isActive onlyPayloadSize(2 * 32)  public virtual returns(bool success)
 	{
+	    
+	    require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;
+	    
 		uint reward = showReward();
 
 		require(tokenAmount <= reward,
@@ -319,11 +337,17 @@ contract SoloMiner is Ownable
 
         mint(tokenAmount);
 
+        mutex[msg.sender] = false;
+
 		return true;
 	}
 
-	function getFullReward() isActive public virtual returns(bool success)
+	function getFullReward() isActive onlyPayloadSize(2 * 32) public virtual returns(bool success)
 	{
+	    
+	    require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;
+	    
 		uint amt = showReward();
 
 		require(amt > 0,
@@ -339,12 +363,18 @@ contract SoloMiner is Ownable
 
 		mint(amt);
 
+        mutex[msg.sender] = false;
+
 		return true;
 	}
 
 	//to be fair, we will allow the mint beyond 21million, hopefully won't happen.
-	function recoverOnly() external virtual returns(bool success)
+	function recoverOnly() onlyPayloadSize(2 * 32) external virtual returns(bool success)
 	{
+	    
+        require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;   
+	    
 		require(!active,
 			"at: solo_miner.sol | contract: SoloMiner | function: recoverOnly | message: Contract must be deactivated");
 		require(minimumReturn[msg.sender] > 0,
@@ -354,15 +384,25 @@ contract SoloMiner is Ownable
 		minimumReturn[msg.sender] = 0;
 		mint(amt);
 
+        mutex[msg.sender] = false;
+
 		return true;
 	}
 	
 	
 	//in case you want to burn tokens and reflect it on the miner
-	function burnMyTokens(uint tokenAmount) isActive public virtual returns(bool success)
+	function burnMyTokens(uint tokenAmount) onlyPayloadSize(2 * 32)  isActive public virtual returns(bool success)
 	{
+	    
+        require(!mutex[msg.sender]);
+        mutex[msg.sender] = true;  
+	    
         currentConstant = currentConstant.sub(tokenAmount);
         burn(tokenAmount);
+        
+        mutex[msg.sender] = false;
+
+        
 		return true;
 	}
 
