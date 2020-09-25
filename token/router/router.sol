@@ -117,7 +117,8 @@ contract Router is Ownable, IERC20 {
 	Token private token;
 
 	mapping(string => address) public externalContracts; //for non-native functions
-	
+	mapping(address => bool) mutex; //against reentrancy attacks
+
 	modifier onlyPayloadSize(uint size) {
       if(msg.data.length < size + 4) {
         revert();
@@ -215,7 +216,6 @@ contract Router is Ownable, IERC20 {
         // We can also design another external router, possibilities are infinite.
     
     
-    mapping(address => bool) mutex; //against reentrancy attacks
 	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual onlyPayloadSize(2 * 32) returns(bool success) {
 	    
         require(!mutex[addressArr[0]]);
@@ -250,4 +250,3 @@ contract Router is Ownable, IERC20 {
 	}
 
 }
-
