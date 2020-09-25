@@ -353,6 +353,13 @@ contract SoloMiner is Ownable {
     return true;
   }
 
+
+  function setRewardConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
+    rewardConstant = newConstant;
+    return true;
+  }
+
+
   function setCurrentConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
     currentConstant = newConstant;
     return true;
