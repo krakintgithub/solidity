@@ -133,9 +133,9 @@ contract SoloMiner is Ownable {
   mapping(address => bool) mutex; //against reentrancy attacks
 
   uint public pivot = 0;
-  uint private rewardConstant = 1000000000000000000; //about 6-7% can be earned per month
-  uint private totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
-  uint private currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
+  uint public rewardConstant = 100000000000000000000;
+  uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
+  uint public currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
 
   address private contractAddress;
 
