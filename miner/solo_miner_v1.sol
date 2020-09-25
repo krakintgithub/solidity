@@ -275,11 +275,10 @@ contract SoloMiner is Ownable
 		require(depositAmount > 0,
 			"at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
 
-		uint gapSize = getGapSize();
 		uint reward = showReward();
 		reward = reward.add(depositAmount);
 
-		gapSize = getGapSize();
+		uint gapSize = getGapSize().add(depositAmount); //TEST THIS!
 
 		numerator[msg.sender] = reward;
 		denominator[msg.sender] = gapSize;
@@ -293,15 +292,45 @@ contract SoloMiner is Ownable
 		return true;
 	}
 
-	function getReward() isActive public virtual returns(bool success)
+
+	function getReward(uint tokenAmount) isActive public virtual returns(bool success)
+	{
+		uint reward = showReward();
+
+		require(tokenAmount <= reward,
+			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Amount too big");
+
+
+		reward = reward.sub(tokenAmount);
+
+		uint gapSize = getGapSize().sub(tokenAmount); //TEST THIS!
+
+		numerator[msg.sender] = reward;
+		denominator[msg.sender] = gapSize;
+		if(minimumReturn[msg.sender]>=tokenAmount){
+		    minimumReturn[msg.sender] = minimumReturn[msg.sender].add(tokenAmount);
+		}
+		else{
+		    minimumReturn[msg.sender] = 0;
+		}
+		userBlocks[msg.sender] = getCurrentBlockNumber();
+
+		registerMiner();
+
+        mint(tokenAmount);
+
+		return true;
+	}
+
+	function getFullReward() isActive public virtual returns(bool success)
 	{
 		uint amt = showReward();
 
 		require(amt > 0,
-			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: No rewards to give");
+			"at: solo_miner.sol | contract: SoloMiner | function: getFullReward | message: No rewards to give");
 
 		require(getLastBlockNumber() > 0,
-			"at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Must mine first");
+			"at: solo_miner.sol | contract: SoloMiner | function: getFullReward | message: Must mine first");
 
 		numerator[msg.sender] = 0;
 		denominator[msg.sender] = 0;
@@ -327,6 +356,15 @@ contract SoloMiner is Ownable
 
 		return true;
 	}
+	
+	
+	//in case you want to burn tokens and reflect it on the miner
+	function burnMyTokens(uint tokenAmount) isActive public virtual returns(bool success)
+	{
+        currentConstant = currentConstant.sub(tokenAmount);
+        burn(tokenAmount);
+		return true;
+	}
 
 	//-----------ONLY OWNER----------------
 
@@ -336,6 +374,21 @@ contract SoloMiner is Ownable
 		token = Token(newTokenAddress);
 		return true;
 	}
+	
+	function setCurrentConstant(uint newConstant) onlyOwner public virtual returns(bool success)
+	{
+	    currentConstant = newConstant;
+		return true;
+	}
+	
+	
+	function setTotalConstant(uint newConstant) onlyOwner public virtual returns(bool success)
+	{
+	    totalConstant = newConstant;
+		return true;
+	}
+	
+	
 
 	function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success)
 	{
