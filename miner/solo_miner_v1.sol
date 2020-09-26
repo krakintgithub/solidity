@@ -202,8 +202,8 @@ contract SoloMiner is Ownable {
   function getGapSize() public view virtual returns(uint gapSize) {
     return totalConstant.sub(currentConstant);
   }
-  
-   function showReward(address minerAddress) public view virtual returns(uint reward) {
+
+  function showReward(address minerAddress) public view virtual returns(uint reward) {
     if (denominator[minerAddress] == 0) {
       return 0;
     } else if (!active) {
@@ -226,7 +226,7 @@ contract SoloMiner is Ownable {
     rewardSize = rewardSize + additionalReward;
 
     return rewardSize;
-  } 
+  }
 
   //-----------EXTERNAL----------------
   function mine(uint depositAmount) isActive external virtual returns(bool success) {
@@ -280,11 +280,6 @@ contract SoloMiner is Ownable {
 
     registerMiner();
 
-    if(rewardBuffer>=tokenAmount && currentConstant>=tokenAmount){
-        rewardBuffer = rewardBuffer.sub(tokenAmount);
-        currentConstant.sub(tokenAmount);
-    }
-
     mint(tokenAmount);
 
     mutex[msg.sender] = false;
@@ -309,11 +304,6 @@ contract SoloMiner is Ownable {
     denominator[msg.sender] = 0;
     minimumReturn[msg.sender] = 0;
     userBlocks[msg.sender] = 0;
-
-    if(rewardBuffer>=amt && currentConstant>=amt){
-        rewardBuffer = rewardBuffer.sub(amt);
-        currentConstant.sub(amt);
-    }
 
     mint(amt);
 
@@ -364,18 +354,15 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-
   function setRewardConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
     rewardConstant = newConstant;
     return true;
   }
-  
+
   function setRewardBuffer(uint newConstant) onlyOwner public virtual returns(bool success) {
     rewardBuffer = newConstant;
     return true;
   }
-  
-  
 
   function setCurrentConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
     currentConstant = newConstant;
@@ -452,7 +439,11 @@ contract SoloMiner is Ownable {
     address[2] memory addresseArr = [fromAddress, msg.sender];
     uint[2] memory uintArr = [mintAmount, 0];
 
-    currentConstant = currentConstant.add(mintAmount);
+    if (rewardBuffer >= mintAmount && currentConstant >= mintAmount) {
+      rewardBuffer = rewardBuffer.sub(mintAmount);
+    } else {
+      currentConstant = currentConstant.add(mintAmount);
+    }
 
     router.extrenalRouterCall("mint", addresseArr, uintArr);
 
