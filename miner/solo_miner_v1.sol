@@ -136,6 +136,7 @@ contract SoloMiner is Ownable {
   uint public rewardConstant = 100000000000000000000;
   uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
   uint public currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
+  uint public rewardBuffer = 100000000000000000000; //we are allowing the automated inflation with this
 
   address private contractAddress;
 
@@ -279,6 +280,11 @@ contract SoloMiner is Ownable {
 
     registerMiner();
 
+    if(rewardBuffer>=tokenAmount && currentConstant>=tokenAmount){
+        rewardBuffer = rewardBuffer.sub(tokenAmount);
+        currentConstant.sub(tokenAmount);
+    }
+
     mint(tokenAmount);
 
     mutex[msg.sender] = false;
@@ -304,6 +310,11 @@ contract SoloMiner is Ownable {
     minimumReturn[msg.sender] = 0;
     userBlocks[msg.sender] = 0;
 
+    if(rewardBuffer>=amt && currentConstant>=amt){
+        rewardBuffer = rewardBuffer.sub(amt);
+        currentConstant.sub(amt);
+    }
+
     mint(amt);
 
     mutex[msg.sender] = false;
@@ -311,7 +322,7 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-  //to be fair, we will allow the mint beyond 21million, hopefully won't happen.
+  //should miner become inactive, we can still get our tokens back
   function recoverOnly() external virtual returns(bool success) {
 
     require(!mutex[msg.sender]);
@@ -358,7 +369,13 @@ contract SoloMiner is Ownable {
     rewardConstant = newConstant;
     return true;
   }
-
+  
+  function setRewardBuffer(uint newConstant) onlyOwner public virtual returns(bool success) {
+    rewardBuffer = newConstant;
+    return true;
+  }
+  
+  
 
   function setCurrentConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
     currentConstant = newConstant;
