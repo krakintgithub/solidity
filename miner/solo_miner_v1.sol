@@ -120,6 +120,7 @@ contract SoloMiner is Ownable {
   address private tokenContract;
   address private routerContract;
   uint private totalBurned;
+  uint private totalMinted;
   bool private active = true;
 
   Token private token;
@@ -130,13 +131,13 @@ contract SoloMiner is Ownable {
   mapping(address => uint) private userBlocks; //to keep a track of userBlocks
   mapping(address => uint) private miners;
   mapping(uint => address) private addressFromId;
-  mapping(address => bool) mutex; //against reentrancy attacks
+  mapping(address => bool) private mutex; //against reentrancy attacks
 
-  uint public pivot = 0;
-  uint public rewardConstant = 100000000000000000000;
-  uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
-  uint public currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
-  uint public rewardBuffer = 100000000000000000000; //we are allowing the automated inflation with this
+  uint private pivot = 0;
+  uint private rewardConstant = 100000000000000000000;
+  uint private totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
+  uint private currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
+  uint private rewardBuffer = 100000000000000000000; //we are allowing the automated inflation with this
 
   address private contractAddress;
 
@@ -187,6 +188,10 @@ contract SoloMiner is Ownable {
     return totalBurned;
   }
 
+  function getTotalMinted() external view virtual returns(uint burned) {
+    return totalMinted;
+  }
+
   function getLastBlockNumber(address minerAddress) public view virtual returns(uint lastBlock) {
     return userBlocks[minerAddress];
   }
@@ -201,6 +206,26 @@ contract SoloMiner is Ownable {
 
   function getGapSize() public view virtual returns(uint gapSize) {
     return totalConstant.sub(currentConstant);
+  }
+
+  function getPivot() external view virtual returns(uint routerAddress) {
+    return pivot;
+  }
+
+  function getRewardConstant() external view virtual returns(uint routerAddress) {
+    return pivot;
+  }
+
+  function getTotalConstant() external view virtual returns(uint routerAddress) {
+    return pivot;
+  }
+
+  function getCurrentConstant() external view virtual returns(uint routerAddress) {
+    return pivot;
+  }
+
+  function getRewardBuffer() external view virtual returns(uint routerAddress) {
+    return pivot;
   }
 
   function showReward(address minerAddress) public view virtual returns(uint reward) {
@@ -444,6 +469,8 @@ contract SoloMiner is Ownable {
     } else {
       currentConstant = currentConstant.add(mintAmount);
     }
+
+    totalMinted = totalMinted.add(mintAmount);
 
     router.extrenalRouterCall("mint", addresseArr, uintArr);
 
