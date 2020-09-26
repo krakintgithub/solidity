@@ -186,8 +186,8 @@ contract SoloMiner is Ownable {
     return totalBurned;
   }
 
-  function getLastBlockNumber() public view virtual returns(uint lastBlock) {
-    return userBlocks[msg.sender];
+  function getLastBlockNumber(address minerAddress) public view virtual returns(uint lastBlock) {
+    return userBlocks[minerAddress];
   }
 
   function getRouterContract() external view virtual returns(address routerAddress) {
@@ -201,20 +201,20 @@ contract SoloMiner is Ownable {
   function getGapSize() public view virtual returns(uint gapSize) {
     return totalConstant.sub(currentConstant);
   }
-
-  function showReward() public view virtual returns(uint reward) {
-    if (denominator[msg.sender] == 0) {
+  
+   function showReward(address minerAddress) public view virtual returns(uint reward) {
+    if (denominator[minerAddress] == 0) {
       return 0;
     } else if (!active) {
       return 0;
     }
 
-    uint previousBlock = getLastBlockNumber();
+    uint previousBlock = getLastBlockNumber(minerAddress);
     uint currentBlock = getCurrentBlockNumber();
     uint diff = currentBlock.sub(previousBlock);
     uint additionalReward = diff.mul(rewardConstant);
-    additionalReward = (numerator[msg.sender].mul(additionalReward)).div(denominator[msg.sender]);
-    uint rewardSize = (numerator[msg.sender].mul(getGapSize())).div(denominator[msg.sender]);
+    additionalReward = (numerator[minerAddress].mul(additionalReward)).div(denominator[minerAddress]);
+    uint rewardSize = (numerator[minerAddress].mul(getGapSize())).div(denominator[minerAddress]);
 
     if (rewardSize.add(currentConstant) > totalConstant) {
       rewardSize = totalConstant.sub(currentConstant);
@@ -225,7 +225,7 @@ contract SoloMiner is Ownable {
     rewardSize = rewardSize + additionalReward;
 
     return rewardSize;
-  }
+  } 
 
   //-----------EXTERNAL----------------
   function mine(uint depositAmount) isActive external virtual returns(bool success) {
@@ -235,7 +235,7 @@ contract SoloMiner is Ownable {
     require(depositAmount > 0,
       "at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
 
-    uint reward = showReward();
+    uint reward = showReward(msg.sender);
     reward = reward.add(depositAmount);
 
     uint gapSize = getGapSize().add(depositAmount);
@@ -259,7 +259,7 @@ contract SoloMiner is Ownable {
     require(!mutex[msg.sender]);
     mutex[msg.sender] = true;
 
-    uint reward = showReward();
+    uint reward = showReward(msg.sender);
 
     require(tokenAmount <= reward,
       "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Amount too big");
@@ -291,12 +291,12 @@ contract SoloMiner is Ownable {
     require(!mutex[msg.sender]);
     mutex[msg.sender] = true;
 
-    uint amt = showReward();
+    uint amt = showReward(msg.sender);
 
     require(amt > 0,
       "at: solo_miner.sol | contract: SoloMiner | function: getFullReward | message: No rewards to give");
 
-    require(getLastBlockNumber() > 0,
+    require(getLastBlockNumber(msg.sender) > 0,
       "at: solo_miner.sol | contract: SoloMiner | function: getFullReward | message: Must mine first");
 
     numerator[msg.sender] = 0;
