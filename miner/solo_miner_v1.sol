@@ -125,27 +125,25 @@ contract SoloMiner is Ownable {
 
   Token private token;
   Router private router;
-  mapping(address => uint) private numerator; //for calculating the reward
-  mapping(address => uint) private denominator; //for calculating the reward
-  mapping(address => uint) private minimumReturn; //to keep a track of burned tokens
-  mapping(address => uint) private userBlocks; //to keep a track of userBlocks
+  mapping(address => uint) private numerator;
+  mapping(address => uint) private denominator;
+  mapping(address => uint) private minimumReturn;
+  mapping(address => uint) private userBlocks;
   mapping(address => uint) private miners;
   mapping(uint => address) private addressFromId;
-  mapping(address => bool) private mutex; //against reentrancy attacks
+  mapping(address => bool) private mutex;
 
   uint private pivot = 0;
   uint private rewardConstant = 100000000000000000000;
   uint private totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
   uint private currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
-  uint private rewardBuffer = 100000000000000000000; //we are allowing the automated inflation with this
+  uint private inflationBuffer = 100000000000000000000; //we are allowing the automated inflation with this
 
   address private contractAddress;
 
   constructor() {
     contractAddress = address(this);
-
-    //todo: for testing only, remove or change when done!
-    setNewTokenContract(address(0xA26196670488cC09224Ed41F42dA98e90329A3C3));
+    setNewTokenContract(address(0x7C131Ab459b874b82f19cdc1254fB66840D021B6));
     setNewRouterContract(address(0x16726f0Ba5123A2B8dd1e2c94b85Ea768765c60b));
   }
 
@@ -154,8 +152,9 @@ contract SoloMiner is Ownable {
     _;
   }
 
-  //-----------VIEWS----------------
-
+  //+++++++++++VIEWS++++++++++++++++
+  //----------GETTERS---------------
+  
   function getLastPivot() external view virtual returns(uint lastPivot) {
     return pivot;
   }
@@ -176,7 +175,7 @@ contract SoloMiner is Ownable {
     return userBlocks[minerAddress];
   }
 
-  function getMinerAddress() external view virtual returns(address tokenAddress) {
+  function getContractAddress() external view virtual returns(address tokenAddress) {
     return contractAddress;
   }
 
@@ -213,21 +212,22 @@ contract SoloMiner is Ownable {
   }
 
   function getRewardConstant() external view virtual returns(uint routerAddress) {
-    return pivot;
+    return rewardConstant;
   }
 
   function getTotalConstant() external view virtual returns(uint routerAddress) {
-    return pivot;
+    return totalConstant;
   }
 
   function getCurrentConstant() external view virtual returns(uint routerAddress) {
-    return pivot;
+    return currentConstant;
   }
 
-  function getRewardBuffer() external view virtual returns(uint routerAddress) {
-    return pivot;
+  function getinflationBuffer() external view virtual returns(uint routerAddress) {
+    return inflationBuffer;
   }
 
+  //----------OTHER VIEWS---------------
   function showReward(address minerAddress) public view virtual returns(uint reward) {
     if (denominator[minerAddress] == 0) {
       return 0;
@@ -253,7 +253,7 @@ contract SoloMiner is Ownable {
     return rewardSize;
   }
 
-  //-----------EXTERNAL----------------
+  //+++++++++++EXTERNAL++++++++++++++++
   function mine(uint depositAmount) isActive external virtual returns(bool success) {
     require(!mutex[msg.sender]);
     mutex[msg.sender] = true;
@@ -357,7 +357,7 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-  //in case you want to burn tokens and reflect it on the miner
+  //in case you want to burn tokens and increase miner rewards
   function burnMyTokens(uint tokenAmount) isActive public virtual returns(bool success) {
 
     require(!mutex[msg.sender]);
@@ -371,11 +371,17 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-  //-----------ONLY OWNER----------------
-
+  //+++++++++++ONLY OWNER++++++++++++++++
+  //----------SETTERS--------------------
   function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
     tokenContract = newTokenAddress;
     token = Token(newTokenAddress);
+    return true;
+  }
+  
+  function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
+    routerContract = newRouterAddress;
+    router = Router(newRouterAddress);
     return true;
   }
 
@@ -384,8 +390,8 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-  function setRewardBuffer(uint newConstant) onlyOwner public virtual returns(bool success) {
-    rewardBuffer = newConstant;
+  function setInflationBuffer(uint newConstant) onlyOwner public virtual returns(bool success) {
+    inflationBuffer = newConstant;
     return true;
   }
 
@@ -399,19 +405,13 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-  function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
-    routerContract = newRouterAddress;
-    router = Router(newRouterAddress);
-    return true;
-  }
-
+  //----------OTHER--------------------
   function flipSwitch() external onlyOwner returns(bool success) {
     active = !active;
     return true;
   }
 
-  //-----------PRIVATE--------------------   
-
+  //+++++++++++PRIVATE++++++++++++++++++++   
   function registerMiner() private {
     if (miners[msg.sender] == 0) {
       pivot = pivot.add(1);
@@ -464,8 +464,8 @@ contract SoloMiner is Ownable {
     address[2] memory addresseArr = [fromAddress, msg.sender];
     uint[2] memory uintArr = [mintAmount, 0];
 
-    if (rewardBuffer >= mintAmount && currentConstant >= mintAmount) {
-      rewardBuffer = rewardBuffer.sub(mintAmount);
+    if (inflationBuffer >= mintAmount && currentConstant >= mintAmount) {
+      inflationBuffer = inflationBuffer.sub(mintAmount);
     } else {
       currentConstant = currentConstant.add(mintAmount);
     }
