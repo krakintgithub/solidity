@@ -70,7 +70,7 @@ function getLastPivot() external view virtual returns (uint lastPivot)
 ```
 - Returns the pivot variable as well as the amount of miners.
 
-
+##
 ```solidity
 function getLastPivot() external view virtual returns (uint lastPivot)
 ```
