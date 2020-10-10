@@ -63,4 +63,7 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `contractAddress` - the address of a miner contract.
 
+### View functions (getters)
+
+`function getLastPivot() external view virtual returns(uint lastPivot) `
 
