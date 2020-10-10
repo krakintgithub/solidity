@@ -69,3 +69,9 @@ All variables are private, and they are accessed by the getter or setter methods
 function getLastPivot() external view virtual returns (uint lastPivot)
 ```
 - Returns the pivot variable as well as the amount of miners.
+
+
+```solidity
+function getLastPivot() external view virtual returns (uint lastPivot)
+```
+- Returns the pivot variable as well as the amount of miners.
