@@ -1,4 +1,4 @@
-# Krakin't Solo Miner
+# <p align="center">Krakin't Solo Miner</p>
 <p align="center">
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/MinerDoodle_logo.jpg"  title="Logo">
 </p>
