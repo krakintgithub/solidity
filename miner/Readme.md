@@ -176,3 +176,118 @@ function getCurrentConstant() external view virtual returns(uint currentConstant
 function getinflationBuffer() external view virtual returns(uint inflationBuffer)
 ```
 - Returns the inflationBuffer constant.
+
+### View functions (other)
+
+```solidity
+function showReward(address minerAddress) public view virtual returns(uint reward)
+```
+- Returns the current user reward.
+
+
+### External public functions
+
+##
+```solidity
+  function mine(uint depositAmount) isActive external virtual returns(bool success) 
+```
+- Deposits, updates the maps, and burns the deposited tokens for mining. Increases everyone's reward by burning and widening the gap.
+
+##
+```solidity  
+function getReward(uint tokenAmount) isActive public virtual returns(bool success) 
+```
+- Gets a reward back from the miner contract by a specified amount.
+
+##
+```solidity
+function getFullReward() isActive public virtual returns(bool success) 
+```
+- Gets the full reward from the miner contract.
+
+##
+```solidity
+function recoverOnly() external virtual returns(bool success) 
+```
+- Allows the token recovery when the miner is stopped.
+
+##
+```solidity
+function burnMyTokens(uint tokenAmount) isActive public virtual returns(bool success)
+```
+- Burns the specified amount of tokens without depositing them. Increases everyone's reward. Mainly used by the project owner to increase everyone's rewards.
+
+
+### Setters (owner only)
+
+##
+```solidity
+function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success)
+```
+- Re-route for the Token contract.
+
+##
+```solidity
+function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) 
+```
+- Re-route for the Router contract.
+
+##
+```solidity
+function setRewardConstant(uint newConstant) onlyOwner public virtual returns(bool success) 
+```
+- Changes the reward constant, should not be touched unless necessary.
+
+##
+```solidity
+function setInflationBuffer(uint newConstant) onlyOwner public virtual returns(bool success) 
+```
+- Changes the inflation buffer, allowing less or more inflation.
+
+##
+```solidity
+function setCurrentConstant(uint newConstant) onlyOwner public virtual returns(bool success)
+```
+- Changes the assumed current supply.
+
+##
+```solidity
+function setTotalConstant(uint newConstant) onlyOwner public virtual returns(bool success) 
+```
+- Changes the assumed total supply.
+
+### Other funcions (owner only)
+
+##
+```solidity
+function flipSwitch() external onlyOwner returns(bool success)
+```
+- Sets the active miner to inactive, and inactive to active (on/off switch).
+
+
+### Private functions
+
+##
+```solidity
+function registerMiner() private 
+```
+- Registers a new miner address with a contract.
+
+##
+```solidity
+function showMyCurrentRewardTotal() private view returns(uint reward)
+```
+- returns the current reward total, used while calculating a reward.
+
+##
+```solidity
+function burn(uint burnAmount) isActive private returns(bool success) 
+```
+- Burns the tokens.
+
+##
+```solidity
+function mint(uint mintAmount) isActive private returns(bool success) 
+```
+- Mints new tokens.
+
