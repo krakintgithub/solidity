@@ -65,5 +65,6 @@ All variables are private, and they are accessed by the getter or setter methods
 
 ### View functions (getters)
 
-`function getLastPivot() external view virtual returns(uint lastPivot) `
-
+```javascript
+function getLastPivot() external view virtual returns(uint lastPivot)
+```
