@@ -61,5 +61,6 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `inflationBuffer` - we use this buffer to regulate the point at which the minting the new tokens will affect the rewards of a collective. Otherwise, if this number is not reached, we continue introducing new tokens by the means of inflation. We may alter this variable as necessary. Initially, we allow 10 million tokens to be introduced.
 
+`contractAddress` - the address of a miner contract.
 
 
