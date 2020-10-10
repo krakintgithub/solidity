@@ -21,8 +21,6 @@ The miner contract is connected to a Router component/contract of the Krakin't t
 
 - The supply of tokens increases by demand and not the time, whenever the tokens are minted with the miner.
 
-- The rewards rate can be exponential, if and only if the user mints and burns tokens repetitively. This is regulated by the costs of Ethereum GAS.
-
 - Mining pools are not necessary since the miner is a mining pool, while difficulty is regulated by the amount of an investment and burned tokens.
 
 ## Source-code
