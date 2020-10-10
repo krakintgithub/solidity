@@ -1,4 +1,9 @@
 # Krakin't Solo Miner
+<p align="center">
+  <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/MinerDoodle_logo.jpg"  title="Logo">
+</p>
+
+
 ## 0xE91c47806D720a8C0A8A87473E6788d30EB1D8F0
 
 ## Introduction
