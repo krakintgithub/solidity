@@ -21,4 +21,14 @@ Miner contract is connected to a Router component/contract of the Krakin't token
 - Mining pools are not necessary since the miner is a mining pool, while difficulty is regulated by the amount of an investment and burned tokens.
 
 ## Source-code
+### General overview
+The main parts of the source code are: SafeMath, Ownable, Token, Router and Solo Miner.  SafeMath and Ownable are the standard methods and need no explanation. Token and router are simply pointing to Krakin't Token and the Krakin't Router. Token is used to see the user's balance of tokens. Router is used to either mint or burn the tokens. This document will therefore focus mainly on the Solo Miner component.
+
+### Variables and their meaning
+All variables are private and they are accessed by the getter or setter methods, thus following the common Object-Oriented design.
+
+`tokenContract` - pointer to the Token contract of Krakin't token.
+`routerContract` - pointer to the Router contract of a Krakin't token.
+
+
 
