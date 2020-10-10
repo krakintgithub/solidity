@@ -28,7 +28,38 @@ The main parts of the source code are: SafeMath, Ownable, Token, Router and Solo
 All variables are private and they are accessed by the getter or setter methods, thus following the common Object-Oriented design.
 
 `tokenContract` - pointer to the Token contract of Krakin't token.
+
 `routerContract` - pointer to the Router contract of a Krakin't token.
+
+`totalBurned` - tells us the overall number of tokens that were burned by the miner.
+
+`totalMinted` - tells us the overall number of tokens that were minted by the miner.
+
+`active` - the miner off/on switch, in case we decide to stop/continue the miner contract.
+
+`numerator` - used for calculating user's rewards, since Solidity does not allow decimals.
+
+`denominator` - used for calculating user's rewards, since Solidity does not allow decimals.
+
+`minimumReturn` - this is the number of tokens (deposited amount) that user will get back regardless even if the miner is stopped.
+
+`userBlocks` - the last block that was mined when a deposit was made. This is used to calculate the reward according to a passed time.
+
+`miners` - allows us to get the miner ID knowing the miner address. Also to determine if the address is a miner.
+
+`addressFromId` - returns the address of a miner providing an incremental ID. We can use this to see the current status of a miner.
+
+`mutex` - safety protocol to avoid the contract attacks by overflowing it.
+
+`pivot` - the las miner ID, also tells us how many miners we have in total.
+
+`rewardConstant` - a constant used to determine how much the users are earning by block. Changing this value would change everyone's rewards. This is why it is important not to change it, unless necessary.
+
+`totalConstant` - assumed total supply of Krakin't tokens.
+
+`currentConstant` - assumed current supply of Krakin't tokens.
+
+`inflationBuffer` - we use this buffer to regulate the point at which the minting the new tokens will affect the rewards of a collective. Otherwise, if this number is not reached, we continue introducing new tokens by the means of inflation. We may alter this variable as necessary.
 
 
 
