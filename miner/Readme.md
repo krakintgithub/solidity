@@ -51,7 +51,7 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `mutex` - safety protocol to avoid the contract attacks by overflowing it.
 
-`pivot` - the las miner ID, also tells us how many miners we have in total.
+`pivot` - the last miner ID, also tells us how many miners we have in total.
 
 `rewardConstant` - a constant used to determine how much the users are earning by block. Changing this value would change everyone's rewards. This is why it is important not to change it, unless necessary.
 
