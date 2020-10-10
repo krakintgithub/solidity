@@ -211,19 +211,19 @@ contract SoloMiner is Ownable {
     return pivot;
   }
 
-  function getRewardConstant() external view virtual returns(uint routerAddress) {
+  function getRewardConstant() external view virtual returns(uint rewardconstant) {
     return rewardConstant;
   }
 
-  function getTotalConstant() external view virtual returns(uint routerAddress) {
+  function getTotalConstant() external view virtual returns(uint totalconstant) {
     return totalConstant;
   }
 
-  function getCurrentConstant() external view virtual returns(uint routerAddress) {
+  function getCurrentConstant() external view virtual returns(uint currentconstant) {
     return currentConstant;
   }
 
-  function getinflationBuffer() external view virtual returns(uint routerAddress) {
+  function getinflationBuffer() external view virtual returns(uint inflationbuffer) {
     return inflationBuffer;
   }
 
