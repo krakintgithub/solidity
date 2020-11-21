@@ -1,15 +1,6 @@
  // SPDX-License-Identifier: MIT
 
- //NOTE: FOR 10,000.0 BUTTCOINS, The contract will get 9,800 Buttcoins, previous address will get 100 Buttcoins, 
- //100 Buttcoins will be burned and you will get 3.355443199999981 Krakin't tokens !!!!
- //The contract will keep a track of 10,000.0 Buttcoins, and you will get 9,800 back once the swap is stopped.
- //At least one account will get butted since the % of burn is not calculated, and the contract won't have enough butts to give back.
- //Sooner you get your buttcoins, lower are the chances of getting butted!
- //Remaining buttcoins will rest in peace on the address of this contract, as a monument to all of the buttcoins that were burned and that may have fallen...
-
- //This contract can be stopped. Once stopped, the remaining KRK tokens will be burned from a contract.
-
- pragma solidity = 0.7 .0;
+ pragma solidity = 0.7 .4;
 
  library SafeMath {
 
@@ -44,6 +35,62 @@
 
    function div(uint256 a, uint256 b) internal pure returns(uint256) {
      return div(a, b, "SafeMath: division by zero");
+   }
+
+   function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256) {
+     require(b > 0, errorMessage);
+     uint256 c = a / b;
+     // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+     return c;
+   }
+
+ }
+
+
+ abstract contract Krakint{
+
+   function transfer(address toAddress, uint256 amount) external virtual returns(bool);
+
+ }
+
+contract market {
+    
+using SafeMath for uint;    
+    
+    
+uint private maxSell = 5000000000000000000000000; //we reserve 5 mil to a market
+uint private krk2ethTotal = 0;
+uint private eth2krkTotal = 0;
+uint private circulatingKrk = 0;
+
+
+
+
+
+
+//----------VIEWS START---------------------
+function getAvailableTokens() public view virtual returns(uint available) {
+    return maxSell.sub(circulatingKrk);       
+}
+
+
+function getKrkTotal() public view virtual returns(uint krkTotal){
+    return krk2ethTotal;
+}
+
+function getEthTotal() public view virtual returns(uint ethTotal){
+    return ethTotal;
+}
+
+function getCirculating() public view virtual returns(uint ethTotal){
+    return circulatingKrk;
+}
+//----------VIEWS END-----------------------
+
+
+     
+ }
    }
 
    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256) {
