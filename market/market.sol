@@ -91,6 +91,54 @@ function getCirculating() public view virtual returns(uint ethTotal){
 
      
  }
+
+
+ }
+
+
+ abstract contract Krakint{
+
+   function transfer(address toAddress, uint256 amount) external virtual returns(bool);
+
+ }
+
+contract market {
+    
+using SafeMath for uint;    
+    
+    
+uint private maxSell = 5000000000000000000000000; //we reserve 5 mil to a market
+uint private krk2ethTotal = 0;
+uint private eth2krkTotal = 0;
+uint private circulatingKrk = 0;
+
+
+
+
+
+
+//----------VIEWS START---------------------
+function getAvailableTokens() public view virtual returns(uint available) {
+    return maxSell.sub(circulatingKrk);       
+}
+
+
+function getKrkTotal() public view virtual returns(uint krkTotal){
+    return krk2ethTotal;
+}
+
+function getEthTotal() public view virtual returns(uint ethTotal){
+    return ethTotal;
+}
+
+function getCirculating() public view virtual returns(uint ethTotal){
+    return circulatingKrk;
+}
+//----------VIEWS END-----------------------
+
+
+     
+ }
    }
 
    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256) {
