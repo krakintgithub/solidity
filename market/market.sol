@@ -58,8 +58,14 @@ contract market {
     
 using SafeMath for uint;    
     
+uint private maxSell = 5000000000000000000000000; //we reserve 5 mil to this contract
+uint private maxPrice = 10000000000000000000; //10 ETH for 1 KRK, our initial price is 0.00001 ETH for 1 KRK
+uint private startPrice = 10000000000000; //our initial price is 0.00001 ETH for 1 KRK
+
+mapping(address => uint) private ethAllowed; //how much ETH user can get from a contract, without extra reward
+mapping(address => uint) private krkAllowed; //how much KRK user can use with the contract
+uint private bonusEth = 0; //how much eth is allocated as a bonus
     
-uint private maxSell = 5000000000000000000000000; //we reserve 5 mil to a market
 uint private krk2ethTotal = 0;
 uint private eth2krkTotal = 0;
 uint private circulatingKrk = 0;
@@ -86,150 +92,42 @@ function getEthTotal() public view virtual returns(uint ethTotal){
 function getCirculating() public view virtual returns(uint ethTotal){
     return circulatingKrk;
 }
+
+function getAllowedEth(address user) public view virtual returns(uint ethAmount){
+    return ethAllowed[user];
+}
+
+function getAllowedKrk(address user) public view virtual returns(uint krkAmount){
+    return krkAllowed[user];
+}
+
+function getPurchasePrice(uint krkAmt) public view virtual returns(uint priceOf){
+    // uint sum = getFivePercent(krkAmt);
+    // sum = sum.add(circulatingKrk.add(krkAmt));
+    // require(sum<=maxSell);
+    // uint price = krkAmt.mul(sum.div(500000));
+    // return price;
+}
+
 //----------VIEWS END-----------------------
 
 
-     
- }
-
-
- }
-
-
- abstract contract Krakint{
-
-   function transfer(address toAddress, uint256 amount) external virtual returns(bool);
-
- }
-
-contract market {
-    
-using SafeMath for uint;    
-    
-    
-uint private maxSell = 5000000000000000000000000; //we reserve 5 mil to a market
-uint private krk2ethTotal = 0;
-uint private eth2krkTotal = 0;
-uint private circulatingKrk = 0;
 
 
 
+//----------PRIVATE PURE START---------------------
 
-
-
-//----------VIEWS START---------------------
-function getAvailableTokens() public view virtual returns(uint available) {
-    return maxSell.sub(circulatingKrk);       
+function getFivePercent(uint number) private pure returns(uint fivePercent){
+    uint ret = number.div(20);
+    return ret;
 }
 
-
-function getKrkTotal() public view virtual returns(uint krkTotal){
-    return krk2ethTotal;
+function getTwoPercent(uint number) private pure returns(uint fivePercent){
+    uint ret = number.div(50);
+    return ret;
 }
-
-function getEthTotal() public view virtual returns(uint ethTotal){
-    return ethTotal;
-}
-
-function getCirculating() public view virtual returns(uint ethTotal){
-    return circulatingKrk;
-}
-//----------VIEWS END-----------------------
+//----------PRIVATE PURE END---------------------
 
 
      
- }
-   }
-
-   function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256) {
-     require(b > 0, errorMessage);
-     uint256 c = a / b;
-     // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-     return c;
-   }
-
- }
-
- abstract contract ButtCoin {
-   function transferFrom(address sender, address recipient, uint256 amount) external virtual returns(bool);
-
-   function allowance(address owner, address spender) public view virtual returns(uint256);
-
-   function balanceOf(address tokenOwner) public view virtual returns(uint balance);
-
-   function transfer(address to, uint tokens) public virtual returns(bool success);
-
-   function approve(address spender, uint tokens) public virtual returns(bool success);
- }
-
- abstract contract Krakint {
-
-   function transfer(address toAddress, uint256 amount) external virtual returns(bool);
-
- }
-
- contract ButtSwap {
-   mapping(address => uint256) public butts;
-
-   using SafeMath
-   for uint;
-   uint private totalButts = 3355443199999981;
-   uint private availableKrakints = 10000000000000000000000;
-   ButtCoin private buttcoin;
-   Krakint private krakint;
-   address public contractAddress;
-   address public owner;
-   uint public krkInContract = 1000000000000000000000000; //to be reduced from 
-   bool public isLive = true;
-
-   address buttcoinAddress = address(0x5556d6a283fD18d71FD0c8b50D1211C5F842dBBc); //change before deployment
-   address krakintAddress = address(0x7C131Ab459b874b82f19cdc1254fB66840D021B6); //change before deployment
-
-   constructor() {
-     contractAddress = address(this);
-     owner = msg.sender;
-     buttcoin = ButtCoin(buttcoinAddress);
-     krakint = Krakint(krakintAddress);
-   }
-
-   function Step2(uint buttcoinAmount) public virtual returns(string memory message) {
-     require(isLive, "Swap contract is stopped");
-
-     require(buttcoin.balanceOf(msg.sender) >= buttcoinAmount, "Not enough allocated buttcoins");
-     buttcoin.transferFrom(msg.sender, contractAddress, buttcoinAmount);
-     butts[msg.sender] = butts[msg.sender].add(buttcoinAmount);
-
-     uint amt2 = calculateKrakints(buttcoinAmount);
-     require(krkInContract >= amt2, "Not enough krakints");
-
-     krakint.transfer(msg.sender, amt2);
-
-     krkInContract = krkInContract.sub(amt2);
-
-     string memory mssg = "Done! Please wait for the Krakin't transfer to complete.";
-     return mssg;
-   }
-
-   function calculateKrakints(uint buttcoins) private view returns(uint amount) {
-     buttcoins = buttcoins.mul(10000000000000); //adds decimals
-     uint ret = (buttcoins.mul(totalButts)).div(availableKrakints);
-     return ret;
-   }
-
-   //we do not count the losses, so it can happen that some accounts will get butted!
-   function recoverButtcoins() public virtual returns(bool success) {
-     require(!isLive, "Contract must be stopped to get your butts back");
-     require(butts[msg.sender] > 0, "You cannot recover zero buttcoins");
-     buttcoin.transfer(msg.sender, butts[msg.sender]);
-     butts[msg.sender] = 0;
-     return true;
-   }
-
-   function stopSwap() public virtual {
-     require(msg.sender == owner);
-     require(isLive);
-     isLive = false;
-   }
-
  }
