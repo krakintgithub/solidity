@@ -103,9 +103,9 @@ function getAllowedKrk(address user) public view virtual returns(uint krkAmount)
 
 //******************
 //returns price per eth in gwei
-function getPrice(uint x) public view returns(uint retPrice) {
+function getPrice() public view returns(uint retPrice) {
 
-  //uint x = circulatingKrk;
+  uint x = circulatingKrk;
 
   //stage 10
   //linear equation: y = 5.8579×10^-6 x - 19.2895
@@ -153,7 +153,7 @@ function getPrice(uint x) public view returns(uint retPrice) {
   //linear equation: y = 9.57917×10^-7 x - 0.789583
   //intercepts (1500000,0.647292) and (5000000,4)
   if (x >= 1500000000000000000000000) {
-    return (((x).mul(838177)).div(875000000000)).sub(5527080000000000000);
+    return (((x).mul(838177)).div(875000000000)).sub(789582857142857142);
   }
 
   //stage 3
