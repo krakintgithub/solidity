@@ -74,7 +74,6 @@ uint private circulatingKrk = 0;
 
 
 
-
 //----------VIEWS START---------------------
 function getAvailableTokens() public view virtual returns(uint available) {
     return maxSell.sub(circulatingKrk);       
@@ -101,13 +100,88 @@ function getAllowedKrk(address user) public view virtual returns(uint krkAmount)
     return krkAllowed[user];
 }
 
-function getPurchasePrice(uint krkAmt) public view virtual returns(uint priceOf){
-    // uint sum = getFivePercent(krkAmt);
-    // sum = sum.add(circulatingKrk.add(krkAmt));
-    // require(sum<=maxSell);
-    // uint price = krkAmt.mul(sum.div(500000));
-    // return price;
+
+//******************
+//returns price per eth in gwei
+function getPrice() public view returns(uint retPrice) {
+
+  uint x = circulatingKrk;
+
+  //stage 10
+  //linear equation: y = 5.8579×10^-6 x - 19.2895
+  if (x > 4500000000000000000000000) {
+    require((x).mul(58579) > 192895, "Error in getPrice, stage 10, amount too small");
+    return (((x).mul(58579)).sub(192895000000)).mul(100000000);
+  }
+
+  //stage 9
+  //linear equation: y = 3.8579×10^-6 x - 10.2895
+  if (x > 4000000000000000000000000) {
+    require((x).mul(38579) > 102895, "Error in getPrice, stage 9, amount too small");
+    return (((x).mul(38579)).sub(102895000000)).mul(100000000);
+  }
+
+  //stage 8
+  //linear equation: y = 2.85792×10^-6 x - 6.28958
+  if (x > 3500000000000000000000000) {
+    require((x).mul(285792) > 628958000000, "Error in getPrice, stage 8, amount too small");
+    return (((x).mul(285792)).sub(628958000000)).mul(10000000);
+  }
+
+  //stage 7
+  //linear equation: y = 2.19125×10^-6 x - 3.95625
+  if (x > 3000000000000000000000000) {
+    require((x).mul(219125) > 395625000000, "Error in getPrice, stage 7, amount too small");
+    return (((x).mul(219125)).sub(395625000000)).mul(10000000);
+  }
+
+  //stage 6
+  //linear equation: y = 1.69125×10^-6 x - 2.45625
+  if (x > 2500000000000000000000000) {
+    require((x).mul(169125) > 245625000000, "Error in getPrice, stage 6, amount too small");
+    return (((x).mul(169125)).sub(245625000000)).mul(10000000);
+  }
+
+  //stage 5
+  //linear equation: y = 1.29125×10^-6 x - 1.45625
+  if (x > 2000000000000000000000000) {
+    require((x).mul(129125) > 145625000000, "Error in getPrice, stage 5, amount too small");
+    return (((x).mul(129125)).sub(145625000000)).mul(10000000);
+  }
+
+  //stage 4
+  //linear equation: y = 9.57917×10^-7 x - 0.789583
+  if (x > 1500000000000000000000000) {
+    require((x).mul(957917) > 7895830000000, "Error in getPrice, stage 4, amount too small");
+    return (((x).mul(957917)).sub(7895830000000)).mul(1000000);
+  }
+
+  //stage 3
+  //linear equation: y = 6.72202×10^-7 x - 0.361011
+  if (x > 1000000000000000000000000) {
+    require((x).mul(6722020) > 3610110000000, "Error in getPrice, stage 3, amount too small");
+    return (((x).mul(6722020)).sub(3610110000000)).mul(100000);
+  }
+
+  //stage 2
+  //linear equation: y = 4.22202×10^-7 x - 0.111011
+  if (x > 500000000000000000000000) {
+    require((x).mul(4222020) > 1110110000000, "Error in getPrice, stage 2, amount too small");
+    return (((x).mul(4222020)).sub(1110110000000)).mul(100000);
+  }
+
+  //stage 1
+  //linear equation: y = 1.9998×10^-7 x + 0.0001
+  require((x).mul(1999800) > 100, "Error in getPrice, stage 1, amount too small");
+  return (((x).mul(1999800)).sub(100)).mul(100000);
+
 }
+//******************
+
+
+
+
+
 
 //----------VIEWS END-----------------------
 
@@ -126,6 +200,9 @@ function getTwoPercent(uint number) private pure returns(uint fivePercent){
     uint ret = number.div(50);
     return ret;
 }
+
+
+
 //----------PRIVATE PURE END---------------------
 
 
