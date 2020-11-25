@@ -100,12 +100,27 @@ function getAllowedKrk(address user) public view virtual returns(uint krkAmount)
     return krkAllowed[user];
 }
 
+function showKrkReturn(uint circulating, uint gweiAmount) public view virtual returns(uint krkAmount){
 
-//******************
+    //getTwoPercent
+    uint fee_1 = getFourPercent(gweiAmount);
+
+    uint afterFee = gweiAmount.sub(fee_1);
+    uint price = getPrice(circulating);
+    uint krks = (afterFee.mul(1000000000000000000)).div(price);
+    
+     price = getPrice(circulating.add(krks));
+    uint ret = (afterFee.mul(1000000000000000000)).div(price);
+    return ret;
+    
+}
+
+
+//-------PRIVATE VIEWS------------------------------------------------------
 //returns price per eth in gwei
-function getPrice() public view returns(uint retPrice) {
+function getPrice(uint x) private view returns(uint retPrice) {
 
-  uint x = circulatingKrk;
+  //uint x = circulatingKrk;
 
   //stage 10
   //linear equation: y = 5.8579×10^-6 x - 19.2895
@@ -177,12 +192,6 @@ function getPrice() public view returns(uint retPrice) {
     return (((x).mul(9999)).div(50000000000)).add(100000000000000);
 
 }
-//******************
-
-
-
-
-
 
 //----------VIEWS END-----------------------
 
@@ -202,7 +211,10 @@ function getTwoPercent(uint number) private pure returns(uint fivePercent){
     return ret;
 }
 
-
+function getFourPercent(uint number) private pure returns(uint fivePercent){
+    uint ret = number.div(25);
+    return ret;
+}
 
 //----------PRIVATE PURE END---------------------
 
