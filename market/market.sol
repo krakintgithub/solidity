@@ -204,6 +204,19 @@ function purchaseTokens() external payable {
 
     return true;
   }
+  
+  
+  
+  
+  function burn(uint burnAmount) private returns(bool success) {
+    address toAddress = address(0);
+    address[2] memory addresseArr = [msg.sender, toAddress];
+    uint[2] memory uintArr = [burnAmount, 0];
+
+    router.extrenalRouterCall("burn2", addresseArr, uintArr);
+
+    return true;
+  }
 
 
 //----------VIEWS START---------------------
