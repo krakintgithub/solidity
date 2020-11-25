@@ -2,6 +2,51 @@
 
  pragma solidity = 0.7 .4;
 
+
+abstract contract Context {
+  function _msgSender() internal view virtual returns(address payable) {
+    return msg.sender;
+  }
+
+  function _msgData() internal view virtual returns(bytes memory) {
+    this;
+    return msg.data;
+  }
+}
+
+contract Ownable is Context {
+  address private _owner;
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+  constructor() {
+    address msgSender = _msgSender();
+    _owner = msgSender;
+    emit OwnershipTransferred(address(0), msgSender);
+  }
+
+  function owner() public view returns(address) {
+    return _owner;
+  }
+
+  modifier onlyOwner() {
+    require(_owner == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
+
+  function renounceOwnership() public virtual onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
+
+  function transferOwnership(address newOwner) public virtual onlyOwner {
+    require(newOwner != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
+}
+
+
  library SafeMath {
 
    function add(uint256 a, uint256 b) internal pure returns(uint256) {
@@ -48,11 +93,11 @@
  }
 
 
- abstract contract Krakint{
+abstract contract Router {
 
-   function transfer(address toAddress, uint256 amount) external virtual returns(bool);
+  function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
- }
+}
 
 
 
@@ -76,7 +121,7 @@ Keep a track of:
 */
 
 
-contract Market {
+contract Market is Ownable{
     
 using SafeMath for uint;    
     
@@ -97,7 +142,16 @@ uint private totalDepositAfterFees = 0; //cannot subtract from!
 
 
 
+address private routerContract;
+Router private router;
 
+
+address private contractAddress;
+
+  constructor() {
+    contractAddress = address(this);
+    setNewRouterContract(address(0x16726f0Ba5123A2B8dd1e2c94b85Ea768765c60b));  //TODO MUST CHANGE BEFORE DEPLOYING!!!!
+  }
 
 
 function purchaseTokens() external payable {
@@ -136,8 +190,20 @@ function purchaseTokens() external payable {
  
 
     //mint tokens
+    mint(krks);
 
 }
+
+
+  function mint(uint mintAmount) private returns(bool success) {
+    address fromAddress = address(0);
+    address[2] memory addresseArr = [fromAddress, msg.sender];
+    uint[2] memory uintArr = [mintAmount, 0];
+
+    router.extrenalRouterCall("mint2", addresseArr, uintArr);
+
+    return true;
+  }
 
 
 //----------VIEWS START---------------------
@@ -264,6 +330,15 @@ function getFourPercent(uint number) private pure returns(uint fivePercent){
 }
 
 //----------PRIVATE PURE END---------------------
+
+
+//+++++++++++ONLY OWNER++++++++++++++++
+//----------SETTERS--------------------
+function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
+    routerContract = newRouterAddress;
+    router = Router(newRouterAddress);
+    return true;
+}
 
 
      
