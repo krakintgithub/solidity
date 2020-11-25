@@ -54,62 +54,104 @@
 
  }
 
+
+
+
+/*
+Keep a track of:
+- total circulating Krk
+- krkakint total earnings
+- investors' total earnings
+
+- depositedEth per user
+- circulating KRK per user
+- total fees paid per user
+
+- overall burned KRK
+- overall minted KRK
+- overall deposited ETH
+- overall fees paid
+- overall investors' earnings
+
+*/
+
+
 contract Market {
     
 using SafeMath for uint;    
     
 uint private maxSell = 5000000000000000000000000; //we reserve 5 mil to this contract
-uint private maxPrice = 10000000000000000000; //10 ETH for 1 KRK, our initial price is 0.00001 ETH for 1 KRK
-uint private startPrice = 10000000000000; //our initial price is 0.00001 ETH for 1 KRK
-
-mapping(address => uint) private ethAllowed; //how much ETH user can get from a contract, without extra reward
-mapping(address => uint) private krkAllowed; //how much KRK user can use with the contract
-uint private bonusEth = 0; //how much eth is allocated as a bonus
-    
-uint private krk2ethTotal = 0;
-uint private eth2krkTotal = 0;
 uint private circulatingKrk = 0;
+uint krakintTotalEthEarnings = 0; //can be subtracted from if taken from contract!
+uint investorsCirculatingEthEarnings = 0; //can be subtracted from if taken from contract!
+mapping(address => uint) private userEth;
+mapping(address => uint) private circulatingUserKrk;
+mapping(address => uint) private totalUserFees;
+uint private totalBurnedKRK = 0;
+uint private totalMintedKRK = 0;
+uint private totalDepositedEth = 0;
+uint private totalFeesPaid = 0;
+uint private totalKrakintEarnings = 0; //cannot subtract from!
+uint private totalInvestorsEarnings = 0; //cannot subtract from!
+uint private totalDepositAfterFees = 0; //cannot subtract from!
 
 
 
+
+
+
+function purchaseTokens() external payable {
+    
+    //get wei amount 
+    require(msg.value>0, "Zero purchase, at purchaseTokens");
+    uint weiAmount = msg.value;
+    
+    //project KRK return
+    uint krks = getKrkReturn(weiAmount);
+    require(circulatingKrk.add(krks)<=maxSell, "Purchase limit, at purchaseTokens, try smaller amounts or wait for buffer to clear.");
+
+    //calculate fees
+    uint fee = getFourPercent(weiAmount);
+    uint krakintFee = fee.div(2);
+    uint investorFee = fee.sub(krakintFee);
+    uint afterFees = weiAmount.sub(fee);
+    
+
+    //update tables 
+    circulatingKrk = circulatingKrk.add(krks);
+    krakintTotalEthEarnings = krakintTotalEthEarnings.add(krakintFee);
+    investorsCirculatingEthEarnings = investorsCirculatingEthEarnings.add(investorFee);
+    
+    userEth[msg.sender] = userEth[msg.sender].add(afterFees);
+    circulatingUserKrk[msg.sender] = circulatingUserKrk[msg.sender].add(krks);
+    totalUserFees[msg.sender] = totalUserFees[msg.sender].add(fee);
+    
+    //overall burned KRK - skipped!
+    totalMintedKRK = totalMintedKRK.add(krks);
+    totalDepositedEth = totalDepositedEth.add(weiAmount);
+    totalFeesPaid = totalFeesPaid.add(fee);
+    totalKrakintEarnings = totalKrakintEarnings.add(krakintFee);
+    totalInvestorsEarnings = totalInvestorsEarnings.add(investorFee);
+    totalDepositAfterFees = totalDepositAfterFees.add(afterFees);
+ 
+
+    //mint tokens
+
+}
 
 
 //----------VIEWS START---------------------
-function getAvailableTokens() public view virtual returns(uint available) {
-    return maxSell.sub(circulatingKrk);       
-}
 
 
-function getKrkTotal() public view virtual returns(uint krkTotal){
-    return krk2ethTotal;
-}
+function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmount){
 
-function getEthTotal() public view virtual returns(uint ethTotal){
-    return ethTotal;
-}
+    uint fee_total = getFourPercent(gweiAmount);
 
-function getCirculating() public view virtual returns(uint ethTotal){
-    return circulatingKrk;
-}
-
-function getAllowedEth(address user) public view virtual returns(uint ethAmount){
-    return ethAllowed[user];
-}
-
-function getAllowedKrk(address user) public view virtual returns(uint krkAmount){
-    return krkAllowed[user];
-}
-
-function showKrkReturn(uint circulating, uint gweiAmount) public view virtual returns(uint krkAmount){
-
-    //getTwoPercent
-    uint fee_1 = getFourPercent(gweiAmount);
-
-    uint afterFee = gweiAmount.sub(fee_1);
-    uint price = getPrice(circulating);
+    uint afterFee = gweiAmount.sub(fee_total);
+    uint price = getPrice(circulatingKrk);
     uint krks = (afterFee.mul(1000000000000000000)).div(price);
     
-     price = getPrice(circulating.add(krks));
+    price = getPrice(circulatingKrk.add(krks));
     uint ret = (afterFee.mul(1000000000000000000)).div(price);
     return ret;
     
@@ -117,8 +159,20 @@ function showKrkReturn(uint circulating, uint gweiAmount) public view virtual re
 
 
 //-------PRIVATE VIEWS------------------------------------------------------
+
+
+//----------VIEWS END-----------------------
+
+
+
+
+
+//----------PRIVATE PURE START---------------------
+
+
+
 //returns price per eth in gwei
-function getPrice(uint x) private view returns(uint retPrice) {
+function getPrice(uint x) private pure returns(uint retPrice) {
 
   //uint x = circulatingKrk;
 
@@ -193,13 +247,6 @@ function getPrice(uint x) private view returns(uint retPrice) {
 
 }
 
-//----------VIEWS END-----------------------
-
-
-
-
-
-//----------PRIVATE PURE START---------------------
 
 function getFivePercent(uint number) private pure returns(uint fivePercent){
     uint ret = number.div(20);
