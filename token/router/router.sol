@@ -276,6 +276,7 @@ contract Router is Ownable, IERC20 {
 	  require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external contract");
 
 	  //WARNING! This kind of a design exposes a danger with old contracts, if linked, to execute the functions. Must be properly maintained.
+	  //also, we must be careful about the substrings  not to mess up the function calls
 	  if (substringOf(route, "mint")) {
 	    //overriden: if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
 	    if (!mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
