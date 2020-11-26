@@ -329,20 +329,20 @@ contract Router is Ownable, IERC20
 		{
 			if (!core.updateJointSupply(uintArr)) revertWithMutex(addressArr[0]);
 		}
-		else if (equals(route, "transfer"))
+		else if (substringOf(route, "transfer"))
 		{
 			// is overriden: if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
 			if (!transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
-		else if (equals(route, "approve"))
+		else if (substringOf(route, "approve"))
 		{
 			if (!core.approve(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
-		else if (equals(route, "increaseAllowance"))
+		else if (substringOf(route, "increaseAllowance"))
 		{
 			if (!core.increaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
-		else if (equals(route, "decreaseAllowance"))
+		else if (substringOf(route, "decreaseAllowance"))
 		{
 			if (!core.decreaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
