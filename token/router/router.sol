@@ -103,6 +103,12 @@ abstract contract Core {
 
 abstract contract Token {
 	function allowance(address owner, address spender) external view virtual returns(uint256 data);
+	
+	//for transfer override, saving gas
+	function balanceOf(address account) external view virtual returns(uint256 data);
+    
+    //for transfer override, saving gas
+	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external virtual returns(bool success);
 }
 
 //============================================================================================
@@ -173,7 +179,8 @@ contract Router is Ownable, IERC20 {
         mutex[addressArr[0]] = true;
 
 		if (equals(route, "transfer")) {
-			if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+			// is overriden: if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
+			if(!transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		} else if (equals(route, "approve")) {
 			if(!core.approve(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		} else if (equals(route, "increaseAllowance")) {
@@ -207,6 +214,33 @@ contract Router is Ownable, IERC20 {
         mutex[userAddress] = false;
         require(mutex[userAddress], "at: router.sol | contract: Router | function: revertWithMutex | message: Prevented multiple calls with the mutex, your previous call must end or cancel");
 	}
+
+//---------OVERRIDDEN FUNCTIONS START---------------
+
+//OVERRIDES: The core contract call, to lower the transfer fees.
+	function transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
+		_transfer(addressArr, uintArr);
+		return true;
+	}
+	
+//OVERRIDES: The core contract call, to lower the transfer fees.
+	function _transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
+		address fromAddress = addressArr[0];
+		address toAddress = addressArr[1];
+
+		require(fromAddress != address(0), "at: router.sol | contract: Router | function: _transfer | message: Sender cannot be address(0)");
+
+		uint amount = uintArr[0];
+
+		require(amount <= token.balanceOf(fromAddress), "at: router.sol | contract: Router | function: _transfer | message: Insufficient amount");
+
+		token.emitTransfer(fromAddress, toAddress, amount, false);
+		return true;
+	}
+
+//---------OVERRIDDEN FUNCTIONS END-----------------
+
+
 	
 	//============== NATIVE FUNCTIONS END HERE ==================================================
 
@@ -217,61 +251,53 @@ contract Router is Ownable, IERC20 {
     
     
 	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual onlyPayloadSize(2 * 32) returns(bool success) {
-	    
-        require(!mutex[addressArr[0]]);
-        mutex[addressArr[0]] = true;
-	    
-		require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external contract");
 
-        //WARNING! This kind of a design exposes a danger of old contracts, if linked, to execute the functions. Must be properly maintained.
-		if (substringOf(route, "mint")) {
-			if(!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		} else if (substringOf(route, "burn")) {
-			if(!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		} else if (substringOf(route, "updateTotalSupply")){
-			if(!core.updateTotalSupply(uintArr)) revertWithMutex(addressArr[0]);
-		} else if (substringOf (route, "updateCurrentSupply")){
-			if(!core.updateCurrentSupply(uintArr)) revertWithMutex(addressArr[0]);
-		} else if (substringOf (route, "updateJointSupply")){
-			if(!core.updateJointSupply(uintArr)) revertWithMutex(addressArr[0]);
-		}
+	  require(!mutex[addressArr[0]]);
+	  mutex[addressArr[0]] = true;
 
-        mutex[addressArr[0]] = false;
+	  require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external contract");
 
-		return true;
+	  //WARNING! This kind of a design exposes a danger of old contracts, if linked, to execute the functions. Must be properly maintained.
+	  if (substringOf(route, "mint")) {
+	    if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+	  } else if (substringOf(route, "burn")) {
+	    if (!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+	  } else if (substringOf(route, "updateTotalSupply")) {
+	    if (!core.updateTotalSupply(uintArr)) revertWithMutex(addressArr[0]);
+	  } else if (substringOf(route, "updateCurrentSupply")) {
+	    if (!core.updateCurrentSupply(uintArr)) revertWithMutex(addressArr[0]);
+	  } else if (substringOf(route, "updateJointSupply")) {
+	    if (!core.updateJointSupply(uintArr)) revertWithMutex(addressArr[0]);
+	  }
+
+	  mutex[addressArr[0]] = false;
+
+	  return true;
 	}
-	
-	
+
 	//string comparison used to generalize the functions called by multiple contracts
-    function substringOf(string memory _haystack, string memory _needle) public pure returns (bool t)
-    {
-    	bytes memory h = bytes(_haystack);
-    	bytes memory n = bytes(_needle);
-    	if(h.length < 1 || n.length < 1 || (n.length > h.length)) 
-    		return false;
-    	else if(h.length > (2**128 -1))
-    		return false;									
-    	else
-    	{
-    		uint subindex = 0;
-    		for (uint i = 0; i < h.length; i ++)
-    		{
-    			if (h[i] == n[0])
-    			{
-    				subindex = 1;
-    				while(subindex < n.length && (i + subindex) < h.length && h[i + subindex] == n[subindex])
-    				{
-    					subindex++;
-    				}	
-    				if(subindex == n.length)
-    					return true;
-    			}
-    		}
-    		return false;
-    	}	
-     }
-	
-	
+	function substringOf(string memory _haystack, string memory _needle) public pure returns(bool t) {
+	  bytes memory h = bytes(_haystack);
+	  bytes memory n = bytes(_needle);
+	  if (h.length < 1 || n.length < 1 || (n.length > h.length))
+	    return false;
+	  else if (h.length > (2 ** 128 - 1))
+	    return false;
+	  else {
+	    uint subindex = 0;
+	    for (uint i = 0; i < h.length; i++) {
+	      if (h[i] == n[0]) {
+	        subindex = 1;
+	        while (subindex < n.length && (i + subindex) < h.length && h[i + subindex] == n[subindex]) {
+	          subindex++;
+	        }
+	        if (subindex == n.length)
+	          return true;
+	      }
+	    }
+	    return false;
+	  }
+	}
 	
 
 }
