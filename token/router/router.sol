@@ -237,6 +237,24 @@ contract Router is Ownable, IERC20 {
 		token.emitTransfer(fromAddress, toAddress, amount, false);
 		return true;
 	}
+	
+//OVERRIDES: The core contract call, to lower the transfer fees.
+	function mint(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
+		address fromAddress = address(0);
+		address toAddress = addressArr[1];
+		uint amount = uintArr[0];
+		token.emitTransfer(fromAddress, toAddress, amount, false);
+		return true;
+	}
+
+//OVERRIDES: The core contract call, to lower the transfer fees.
+	function burn(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success) {
+		address fromAddress = addressArr[0];
+		address toAddress = address(0);
+		uint amount = uintArr[0];
+		token.emitTransfer(fromAddress, toAddress, amount,false);
+		return true;
+	}	
 
 //---------OVERRIDDEN FUNCTIONS END-----------------
 
@@ -259,9 +277,11 @@ contract Router is Ownable, IERC20 {
 
 	  //WARNING! This kind of a design exposes a danger with old contracts, if linked, to execute the functions. Must be properly maintained.
 	  if (substringOf(route, "mint")) {
-	    if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+	    //overriden: if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
+	    if (!mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 	  } else if (substringOf(route, "burn")) {
-	    if (!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+	    //overriden: if (!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
+	    if (!burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 	  } else if (substringOf(route, "updateTotalSupply")) {
 	    if (!core.updateTotalSupply(uintArr)) revertWithMutex(addressArr[0]);
 	  } else if (substringOf(route, "updateCurrentSupply")) {
