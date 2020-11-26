@@ -170,6 +170,7 @@ function purchaseTokens() external payable {
 }
 
 function purchaseEthereum(uint krkAmount) external returns (bool success){
+    require(circulatingKrk>0, "There is no Ethereum on contract, at purchaseEthereum");
     require(krkAmount>0, "No zero transfers, at purchaseEthereum");
     uint ethAmount = getEthReturnNoBonus(krkAmount);
     require(ethAmount>0, "No Ethereum to transfer, at purchaseEthereum");
@@ -348,4 +349,4 @@ function setNewRouterContract(address newRouterAddress) onlyOwner public virtual
 
 
      
-}
+ }
