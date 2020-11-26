@@ -10,7 +10,7 @@ The main idea of this design was to follow the adjusted Proxy and the MVC design
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity = 0.7 .0;
+pragma solidity = 0.7 .4;
 
 abstract contract Context {
 	function _msgSender() internal view virtual returns(address payable) {
@@ -221,26 +221,18 @@ contract Router is Ownable, IERC20 {
         require(!mutex[addressArr[0]]);
         mutex[addressArr[0]] = true;
 	    
-		if (equals(route, "mint")) {
-			require(externalContracts["mint"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
+		require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external contract");
+
+        //WARNING! This kind of a design exposes a danger of old contracts, if linked, to execute the functions. Must be properly maintained.
+		if (substringOf(route, "mint")) {
 			if(!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		} else if (equals(route, "burn")) {
-			require(externalContracts["burn"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
+		} else if (substringOf(route, "burn")) {
 			if(!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		} else if (equals(route, "mint2")) {
-			require(externalContracts["mint"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'mint' contract");
-			if(!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		} else if (equals(route, "burn2")) {
-			require(externalContracts["burn"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'burn' contract");
-			if(!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		} else if (equals(route, "updateTotalSupply")){
-			require(externalContracts["updateTotalSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateTotalSupply' contract");
+		} else if (substringOf(route, "updateTotalSupply")){
 			if(!core.updateTotalSupply(uintArr)) revertWithMutex(addressArr[0]);
-		} else if (equals (route, "updateCurrentSupply")){
-			require(externalContracts["updateCurrentSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateCurrentSupply' contract");
+		} else if (substringOf (route, "updateCurrentSupply")){
 			if(!core.updateCurrentSupply(uintArr)) revertWithMutex(addressArr[0]);
-		} else if (equals (route, "updateJointSupply")){
-			require(externalContracts["updateJointSupply"] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external 'updateJointSupply' contract");
+		} else if (substringOf (route, "updateJointSupply")){
 			if(!core.updateJointSupply(uintArr)) revertWithMutex(addressArr[0]);
 		}
 
@@ -248,5 +240,38 @@ contract Router is Ownable, IERC20 {
 
 		return true;
 	}
+	
+	
+	//string comparison used to generalize the functions called by multiple contracts
+    function substringOf(string memory _haystack, string memory _needle) public pure returns (bool t)
+    {
+    	bytes memory h = bytes(_haystack);
+    	bytes memory n = bytes(_needle);
+    	if(h.length < 1 || n.length < 1 || (n.length > h.length)) 
+    		return false;
+    	else if(h.length > (2**128 -1))
+    		return false;									
+    	else
+    	{
+    		uint subindex = 0;
+    		for (uint i = 0; i < h.length; i ++)
+    		{
+    			if (h[i] == n[0])
+    			{
+    				subindex = 1;
+    				while(subindex < n.length && (i + subindex) < h.length && h[i + subindex] == n[subindex])
+    				{
+    					subindex++;
+    				}	
+    				if(subindex == n.length)
+    					return true;
+    			}
+    		}
+    		return false;
+    	}	
+     }
+	
+	
+	
 
 }
