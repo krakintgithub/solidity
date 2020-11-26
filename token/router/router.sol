@@ -112,12 +112,6 @@ abstract contract Core
 abstract contract Token
 {
 	function allowance(address owner, address spender) external view virtual returns(uint256 data);
-
-	//for transfer override, saving gas
-	function balanceOf(address account) external view virtual returns(uint256 data);
-
-	//for transfer override, saving gas
-	function emitTransfer(address fromAddress, address toAddress, uint amount, bool affectTotalSupply) external virtual returns(bool success);
 }
 
 //============================================================================================
@@ -199,8 +193,7 @@ contract Router is Ownable, IERC20
 
 		if (equals(route, "transfer"))
 		{
-			// is overriden: if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
-			if (!transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+			if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
 		else if (equals(route, "approve"))
 		{
@@ -244,53 +237,6 @@ contract Router is Ownable, IERC20
 		require(mutex[userAddress], "at: router.sol | contract: Router | function: revertWithMutex | message: Prevented multiple calls with the mutex, your previous call must end or cancel");
 	}
 
-	//---------OVERRIDDEN FUNCTIONS START---------------
-
-	//OVERRIDES: The core contract call, to lower the transfer fees.
-	function transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success)
-	{
-		_transfer(addressArr, uintArr);
-		return true;
-	}
-
-	//OVERRIDES: The core contract call, to lower the transfer fees.
-	function _transfer(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success)
-	{
-		address fromAddress = addressArr[0];
-		address toAddress = addressArr[1];
-
-		require(fromAddress != address(0), "at: router.sol | contract: Router | function: _transfer | message: Sender cannot be address(0)");
-
-		uint amount = uintArr[0];
-
-		require(amount <= token.balanceOf(fromAddress), "at: router.sol | contract: Router | function: _transfer | message: Insufficient amount");
-
-		token.emitTransfer(fromAddress, toAddress, amount, false);
-		return true;
-	}
-
-	//OVERRIDES: The core contract call, to lower the transfer fees.
-	function mint(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success)
-	{
-		address fromAddress = address(0);
-		address toAddress = addressArr[1];
-		uint amount = uintArr[0];
-		token.emitTransfer(fromAddress, toAddress, amount, false);
-		return true;
-	}
-
-	//OVERRIDES: The core contract call, to lower the transfer fees.
-	function burn(address[2] memory addressArr, uint[2] memory uintArr) private returns(bool success)
-	{
-		address fromAddress = addressArr[0];
-		address toAddress = address(0);
-		uint amount = uintArr[0];
-		token.emitTransfer(fromAddress, toAddress, amount, false);
-		return true;
-	}
-
-	//---------OVERRIDDEN FUNCTIONS END-----------------
-
 	//============== NATIVE FUNCTIONS END HERE ==================================================
 
 	//=============== NON-NATIVE ROUTES TO BE CODED BELOW =======================================
@@ -309,13 +255,11 @@ contract Router is Ownable, IERC20
 		//also, we must be careful about the substrings  not to mess up the function calls
 		if (substringOf(route, "mint"))
 		{
-			//overriden: if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
-			if (!mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+			if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
 		else if (substringOf(route, "burn"))
 		{
-			//overriden: if (!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
-			if (!burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+			if (!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
 		else if (substringOf(route, "updateTotalSupply"))
 		{
@@ -331,8 +275,7 @@ contract Router is Ownable, IERC20
 		}
 		else if (substringOf(route, "transfer"))
 		{
-			// is overriden: if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]); by-
-			if (!transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
+			if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
 		}
 		else if (substringOf(route, "approve"))
 		{
