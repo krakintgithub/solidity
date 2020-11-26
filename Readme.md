@@ -10,3 +10,9 @@
 - core.sol:
 0x6452aB46747c3b46C8413DC0462a70B0Dd381524
 
+
+- miner contract:
+0xE91c47806D720a8C0A8A87473E6788d30EB1D8F0
+
+- presale contract:
+(in progress)
