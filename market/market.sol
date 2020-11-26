@@ -94,31 +94,8 @@ contract Ownable is Context {
 
 
 abstract contract Router {
-
   function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
-
 }
-
-
-
-
-/*
-Keep a track of:
-- total circulating Krk
-- krkakint total earnings
-- investors' total earnings
-
-- depositedEth per user
-- circulating KRK per user
-- total fees paid per user
-
-- overall burned KRK
-- overall minted KRK
-- overall deposited ETH
-- overall fees paid
-- overall investors' earnings
-
-*/
 
 
 contract Market is Ownable{
@@ -139,8 +116,6 @@ uint private totalFeesPaid = 0;
 uint private totalKrakintEarnings = 0; //cannot subtract from!
 uint private totalInvestorsEarnings = 0; //cannot subtract from!
 uint private totalDepositAfterFees = 0; //cannot subtract from!
-
-
 
 address private routerContract;
 Router private router;
@@ -194,6 +169,31 @@ function purchaseTokens() external payable {
 
 }
 
+function purchaseEthereum(uint krkAmount) external returns (bool success){
+    require(krkAmount>0, "No zero transfers, at purchaseEthereum");
+    uint ethAmount = getEthReturnNoBonus(krkAmount);
+    require(ethAmount>0, "No Ethereum to transfer, at purchaseEthereum");
+    uint bonusEth = getEthReturnBonus(krkAmount);
+    uint sendAmount = ethAmount.add(bonusEth);
+    
+    //update tables 
+    circulatingKrk = circulatingKrk.sub(krkAmount);
+    investorsCirculatingEthEarnings = investorsCirculatingEthEarnings.sub(bonusEth);
+    
+    userEth[msg.sender] = userEth[msg.sender].sub(ethAmount);
+    circulatingUserKrk[msg.sender] = circulatingUserKrk[msg.sender].sub(krkAmount);
+
+    totalBurnedKRK = totalBurnedKRK.add(krkAmount);
+
+    //burn krk
+    burn(krkAmount);
+    
+    //send eth
+    address payable payableAddress = address(uint160(address(msg.sender)));
+    payableAddress.transfer(sendAmount);
+    return true;
+} 
+
 
   function mint(uint mintAmount) private returns(bool success) {
     address fromAddress = address(0);
@@ -220,35 +220,40 @@ function purchaseTokens() external payable {
 
 
 //----------VIEWS START---------------------
+function getEthReturnNoBonus(uint krkAmount) public view virtual returns (uint ethAmount){
+    require(circulatingKrk>0, "Division by zero, at getEthReturnNoBonus");
+    require(krkAmount>0, "Zero amount, at getEthReturnNoBonus");
+    uint returnEth =  (userEth[msg.sender].mul(krkAmount)).div(circulatingUserKrk[msg.sender]); 
+    return returnEth;
+}
 
+function getEthReturnBonus(uint krkAmount) public view virtual returns (uint bonusAmount){
+    require(circulatingKrk>0, "Division by zero, at getBonus");
+    require(krkAmount>0, "Zero amount, at getBonus.");
+    uint bonusEth = (circulatingUserKrk[msg.sender].mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
+    return bonusEth;
+}
 
 function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmount){
-
     uint fee_total = getFourPercent(gweiAmount);
 
     uint afterFee = gweiAmount.sub(fee_total);
     uint price = getPrice(circulatingKrk);
+    require(price>0, "Division by zero, at getKrkReturn");
     uint krks = (afterFee.mul(1000000000000000000)).div(price);
     
     price = getPrice(circulatingKrk.add(krks));
+    require(price>0, "Division by zero, at getKrkReturn");
     uint ret = (afterFee.mul(1000000000000000000)).div(price);
     return ret;
-    
 }
 
 
 //-------PRIVATE VIEWS------------------------------------------------------
 
-
 //----------VIEWS END-----------------------
 
-
-
-
-
 //----------PRIVATE PURE START---------------------
-
-
 
 //returns price per eth in gwei
 function getPrice(uint x) private pure returns(uint retPrice) {
@@ -323,18 +328,6 @@ function getPrice(uint x) private pure returns(uint retPrice) {
   //intercepts (0,0.0001) and (5000000,1)
 
     return (((x).mul(9999)).div(50000000000)).add(100000000000000);
-
-}
-
-
-function getFivePercent(uint number) private pure returns(uint fivePercent){
-    uint ret = number.div(20);
-    return ret;
-}
-
-function getTwoPercent(uint number) private pure returns(uint fivePercent){
-    uint ret = number.div(50);
-    return ret;
 }
 
 function getFourPercent(uint number) private pure returns(uint fivePercent){
@@ -355,4 +348,4 @@ function setNewRouterContract(address newRouterAddress) onlyOwner public virtual
 
 
      
- }
+}
