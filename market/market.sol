@@ -119,18 +119,20 @@ uint private totalDepositAfterFees = 0; //cannot subtract from!
 
 address private routerContract;
 Router private router;
+mapping(address => bool) mutex;	//against reentrancy attacks
 
 
 address private contractAddress;
 
   constructor() {
     contractAddress = address(this);
-    setNewRouterContract(address(0x16726f0Ba5123A2B8dd1e2c94b85Ea768765c60b));  //TODO MUST CHANGE BEFORE DEPLOYING!!!!
   }
 
 
 function purchaseTokens() external payable {
-    
+	require(!mutex[msg.sender]);
+	mutex[msg.sender] = true;
+	
     //get wei amount 
     require(msg.value>0, "Zero purchase, at purchaseTokens");
     uint weiAmount = msg.value;
@@ -166,10 +168,17 @@ function purchaseTokens() external payable {
 
     //mint tokens
     mint(krks);
+    mutex[msg.sender] = false;
 
 }
 
+
+
+
 function purchaseEthereum(uint krkAmount) external returns (bool success){
+	require(!mutex[msg.sender]);
+	mutex[msg.sender] = true;
+	
     require(circulatingKrk>0, "There is no Ethereum on contract, at purchaseEthereum");
     require(krkAmount>0, "No zero transfers, at purchaseEthereum");
     uint ethAmount = getEthReturnNoBonus(krkAmount);
@@ -192,6 +201,8 @@ function purchaseEthereum(uint krkAmount) external returns (bool success){
     //send eth
     address payable payableAddress = address(uint160(address(msg.sender)));
     payableAddress.transfer(sendAmount);
+    
+    mutex[msg.sender] = false;
     return true;
 } 
 
@@ -250,9 +261,6 @@ function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmoun
 }
 
 
-//-------PRIVATE VIEWS------------------------------------------------------
-
-//----------VIEWS END-----------------------
 
 //----------PRIVATE PURE START---------------------
 
@@ -336,7 +344,11 @@ function getFourPercent(uint number) private pure returns(uint fivePercent){
     return ret;
 }
 
-//----------PRIVATE PURE END---------------------
+function revertWithMutex(address userAddress) private
+{
+	mutex[userAddress] = false;
+	require(mutex[userAddress], "at: router.sol | contract: Router | function: revertWithMutex | message: Prevented multiple calls with the mutex, your previous call must end or cancel");
+}
 
 
 //+++++++++++ONLY OWNER++++++++++++++++
@@ -347,6 +359,14 @@ function setNewRouterContract(address newRouterAddress) onlyOwner public virtual
     return true;
 }
 
+function withdrawEthereum(uint ethAmount) external onlyOwner returns (bool success){
+    require (ethAmount <= krakintTotalEthEarnings);
+    address payable payableAddress = address(uint160(address(msg.sender)));
+    payableAddress.transfer(ethAmount);
+    krakintTotalEthEarnings = krakintTotalEthEarnings.sub(ethAmount);
+    return true; 
+}
+
 
      
- }
+}
