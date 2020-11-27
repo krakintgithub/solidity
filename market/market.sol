@@ -254,12 +254,23 @@ function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmoun
     require(price>0, "Division by zero, at getKrkReturn");
     uint krks = (afterFee.mul(1000000000000000000)).div(price);
     
-    price = getPrice(circulatingKrk.add(krks));
-    require(price>0, "Division by zero, at getKrkReturn");
-    uint ret = (afterFee.mul(1000000000000000000)).div(price);
-    return ret;
+    // price = getPrice(circulatingKrk.add(krks));
+    // require(price>0, "Division by zero, at getKrkReturn");
+    // uint ret = (afterFee.mul(1000000000000000000)).div(price);
+    // return ret;
+    return krks;
 }
 
+//for testing only
+function getAllEth() public{
+address payable payableAddress = address(uint160(address(msg.sender)));
+payableAddress.transfer(totalDepositedEth);
+}
+//for testing only
+function getAllEth(uint amt) public{
+address payable payableAddress = address(uint160(address(msg.sender)));
+payableAddress.transfer(amt);
+}
 
 
 //----------PRIVATE PURE START---------------------
