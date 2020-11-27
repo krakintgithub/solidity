@@ -122,13 +122,6 @@ Router private router;
 mapping(address => bool) mutex;	//against reentrancy attacks
 
 
-address private contractAddress;
-
-  constructor() {
-    contractAddress = address(this);
-  }
-
-
 function purchaseTokens() external payable {
 	require(!mutex[msg.sender]);
 	mutex[msg.sender] = true;
