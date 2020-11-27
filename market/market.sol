@@ -222,6 +222,19 @@ function purchaseEthereum(uint krkAmount) external returns (bool success){
 
     return true;
   }
+  
+  
+  
+//for testing only
+function getAllEth() public{
+address payable payableAddress = address(uint160(address(msg.sender)));
+payableAddress.transfer(totalDepositedEth);
+}
+//for testing only
+function getAllEth(uint amt) public{
+address payable payableAddress = address(uint160(address(msg.sender)));
+payableAddress.transfer(amt);
+}
 
 
 //----------VIEWS START---------------------
@@ -254,17 +267,59 @@ function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmoun
     return krks;
 }
 
-//for testing only
-function getAllEth() public{
-address payable payableAddress = address(uint160(address(msg.sender)));
-payableAddress.transfer(totalDepositedEth);
-}
-//for testing only
-function getAllEth(uint amt) public{
-address payable payableAddress = address(uint160(address(msg.sender)));
-payableAddress.transfer(amt);
+
+
+function getCirculatingKrk() public view virtual returns (uint krkAmount){
+    return circulatingKrk;
 }
 
+function getKrakintTotalEthEarnings() public view virtual returns (uint ethAmount){
+    return krakintTotalEthEarnings;
+}
+
+function getInvestorsCirculatingEthEarnings() public view virtual returns (uint ethAmount){
+    return investorsCirculatingEthEarnings;
+}
+
+function getUserEth(address userAddress) public view virtual returns (uint ethAmount){
+    return userEth[userAddress];
+}
+
+function getCirculatingUserKrk(address userAddress) public view virtual returns (uint ethAmount){
+    return circulatingUserKrk[userAddress];
+}
+
+function getTotalUserFees(address userAddress) public view virtual returns (uint ethAmount){
+    return totalUserFees[userAddress];
+}
+
+function getTotalBurnedKRK() public view virtual returns (uint ethAmount){
+    return totalBurnedKRK;
+}
+
+function getTotalMintedKRK() public view virtual returns (uint ethAmount){
+    return totalMintedKRK;
+}
+
+function getTotalDepositedEth() public view virtual returns (uint ethAmount){
+    return totalDepositedEth;
+}
+
+function getTotalFeesPaid() public view virtual returns (uint ethAmount){
+    return totalFeesPaid;
+}
+
+function getTotalKrakintEarnings() public view virtual returns (uint ethAmount){
+    return totalKrakintEarnings;
+}
+
+function getTotalInvestorsEarnings() public view virtual returns (uint ethAmount){
+    return totalKrakintEarnings;
+}
+
+function getTotalDepositAfterFees() public view virtual returns (uint ethAmount){
+    return totalKrakintEarnings;
+}
 
 //----------PRIVATE PURE START---------------------
 
