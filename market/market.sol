@@ -259,11 +259,12 @@ function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmoun
     uint price = getPrice(circulatingKrk);
     require(price>0, "Division by zero, at getKrkReturn");
     uint krks = (afterFee.mul(1000000000000000000)).div(price);
-    
-    // price = getPrice(circulatingKrk.add(krks));
-    // require(price>0, "Division by zero, at getKrkReturn");
-    // uint ret = (afterFee.mul(1000000000000000000)).div(price);
-    // return ret;
+
+    uint stageNumber = getStageNumber(circulatingKrk);
+    uint multiplyBy = (uint (1000)).div(stageNumber);
+     
+    krks = krks.mul(multiplyBy);
+
     return krks;
 }
 
@@ -322,6 +323,39 @@ function getTotalDepositAfterFees() public view virtual returns (uint ethAmount)
 }
 
 //----------PRIVATE PURE START---------------------
+
+function getStageNumber(uint x) private pure returns(uint stageNumber) {
+    uint ret = 1;
+  if (x >= 4500000000000000000000000) {
+    ret = 10;
+  }
+  else if (x >= 4000000000000000000000000) {
+    ret = 9;
+  }
+  else if (x >= 3500000000000000000000000) {
+    ret = 8;
+  }
+  else if (x >= 3000000000000000000000000) {
+    ret = 7;
+  }
+  else if (x >= 2500000000000000000000000) {
+    ret = 6;
+  }
+  else if (x >= 2000000000000000000000000) {
+    ret = 5;
+  }
+  else if (x >= 1500000000000000000000000) {
+    ret = 4;
+  }
+  else if (x >= 1000000000000000000000000) {
+    ret = 3;
+  }
+  else if (x >= 500000000000000000000000) {
+    ret = 2;
+  }
+  return ret;
+}
+
 
 //returns price per eth in gwei
 function getPrice(uint x) private pure returns(uint retPrice) {
