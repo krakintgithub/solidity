@@ -1,0 +1,9 @@
+Initial:
+
+User deposits 0.001 ETH (1000000000000000 wei):
+
+-9.6×10¹⁴ wei goes to user
+
+-4×10¹³ wei goes to everyone AND Krakint
+
+-2×10¹³ wei goes to Krk and 2×10¹³ to everyone
