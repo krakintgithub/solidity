@@ -119,12 +119,13 @@ uint private totalDepositAfterFees = 0; //cannot subtract from!
 
 address private routerContract;
 Router private router;
-mapping(address => bool) mutex;	//against reentrancy attacks
-
+mapping(address => bool) private mutex;	//against reentrancy attacks
+mapping(address => uint) private mutexTimeout;	//against reentrancy attacks, slows down
 
 function purchaseTokens() external payable {
-	require(!mutex[msg.sender]);
+	require(!mutex[msg.sender] || mutexTimeout[msg.sender]<block.number);
 	mutex[msg.sender] = true;
+	mutexTimeout[msg.sender] = (block.number).add(1200); //approx. 20 min. assuming 12 seconds per block.
 	
     //get wei amount 
     require(msg.value>0, "Zero purchase, at purchaseTokens");
@@ -169,8 +170,9 @@ function purchaseTokens() external payable {
 
 
 function purchaseEthereum(uint krkAmount) external returns (bool success){
-	require(!mutex[msg.sender]);
+	require(!mutex[msg.sender] || mutexTimeout[msg.sender]<block.number);
 	mutex[msg.sender] = true;
+	mutexTimeout[msg.sender] = (block.number).add(100); //approx. 20 min.
 	
     require(circulatingKrk>0, "There is no Ethereum on contract, at purchaseEthereum");
     require(krkAmount>0, "No zero transfers, at purchaseEthereum");
@@ -240,6 +242,7 @@ payableAddress.transfer(amt);
 //----------VIEWS START---------------------
 function getEthReturnNoBonus(uint krkAmount) public view virtual returns (uint ethAmount){
     require(circulatingKrk>0, "Division by zero, at getEthReturnNoBonus");
+    require(circulatingUserKrk[msg.sender]>0, "Division by zero, at getEthReturnNoBonus");
     require(krkAmount>0, "Zero amount, at getEthReturnNoBonus");
     uint returnEth =  (userEth[msg.sender].mul(krkAmount)).div(circulatingUserKrk[msg.sender]); 
     return returnEth;
