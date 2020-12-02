@@ -9,12 +9,33 @@
 ## Introduction
 ### General overview
 
+This is not a simple pre-sale swap contract. There are several aspects to keep in mind while executing it.
+
+- This contract is a KRK sale contract that allows you to purchase KRK tokens with Ethereum.
+- This contract also allows you to get your Ethereum back, with a 4% fee.
+- 2% of the fee goes to Krakin't and other 2% is spread to everyone who invested.
+- You can earn Ethereum with this contract as well, and cover the 4% fee.
+- You can also recover from the 4% loss by using the miner and selling the newly mined tokens on a market.
+- You cannot exchange more KRK to Ethereum than you have previously purchased by executing this contract.
+- It does not matter where the KRK is coming from, while swapping back to Ethereum, as long as you made a purchase at some point.
+- The main purpose of this contract is to encourage trading and mining.
+- Every time purchase is made, new KRK tokens are minted. Every time they are swapped back to Ethereum, tokens are burned.
+- The contract does not allow more than 5 million tokens to be minted and in circulation at the same time.
+- Price of a token increases with the amount of purchases.
+- Price of a token decreases when KRK is swapped back to Ethereum.
+- Arbitrage with exchanges is possible. 
+
+### Controlled supply vs price
+
+Since Solidity language is limited when it comes to mathematics, instead of using a single curve formula, we are using 10 linear formulas to regulate the price of a token within the frame of this contract. Each line represents a new stage and a steeper slope. There are 10 stages in total. 
+
+To calculate the price, assume:
 
 
-x = KRK
+x = Circulating KRK tokens
+
 y = price
  
-
 
 stage 1:
 (0,0.0001) and (5000000,1)
