@@ -1,6 +1,6 @@
 # <p align="center">Krakin't Presale Contract (in progress)</p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/MinerDoodle_logo.jpg"  title="Logo">
+  <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/purchaseDoodle.png"  title="Logo" width="20px">
 </p>
 
 
