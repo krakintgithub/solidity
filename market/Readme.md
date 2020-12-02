@@ -1,3 +1,16 @@
+# <p align="center">Krakin't Presale Contract (in progress)</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/MinerDoodle_logo.jpg"  title="Logo">
+</p>
+
+
+## <p align="center">0x....</p>
+
+## Introduction
+### General overview
+
+
+
 x = KRK
 y = price
  
