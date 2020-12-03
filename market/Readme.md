@@ -84,5 +84,5 @@ Now, here is something else to consider.  In order to increase the yield, we mul
 
 The number of minted tokens by the contract then increases by the 51000 KRK + 111855.73717 KRK, so the next purchase for 1.2 Ethereum gives less tokens.
 
-Please keep in mind, since we are using Solidity and no decimals (just big integers), the price is always going to be the best estimate lacking a certain precision while transforming everything to big integers that include 18 decimals in calculation.
+Please keep in mind, since we are using Solidity and no decimals (just big integers), the price is always going to be the best estimate lacking a certain precision while transforming everything to big integers that include 18 decimals in calculation. This is a reason why the contract line formulas and the ones presented in this document are different. Nevertheless, they represent the same numbers and logic.
 
