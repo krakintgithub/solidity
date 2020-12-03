@@ -163,52 +163,89 @@ function burn(uint burnAmount) private returns(bool success)
 #### View Functions
 ```solidity 
 function getEthReturnNoBonus(uint krkAmount) public view virtual returns (uint ethAmount)
- ```
+```
+Show the amount of ETH that is returned for the inputted KRK amount, without any earnings. 
+ 
+ 
 ```solidity 
 function getEthReturnBonus(uint krkAmount) public view virtual returns (uint bonusAmount)
- ```
+```
+Show the amount of ETH that is returned for the inputted KRK amount, with earnings. 
+
+
 ```solidity 
 function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmount)
- ```
+```
+Show the amount of KRK that is returned for the inputted ETH amount in Wei. 
+
+
 ```solidity 
 function getCirculatingKrk() public view virtual returns (uint krkAmount)
- ```
+```
+A circulatingKrk getter.
+ 
+ 
 ```solidity 
 function getKrakintTotalEthEarnings() public view virtual returns (uint ethAmount)
- ```
+```
+A krakintTotalEthEarnings getter.
+
+
 ```solidity 
 function getInvestorsCirculatingEthEarnings() public view virtual returns (uint ethAmount)
- ```
+```
+A investorsCirculatingEthEarnings getter.
+
+
 ```solidity 
 function getUserEth(address userAddress) public view virtual returns (uint ethAmount)
  ```
+A userEth getter.
+ 
 ```solidity 
 function getCirculatingUserKrk(address userAddress) public view virtual returns (uint ethAmount)
  ```
+A circulatingUserKrk getter.
+ 
 ```solidity 
 function getTotalUserFees(address userAddress) public view virtual returns (uint ethAmount)
  ```
+A totalUserFees getter.
+ 
 ```solidity 
 function getTotalBurnedKRK() public view virtual returns (uint ethAmount)
  ```
+A totalBurnedKRK getter.
+ 
 ```solidity 
 function getTotalMintedKRK() public view virtual returns (uint ethAmount)
  ```
+A totalMintedKRK getter.
+ 
 ```solidity 
 function getTotalDepositedEth() public view virtual returns (uint ethAmount)
  ```
+A totalDepositedEth getter. 
+ 
 ```solidity 
 function getTotalFeesPaid() public view virtual returns (uint ethAmount)
  ```
+A totalFeesPaid getter. 
+ 
 ```solidity 
 function getTotalKrakintEarnings() public view virtual returns (uint ethAmount)
  ```
+A totalKrakintEarnings getter.
+ 
 ```solidity 
 function getTotalInvestorsEarnings() public view virtual returns (uint ethAmount)
  ```
+A totalInvestorsEarnings getter.
+ 
 ```solidity 
 function getTotalDepositAfterFees() public view virtual returns (uint ethAmount)
  ```
+A totalDepositAfterFees getter.
  
  
 #### Private Pure Functions
