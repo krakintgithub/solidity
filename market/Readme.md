@@ -82,7 +82,50 @@ Let us assume that you want to deposit 1.2 Ethereum to a contract. Therefore, we
 Now, here is something else to consider.  In order to increase the yield, we multiply 111.85573717 by 1000/(stage number). 
 - Therefore, you will get 111855.73717 KRK tokens.
 
-The number of minted tokens by the contract then increases by the 51000 KRK + 111855.73717 KRK, so the next purchase for 1.2 Ethereum gives less tokens.
+The number of minted tokens by the contract then increases by the 51000 KRK + 111855.73717 KRK, so the next purchase for 1.2 Ethereum gives fewer tokens.
 
 Please keep in mind, since we are using Solidity and no decimals (just big integers), the price is always going to be the best estimate lacking a certain precision while transforming everything to big integers that include 18 decimals in calculation. This is a reason why the contract line formulas and the ones presented in this document are different. Nevertheless, they represent the same numbers and logic.
 
+
+
+## Source Code Overview
+### Variables and their meaning
+
+All variables are private, and they are accessed by the getter or setter methods, thus following the common Object-Oriented design.
+
+`maxSell` The maximum number of tokens that can be minted as circulating tokens, by this contract
+
+`circulatingKrk` The number of tokens that were minted and are circulating
+
+`krakintTotalEthEarnings` Amount of available Ethereum (in Wei) Krakin't is allowed to obtain from the contract
+
+`investorsCirculatingEthEarnings` Amount of available Ethereum (in Wei) spread to all investors
+
+`userEth` Amount of available Ethereum an user can obtain back depositing KRK tokens
+
+`circulatingUserKrk` ????
+
+`totalUserFees` amount of fees (in Wei) used has paid, in total
+
+`totalBurnedKRK` total amount of KRK that were swapped to ETH (and burned)
+
+`totalMintedKRK` total amount of KRK that was minted by the contract
+
+`totalDepositedEth` total amount of ETH that was deposited to a contract
+
+`totalFeesPaid` total amount of fees that were paid to a contract
+
+`totalKrakintEarnings` total amount of Ethereum (in Wei) that Krakin't made
+
+`totalInvestorsEarnings` total amount of Ethereum (in Wei) that investors made
+
+`totalDepositAfterFees` total amount of Ethereum that was deposited, after the fees were applied
+
+`routerContract` address to a Router contract (native token contract)
+
+`router` for interracting with a token
+
+`mutex` regulates the access to contract functions
+
+`mutexTimeout` regulates the access to contract functions, with an expiry time of 20 minutes
+  
