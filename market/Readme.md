@@ -129,3 +129,106 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `mutexTimeout` regulates the access to contract functions, with an expiry time of 20 minutes, against reentrancy attacks
   
+### Functions
+#### Main Functions
+
+```solidity 
+function purchaseTokens() external payable
+```
+The function used to purchase KRK tokens, fields are in Ethereum, not Wei. 
+ 
+ 
+ 
+```solidity 
+function purchaseEthereum(uint krkAmount) external returns (bool success)
+ ```
+ The function used to get Ethereum back from the contract. Any bonus earnings are calculated. The contract does not accept more KRK than it was generated, per user.
+ 
+ 
+ 
+```solidity 
+function mint(uint mintAmount) private returns(bool success)
+ ```
+ 
+ Private function used to mint the tokens when purchase is made.
+ 
+ 
+ 
+```solidity 
+function burn(uint burnAmount) private returns(bool success)
+ ```
+ Private function used to burn the tokens once they are swapped back to Ethereum.
+ 
+ 
+#### View Functions
+```solidity 
+function getEthReturnNoBonus(uint krkAmount) public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getEthReturnBonus(uint krkAmount) public view virtual returns (uint bonusAmount)
+ ```
+```solidity 
+function getKrkReturn(uint gweiAmount) public view virtual returns(uint krkAmount)
+ ```
+```solidity 
+function getCirculatingKrk() public view virtual returns (uint krkAmount)
+ ```
+```solidity 
+function getKrakintTotalEthEarnings() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getInvestorsCirculatingEthEarnings() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getUserEth(address userAddress) public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getCirculatingUserKrk(address userAddress) public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalUserFees(address userAddress) public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalBurnedKRK() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalMintedKRK() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalDepositedEth() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalFeesPaid() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalKrakintEarnings() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalInvestorsEarnings() public view virtual returns (uint ethAmount)
+ ```
+```solidity 
+function getTotalDepositAfterFees() public view virtual returns (uint ethAmount)
+ ```
+ 
+ 
+#### Private Pure Functions
+```solidity 
+function getStageNumber(uint x) private pure returns(uint stageNumber)
+ ```
+```solidity 
+function getPrice(uint x) private pure returns(uint retPrice)
+ ```
+```solidity 
+function getFourPercent(uint number) private pure returns(uint fivePercent)
+ ```
+```solidity 
+function revertWithMutex(address userAddress) private
+ ```
+ 
+#### User-only Functions
+```solidity 
+function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success)
+ ```
+```solidity 
+function withdrawEthereum(uint ethAmount) external onlyOwner returns (bool success)
+ ```
