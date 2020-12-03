@@ -76,12 +76,13 @@ f(x) = 1.9998×10^-7 x + 0.0001 = 0.01029898 (ETH/KRK)
 
 Let us assume that you want to deposit 1.2 Ethereum to a contract. Therefore, we will calculate this as:
 
-1.2 / 0.01029898 = 116.516392886
+- Take away 4% from 1.2 to get 1.152 ETH
+- Then calculate the amount of tokens by 1.152 / 0.01029898 = 111.85573717
 
-Now, here is something else to consider.  In order to increase the yield, we multiply 116.516392886 by 1000/(stage number). 
-- Therefore, you will get 116516.392886 KRK tokens.
+Now, here is something else to consider.  In order to increase the yield, we multiply 111.85573717 by 1000/(stage number). 
+- Therefore, you will get 111855.73717 KRK tokens.
 
-
+The number of minted tokens by the contract then increases by the 51000 KRK + 111855.73717 KRK, so the next purchase for 1.2 Ethereum gives less tokens.
 
 
 
