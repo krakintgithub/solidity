@@ -125,7 +125,7 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `router` for interracting with a token
 
-`mutex` regulates the access to contract functions
+`mutex` regulates the access to contract functions, against reentrancy attacks
 
-`mutexTimeout` regulates the access to contract functions, with an expiry time of 20 minutes
+`mutexTimeout` regulates the access to contract functions, with an expiry time of 20 minutes, against reentrancy attacks
   
