@@ -103,7 +103,7 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `userEth` Amount of available Ethereum an user can obtain back depositing KRK tokens
 
-`circulatingUserKrk` ????
+`circulatingUserKrk` Amount of minted KRK tokens, per user, that are still circulating
 
 `totalUserFees` amount of fees (in Wei) used has paid, in total
 
