@@ -176,9 +176,9 @@ function purchaseEthereum(uint krkAmount) external returns (bool success){
 	
     require(circulatingKrk>0, "There is no Ethereum on contract, at purchaseEthereum");
     require(krkAmount>0, "No zero transfers, at purchaseEthereum");
-    uint ethAmount = getEthReturnNoBonus(krkAmount);
+    uint ethAmount = getEthReturnNoBonus(krkAmount, msg.sender);
     require(ethAmount>0, "No Ethereum to transfer, at purchaseEthereum");
-    uint bonusEth = getEthReturnBonus(krkAmount);
+    uint bonusEth = getEthReturnBonus(krkAmount, msg.sender);
     uint sendAmount = ethAmount.add(bonusEth);
     
     //update tables 
@@ -240,18 +240,19 @@ payableAddress.transfer(amt);
 
 
 //----------VIEWS START---------------------
-function getEthReturnNoBonus(uint krkAmount) public view virtual returns (uint ethAmount){
-    require(circulatingKrk>0, "Division by zero, at getEthReturnNoBonus");
-    require(circulatingUserKrk[msg.sender]>0, "Division by zero, at getEthReturnNoBonus");
-    require(krkAmount>0, "Zero amount, at getEthReturnNoBonus");
-    uint returnEth =  (userEth[msg.sender].mul(krkAmount)).div(circulatingUserKrk[msg.sender]); 
+function getEthReturnNoBonus(uint krkAmount, address userAddress) public view virtual returns (uint ethAmount){
+    if(circulatingKrk<=0) return 0;
+    if(circulatingUserKrk[msg.sender]<=0) return 0;
+    if(krkAmount<=0) return 0;
+    
+    uint returnEth =  (userEth[userAddress].mul(krkAmount)).div(circulatingUserKrk[msg.sender]); 
     return returnEth;
 }
 
-function getEthReturnBonus(uint krkAmount) public view virtual returns (uint bonusAmount){
+function getEthReturnBonus(uint krkAmount, address userAddress) public view virtual returns (uint bonusAmount){
     require(circulatingKrk>0, "Division by zero, at getBonus");
     require(krkAmount>0, "Zero amount, at getBonus.");
-    uint bonusEth = (circulatingUserKrk[msg.sender].mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
+    uint bonusEth = (circulatingUserKrk[userAddress].mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
     return bonusEth;
 }
 
