@@ -242,7 +242,7 @@ payableAddress.transfer(amt);
 //----------VIEWS START---------------------
 function getEthReturnNoBonus(uint krkAmount, address userAddress) public view virtual returns (uint ethAmount){
     if(circulatingKrk<=0) return 0;
-    if(circulatingUserKrk[msg.sender]<=0) return 0;
+    if(circulatingUserKrk[userAddress]<=0) return 0;
     if(krkAmount<=0) return 0;
     
     uint returnEth =  (userEth[userAddress].mul(krkAmount)).div(circulatingUserKrk[userAddress]); 
@@ -252,7 +252,8 @@ function getEthReturnNoBonus(uint krkAmount, address userAddress) public view vi
 function getEthReturnBonus(uint krkAmount, address userAddress) public view virtual returns (uint bonusAmount){
     if(circulatingKrk<=0) return 0;
     if(krkAmount<=0) return 0;
-    uint bonusEth = (circulatingUserKrk[userAddress].mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
+    if(circulatingUserKrk[userAddress] < krkAmount) return 0;
+    uint bonusEth = (krkAmount.mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
     return bonusEth;
 }
 
