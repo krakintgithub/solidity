@@ -245,13 +245,13 @@ function getEthReturnNoBonus(uint krkAmount, address userAddress) public view vi
     if(circulatingUserKrk[msg.sender]<=0) return 0;
     if(krkAmount<=0) return 0;
     
-    uint returnEth =  (userEth[userAddress].mul(krkAmount)).div(circulatingUserKrk[msg.sender]); 
+    uint returnEth =  (userEth[userAddress].mul(krkAmount)).div(circulatingUserKrk[userAddress]); 
     return returnEth;
 }
 
 function getEthReturnBonus(uint krkAmount, address userAddress) public view virtual returns (uint bonusAmount){
-    require(circulatingKrk>0, "Division by zero, at getBonus");
-    require(krkAmount>0, "Zero amount, at getBonus.");
+    if(circulatingKrk<=0) return 0;
+    if(krkAmount<=0) return 0;
     uint bonusEth = (circulatingUserKrk[userAddress].mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
     return bonusEth;
 }
