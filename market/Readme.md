@@ -86,7 +86,8 @@ The number of minted tokens by the contract then increases by the 51000 KRK + 11
 
 Please keep in mind, since we are using Solidity and no decimals (just big integers), the price is always going to be the best estimate lacking a certain precision while transforming everything to big integers that include 18 decimals in calculation. This is a reason why the contract line formulas and the ones presented in this document are different. Nevertheless, they represent the same numbers and logic.
 
-
+### Ethereum Earnings
+- TODO!
 
 ## Source Code Overview
 ### Variables and their meaning
@@ -96,6 +97,8 @@ All variables are private, and they are accessed by the getter or setter methods
 `maxSell` The maximum number of tokens that can be minted as circulating tokens, by this contract
 
 `circulatingKrk` The number of tokens that were minted and are circulating
+
+`circulatingEth` The amount of Ethereum that exists on a contract
 
 `krakintTotalEthEarnings` Amount of available Ethereum (in Wei) Krakin't is allowed to obtain from the contract
 
@@ -183,7 +186,13 @@ Show the amount of KRK that is returned for the inputted ETH amount in Wei.
 function getCirculatingKrk() public view virtual returns (uint krkAmount)
 ```
 A circulatingKrk getter.
- 
+
+
+```solidity 
+function getCirculatingEth() public view virtual returns (uint krkAmount)
+```
+A circulatingEth getter.
+
  
 ```solidity 
 function getKrakintTotalEthEarnings() public view virtual returns (uint ethAmount)
