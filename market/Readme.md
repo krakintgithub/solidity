@@ -1,4 +1,4 @@
-# <p align="center">Krakin't Presale Contract (in progress)</p>
+# <p align="center">Krakin't Presale Contract</p>
 <p align="center">
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/purchaseDoodle.png"  title="Logo" width="200px">
 </p>
