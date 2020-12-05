@@ -116,6 +116,8 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `totalDepositedEth` total amount of ETH that was deposited to a contract
 
+`totalWitdrawnEth` total amount of ETH that was withdrawn from a contract, excluding the Krakin't earnings.
+
 `totalFeesPaid` total amount of fees that were paid to a contract
 
 `totalKrakintEarnings` total amount of Ethereum (in Wei) that Krakin't made
@@ -185,76 +187,81 @@ Show the amount of KRK that is returned for the inputted ETH amount in Wei.
 ```solidity 
 function getCirculatingKrk() public view virtual returns (uint krkAmount)
 ```
-A circulatingKrk getter.
+A circulatingKrk getter. See the variable definition from above.
 
 
 ```solidity 
 function getCirculatingEth() public view virtual returns (uint krkAmount)
 ```
-A circulatingEth getter.
+A circulatingEth getter. See the variable definition from above.
 
  
 ```solidity 
 function getKrakintTotalEthEarnings() public view virtual returns (uint ethAmount)
 ```
-A krakintTotalEthEarnings getter.
+A krakintTotalEthEarnings getter. See the variable definition from above.
 
 
 ```solidity 
 function getInvestorsCirculatingEthEarnings() public view virtual returns (uint ethAmount)
 ```
-A investorsCirculatingEthEarnings getter.
+A investorsCirculatingEthEarnings getter. See the variable definition from above.
 
 
 ```solidity 
 function getUserEth(address userAddress) public view virtual returns (uint ethAmount)
  ```
-A userEth getter.
+A userEth getter. See the variable definition from above.
  
 ```solidity 
 function getCirculatingUserKrk(address userAddress) public view virtual returns (uint ethAmount)
  ```
-A circulatingUserKrk getter.
+A circulatingUserKrk getter. See the variable definition from above.
  
 ```solidity 
 function getTotalUserFees(address userAddress) public view virtual returns (uint ethAmount)
  ```
-A totalUserFees getter.
+A totalUserFees getter. See the variable definition from above.
  
 ```solidity 
 function getTotalBurnedKRK() public view virtual returns (uint ethAmount)
  ```
-A totalBurnedKRK getter.
+A totalBurnedKRK getter. See the variable definition from above.
  
 ```solidity 
 function getTotalMintedKRK() public view virtual returns (uint ethAmount)
  ```
-A totalMintedKRK getter.
+A totalMintedKRK getter. See the variable definition from above.
  
 ```solidity 
 function getTotalDepositedEth() public view virtual returns (uint ethAmount)
  ```
-A totalDepositedEth getter. 
+A totalDepositedEth getter. See the variable definition from above.
+
+```solidity 
+function getTotalWitdrawnEth() public view virtual returns (uint ethAmount)
+ ```
+A totalWithdrawnEth getter. See the variable definition from above. 
  
 ```solidity 
 function getTotalFeesPaid() public view virtual returns (uint ethAmount)
  ```
-A totalFeesPaid getter. 
+A totalFeesPaid getter. See the variable definition from above. 
  
 ```solidity 
 function getTotalKrakintEarnings() public view virtual returns (uint ethAmount)
  ```
-A totalKrakintEarnings getter.
+A totalKrakintEarnings getter. See the variable definition from above.
  
 ```solidity 
 function getTotalInvestorsEarnings() public view virtual returns (uint ethAmount)
  ```
-A totalInvestorsEarnings getter.
+A totalInvestorsEarnings getter. See the variable definition from above.
  
 ```solidity 
 function getTotalDepositAfterFees() public view virtual returns (uint ethAmount)
  ```
-A totalDepositAfterFees getter.
+A totalDepositAfterFees getter. See the variable definition from above.
  
  
 #### Private Pure Functions
