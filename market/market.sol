@@ -237,6 +237,7 @@
      if (circulatingKrk <= 0) return 0;
      if (circulatingUserKrk[userAddress] <= 0) return 0;
      if (krkAmount <= 0) return 0;
+     if (krkAmount > circulatingUserKrk[userAddress]) return 0; 
 
      uint returnEth = (userEth[userAddress].mul(krkAmount)).div(circulatingUserKrk[userAddress]);
      return returnEth;
@@ -246,7 +247,9 @@
      if (circulatingKrk <= 0) return 0;
      if (krkAmount <= 0) return 0;
      if (circulatingUserKrk[userAddress] < krkAmount) return 0;
-     uint bonusEth = (krkAmount.mul(investorsCirculatingEthEarnings)).div(circulatingKrk);
+     
+     uint bonusEth = (circulatingUserKrk[userAddress].mul(circulatingUserKrk[userAddress]).mul(investorsCirculatingEthEarnings)).div(circulatingKrk.mul(circulatingKrk));
+     
      return bonusEth;
    }
 
