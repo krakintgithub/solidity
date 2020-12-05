@@ -268,20 +268,33 @@ A totalDepositAfterFees getter. See the variable definition from above.
 ```solidity 
 function getStageNumber(uint x) private pure returns(uint stageNumber)
  ```
+ Returns the stage of the token sale, based on amount of tokens that were sold.
+ 
 ```solidity 
 function getPrice(uint x) private pure returns(uint retPrice)
  ```
+ Returns the price assuming the x number of circulating tokens.
+ 
+ 
 ```solidity 
 function getFourPercent(uint number) private pure returns(uint fivePercent)
  ```
+ Calculates 4% of a number.
+ 
+ 
 ```solidity 
 function revertWithMutex(address userAddress) private
  ```
+Reverts the function call setting back the mutex true/false values. 
  
 #### User-only Functions
 ```solidity 
 function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success)
- ```
+```
+Sets the Router contract of the native KRK token component. 
+ 
+ 
 ```solidity 
-function withdrawEthereum(uint ethAmount) external onlyOwner returns (bool success)
+function withdrawEthereum() external onlyOwner returns (bool success)
  ```
+Withdraws all ethereum earnings that Krakin't made.
