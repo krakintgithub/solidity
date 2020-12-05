@@ -221,17 +221,6 @@
      return true;
    }
 
-   // //for testing only
-   // function getAllEth() public{
-   // address payable payableAddress = address(uint160(address(msg.sender)));
-   // payableAddress.transfer(totalDepositedEth);
-   // }
-   // //for testing only
-   // function getAllEth(uint amt) public{
-   // address payable payableAddress = address(uint160(address(msg.sender)));
-   // payableAddress.transfer(amt);
-   // }
-
    //----------VIEWS START---------------------
    function getEthReturnNoBonus(uint krkAmount, address userAddress) public view virtual returns(uint ethAmount) {
      if (circulatingKrk <= 0) return 0;
@@ -248,7 +237,8 @@
      if (krkAmount <= 0) return 0;
      if (circulatingUserKrk[userAddress] < krkAmount) return 0;
      
-     uint bonusEth = (circulatingUserKrk[userAddress].mul(circulatingUserKrk[userAddress]).mul(investorsCirculatingEthEarnings)).div(circulatingKrk.mul(circulatingKrk));
+     uint bonusEth = (circulatingUserKrk[userAddress].mul(circulatingUserKrk[userAddress])
+                    .mul(investorsCirculatingEthEarnings)).div(circulatingKrk.mul(circulatingKrk));
      
      return bonusEth;
    }
