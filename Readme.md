@@ -5,7 +5,7 @@
 0x7C131Ab459b874b82f19cdc1254fB66840D021B6
 
 - router.sol (the router contract):
-0x797447D2EAbE397C121603fA17e9c81b11f9d1F9 (replace with latest router.sol once eth2 is out)
+0x6A60AB529eeceb0efAE5AEE9Af8A92b25d4d8015
 
 - core.sol:
 0x6452aB46747c3b46C8413DC0462a70B0Dd381524
