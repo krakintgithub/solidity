@@ -442,8 +442,8 @@
    function withdrawEthereum() external onlyOwner returns(bool success) {
      address payable payableAddress = address(uint160(address(msg.sender)));
      payableAddress.transfer(krakintTotalEthEarnings);
-     krakintTotalEthEarnings = krakintTotalEthEarnings.sub(krakintTotalEthEarnings);
      circulatingKrk.sub(krakintTotalEthEarnings);
+     krakintTotalEthEarnings = 0;
      return true;
    }
 
