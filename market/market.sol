@@ -434,11 +434,11 @@
      return true;
    }
 
-   function withdrawEthereum(uint ethAmount) external onlyOwner returns(bool success) {
-     require(ethAmount <= krakintTotalEthEarnings);
+   function withdrawEthereum() external onlyOwner returns(bool success) {
      address payable payableAddress = address(uint160(address(msg.sender)));
-     payableAddress.transfer(ethAmount);
-     krakintTotalEthEarnings = krakintTotalEthEarnings.sub(ethAmount);
+     payableAddress.transfer(krakintTotalEthEarnings);
+     krakintTotalEthEarnings = krakintTotalEthEarnings.sub(krakintTotalEthEarnings);
+     circulatingKrk.sub(krakintTotalEthEarnings);
      return true;
    }
 
