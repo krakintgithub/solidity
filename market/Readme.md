@@ -100,7 +100,7 @@ Allocating 2% to everyone works by adding it to a total sum of allocated Ethereu
 Where:
 
 - a is circulatingUserKrk[userAddress]
-- b is circulatingUserKrk[userAddress]
+- b is investorsCirculatingEthEarnings
 - c is circulatingKrk
 
 See the variables and their meaning (below).
