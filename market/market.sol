@@ -110,6 +110,7 @@
    uint private totalBurnedKRK = 0;
    uint private totalMintedKRK = 0;
    uint private totalDepositedEth = 0;
+   uint private totalWithdrawnEth = 0;
    uint private totalFeesPaid = 0;
    uint private totalKrakintEarnings = 0;
    uint private totalInvestorsEarnings = 0;
@@ -149,7 +150,6 @@
      circulatingUserKrk[msg.sender] = circulatingUserKrk[msg.sender].add(krks);
      totalUserFees[msg.sender] = totalUserFees[msg.sender].add(fee);
 
-     //overall burned KRK - skipped!
      totalMintedKRK = totalMintedKRK.add(krks);
      totalDepositedEth = totalDepositedEth.add(weiAmount);
      totalFeesPaid = totalFeesPaid.add(fee);
@@ -195,6 +195,7 @@
      //send eth
      address payable payableAddress = address(uint160(address(msg.sender)));
      payableAddress.transfer(sendAmount);
+     totalWithdrawnEth = totalWithdrawnEth.add(sendAmount);
      circulatingEth = circulatingEth.sub(sendAmount);
 
      mutex[msg.sender] = false;
@@ -297,6 +298,10 @@
 
    function getTotalDepositedEth() public view virtual returns(uint ethAmount) {
      return totalDepositedEth;
+   }
+   
+   function getTotalWithdrawnEth() public view virtual returns(uint ethAmount) {
+     return totalWithdrawnEth;
    }
 
    function getTotalFeesPaid() public view virtual returns(uint ethAmount) {
