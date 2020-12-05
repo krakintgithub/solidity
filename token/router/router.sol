@@ -118,7 +118,6 @@ contract Router is Ownable, IERC20 {
   Token private token;
 
   mapping(string => address) public externalContracts; //for non-native functions
-  //mapping(address => bool) mutex;	//against reentrancy attacks
 
   //============== NATIVE FUNCTIONS START HERE ==================================================
   //These functions should never change when introducing a new version of a router.
