@@ -101,6 +101,7 @@
 
    uint private maxSell = 5000000000000000000000000;
    uint private circulatingKrk = 0;
+   uint private circulatingEth = 0;
    uint krakintTotalEthEarnings = 0;
    uint investorsCirculatingEthEarnings = 0;
    mapping(address => uint) private userEth;
@@ -140,6 +141,7 @@
 
      //update tables 
      circulatingKrk = circulatingKrk.add(krks);
+     circulatingEth = circulatingEth.add(weiAmount);
      krakintTotalEthEarnings = krakintTotalEthEarnings.add(krakintFee);
      investorsCirculatingEthEarnings = investorsCirculatingEthEarnings.add(investorFee);
 
@@ -193,6 +195,7 @@
      //send eth
      address payable payableAddress = address(uint160(address(msg.sender)));
      payableAddress.transfer(sendAmount);
+     circulatingEth = circulatingEth.sub(sendAmount);
 
      mutex[msg.sender] = false;
      return true;
@@ -265,6 +268,10 @@
 
    function getCirculatingKrk() public view virtual returns(uint krkAmount) {
      return circulatingKrk;
+   }
+   
+  function getCirculatingEth() public view virtual returns(uint krkAmount) {
+     return circulatingEth;
    }
 
    function getKrakintTotalEthEarnings() public view virtual returns(uint ethAmount) {
