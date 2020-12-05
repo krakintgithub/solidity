@@ -12,315 +12,262 @@ The main idea of this design was to follow the adjusted Proxy and the MVC design
 
 pragma solidity = 0.7 .4;
 
-abstract contract Context
-{
-	function _msgSender() internal view virtual returns(address payable)
-	{
-		return msg.sender;
-	}
+abstract contract Context {
+  function _msgSender() internal view virtual returns(address payable) {
+    return msg.sender;
+  }
 
-	function _msgData() internal view virtual returns(bytes memory)
-	{
-		this;
-		return msg.data;
-	}
+  function _msgData() internal view virtual returns(bytes memory) {
+    this;
+    return msg.data;
+  }
 }
 
-contract Ownable is Context
-{
-	address private _owner;
+contract Ownable is Context {
+  address private _owner;
 
-	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-	constructor()
-	{
-		address msgSender = _msgSender();
-		_owner = msgSender;
-		emit OwnershipTransferred(address(0), msgSender);
-	}
+  constructor() {
+    address msgSender = _msgSender();
+    _owner = msgSender;
+    emit OwnershipTransferred(address(0), msgSender);
+  }
 
-	function owner() public view returns(address)
-	{
-		return _owner;
-	}
+  function owner() public view returns(address) {
+    return _owner;
+  }
 
-	modifier onlyOwner()
-	{
-		require(_owner == _msgSender(), "Ownable: caller is not the owner");
-		_;
-	}
+  modifier onlyOwner() {
+    require(_owner == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
 
-	function renounceOwnership() public virtual onlyOwner
-	{
-		emit OwnershipTransferred(_owner, address(0));
-		_owner = address(0);
-	}
+  function renounceOwnership() public virtual onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
 
-	function transferOwnership(address newOwner) public virtual onlyOwner
-	{
-		require(newOwner != address(0), "Ownable: new owner is the zero address");
-		emit OwnershipTransferred(_owner, newOwner);
-		_owner = newOwner;
-	}
+  function transferOwnership(address newOwner) public virtual onlyOwner {
+    require(newOwner != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
 }
 
-interface IERC20
-{
-	function currentCoreContract() external view returns(address routerAddress);
+interface IERC20 {
+  function currentCoreContract() external view returns(address routerAddress);
 
-	function currentTokenContract() external view returns(address routerAddress);
+  function currentTokenContract() external view returns(address routerAddress);
 
-	function getExternalContractAddress(string memory contractName) external view returns(address routerAddress);
+  function getExternalContractAddress(string memory contractName) external view returns(address routerAddress);
 
-	function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+  function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
 
-	function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
+  function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
 
-	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+  function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external returns(bool success);
+
+  function _extrenalRouterCall(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external returns(bool success);
 
 }
 
-abstract contract Core
-{
+abstract contract Core {
 
-	// native core functions
+  // native core functions
 
-	function transfer(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function transfer(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-	function approve(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function approve(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-	function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function increaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-	function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function decreaseAllowance(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-	function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
+  function transferFrom(address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
 
-	//non-native core functions
+  //non-native core functions
 
-	function mint(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function mint(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-	function burn(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function burn(address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
 
-	function updateTotalSupply(uint[2] memory uintArr) external virtual returns(bool success);
+  function updateTotalSupply(uint[2] memory uintArr) external virtual returns(bool success);
 
-	function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
+  function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
 
-	function updateJointSupply(uint[2] memory uintArr) external virtual returns(bool success);
+  function updateJointSupply(uint[2] memory uintArr) external virtual returns(bool success);
 
 }
 
-abstract contract Token
-{
-	function allowance(address owner, address spender) external view virtual returns(uint256 data);
+abstract contract Token {
+  function allowance(address owner, address spender) external view virtual returns(uint256 data);
 }
 
 //============================================================================================
 // MAIN CONTRACT 
 //============================================================================================
 
-contract Router is Ownable, IERC20
-{
+contract Router is Ownable, IERC20 {
 
-	address public tokenContract;
-	address public coreContract;
-	Core private core;
-	Token private token;
+  uint lastBlock = block.number;
+  address public tokenContract;
+  address public coreContract;
 
-	mapping(string => address) public externalContracts;	//for non-native functions
-	mapping(address => bool) mutex;	//against reentrancy attacks
+  Core private core;
+  Token private token;
 
-	modifier onlyPayloadSize(uint size)
-	{
-		if (msg.data.length < size + 4)
-		{
-			revert();
-		}
-		_;
-	}
+  mapping(string => address) public externalContracts; //for non-native functions
+  //mapping(address => bool) mutex;	//against reentrancy attacks
 
-	//============== NATIVE FUNCTIONS START HERE ==================================================
-	//These functions should never change when introducing a new version of a router.
-	//Router is expected to constantly change, and the code should be written under 
-	//the "NON-CORE FUNCTIONS TO BE CODED BELOW".
+  //============== NATIVE FUNCTIONS START HERE ==================================================
+  //These functions should never change when introducing a new version of a router.
+  //Router is expected to constantly change, and the code should be written under 
+  //the "NON-CORE FUNCTIONS TO BE CODED BELOW".
 
-	function equals(string memory a, string memory b) internal view virtual returns(bool isEqual)
-	{
-		return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
-	}
+  function equals(string memory a, string memory b) internal view virtual returns(bool isEqual) {
+    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+  }
 
-	function currentTokenContract() override external view virtual returns(address routerAddress)
-	{
-		return tokenContract;
-	}
+  function currentTokenContract() override external view virtual returns(address routerAddress) {
+    return tokenContract;
+  }
 
-	function currentCoreContract() override external view virtual returns(address routerAddress)
-	{
-		return coreContract;
-	}
+  function currentCoreContract() override external view virtual returns(address routerAddress) {
+    return coreContract;
+  }
 
-	function getExternalContractAddress(string memory contractName) override external view virtual returns(address routerAddress)
-	{
-		return externalContracts[contractName];
-	}
+  function getExternalContractAddress(string memory contractName) override external view virtual returns(address routerAddress) {
+    return externalContracts[contractName];
+  }
 
-	//function is not needed if token address is hard-coded in a constructor
-	function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success)
-	{
-		tokenContract = newTokenAddress;
-		token = Token(tokenContract);
-		return true;
-	}
+  //function is not needed if token address is hard-coded in a constructor
+  function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
+    tokenContract = newTokenAddress;
+    token = Token(tokenContract);
+    return true;
+  }
 
-	function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success)
-	{
-		coreContract = newCoreAddress;
-		core = Core(coreContract);
-		return true;
-	}
+  function setNewCoreContract(address newCoreAddress) onlyOwner public virtual returns(bool success) {
+    coreContract = newCoreAddress;
+    core = Core(coreContract);
+    return true;
+  }
 
-	function setNewExternalContract(string memory contractName, address newContractAddress) onlyOwner public virtual returns(bool success)
-	{
-		externalContracts[contractName] = newContractAddress;
-		return true;
-	}
+  function setNewExternalContract(string memory contractName, address newContractAddress) onlyOwner public virtual returns(bool success) {
+    externalContracts[contractName] = newContractAddress;
+    return true;
+  }
 
-	function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual onlyPayloadSize(2 *32) returns(bool success)
-	{
-		require(msg.sender == tokenContract, "at: router.sol | contract: Router | function: callRouter | message: Must be called by the registered Token contract");
+  function callRouter(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
+    require(msg.sender == tokenContract, "router:callRouter:token contract not registered");
 
-		require(!mutex[addressArr[0]]);
-		mutex[addressArr[0]] = true;
+    require(block.number > lastBlock, "router: Too many transactions, please wait 12-20 seconds");
 
-		if (equals(route, "transfer"))
-		{
-			if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (equals(route, "approve"))
-		{
-			if (!core.approve(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (equals(route, "increaseAllowance"))
-		{
-			if (!core.increaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (equals(route, "decreaseAllowance"))
-		{
-			if (!core.decreaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
+    if (equals(route, "transfer")) {
+      require(core.transfer(addressArr, uintArr), "router:callRouter:transfer");
+    } else if (equals(route, "approve")) {
+      require(core.approve(addressArr, uintArr), "router:callRouter:approve");
+    } else if (equals(route, "increaseAllowance")) {
+      require(core.increaseAllowance(addressArr, uintArr), "router:callRouter:increaseAllowance");
+    } else if (equals(route, "decreaseAllowance")) {
+      require(core.decreaseAllowance(addressArr, uintArr), "router:callRouter:decreaseAllowance");
+    }
 
-		mutex[addressArr[0]] = false;
+    lastBlock = block.number;
+    return true;
+  }
 
-		return true;
-	}
+  function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
 
-	function _callRouter(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual onlyPayloadSize(2 *32) returns(bool success)
-	{
+    require(msg.sender == tokenContract, "at: router.sol | contract: Router | function: _callRouter | message: Must be called by the registered Token contract");
+    require(block.number > lastBlock, "router: Too many transactions, please wait 12-20 seconds");
 
-		require(msg.sender == tokenContract, "at: router.sol | contract: Router | function: _callRouter | message: Must be called by the registered Token contract");
+    if (equals(route, "transferFrom")) {
+      require(core.transferFrom(addressArr, uintArr), "router:_callRouter:transferFrom");
+    }
 
-		require(!mutex[addressArr[0]]);
-		mutex[addressArr[0]] = true;
+    lastBlock = block.number;
+    return true;
+  }
 
-		if (equals(route, "transferFrom"))
-		{
-			if (!core.transferFrom(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
+  //============== NATIVE FUNCTIONS END HERE ==================================================
 
-		mutex[addressArr[0]] = false;
+  //=============== NON-NATIVE ROUTES TO BE CODED BELOW =======================================
+  // This code is a subject to a change, should we decide to alter anything.
+  // We can also design another external router, possibilities are infinite.
 
-		return true;
-	}
+  function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual returns(bool success) {
 
-	function revertWithMutex(address userAddress) private
-	{
-		mutex[userAddress] = false;
-		require(mutex[userAddress], "at: router.sol | contract: Router | function: revertWithMutex | message: Prevented multiple calls with the mutex, your previous call must end or cancel");
-	}
+    require(block.number > lastBlock, "router: Too many transactions, please wait 12-20 seconds");
 
-	//============== NATIVE FUNCTIONS END HERE ==================================================
+    require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external contract");
 
-	//=============== NON-NATIVE ROUTES TO BE CODED BELOW =======================================
-	// This code is a subject to a change, should we decide to alter anything.
-	// We can also design another external router, possibilities are infinite.
+    //WARNING! This kind of a design exposes a danger with old contracts, if linked, to execute the functions. Must be properly maintained.
+    //also, we must be careful about the substrings  not to mess up the function calls
+    if (substringOf(route, "mint")) {
+      require(core.mint(addressArr, uintArr));
+    } else if (substringOf(route, "burn")) {
+      require(core.burn(addressArr, uintArr), "router:extrenalRouterCall:burn");
+    } else if (substringOf(route, "updateTotalSupply")) {
+      require(core.updateTotalSupply(uintArr), "router:extrenalRouterCall:updateTotalSupply");
+    } else if (substringOf(route, "updateCurrentSupply")) {
+      require(core.updateCurrentSupply(uintArr), "router:extrenalRouterCall:updateCurrentSupply");
+    } else if (substringOf(route, "updateJointSupply")) {
+      require(core.updateJointSupply(uintArr), "router:extrenalRouterCall:updateJointSupply");
+    } else if (substringOf(route, "transfer")) {
+      require(core.transfer(addressArr, uintArr), "router:extrenalRouterCall:transfer");
+    } else if (substringOf(route, "approve")) {
+      require(core.approve(addressArr, uintArr), "router:extrenalRouterCall:approve");
+    } else if (substringOf(route, "increaseAllowance")) {
+      require(core.increaseAllowance(addressArr, uintArr), "router:extrenalRouterCall:increaseAllowance");
+    } else if (substringOf(route, "decreaseAllowance")) {
+      require(core.decreaseAllowance(addressArr, uintArr), "router:extrenalRouterCall:decreaseAllowance");
+    }
 
-	function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) override external virtual onlyPayloadSize(2 *32) returns(bool success)
-	{
+    lastBlock = block.number;
 
-		require(!mutex[addressArr[0]]);
-		mutex[addressArr[0]] = true;
+    return true;
+  }
 
-		require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: extrenalRouterCall | message: Must be called by the registered external contract");
+  function _extrenalRouterCall(string memory route, address[3] memory addressArr, uint[3] memory uintArr) override external virtual returns(bool success) {
 
-		//WARNING! This kind of a design exposes a danger with old contracts, if linked, to execute the functions. Must be properly maintained.
-		//also, we must be careful about the substrings  not to mess up the function calls
-		if (substringOf(route, "mint"))
-		{
-			if (!core.mint(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "burn"))
-		{
-			if (!core.burn(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "updateTotalSupply"))
-		{
-			if (!core.updateTotalSupply(uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "updateCurrentSupply"))
-		{
-			if (!core.updateCurrentSupply(uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "updateJointSupply"))
-		{
-			if (!core.updateJointSupply(uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "transfer"))
-		{
-			if(!core.transfer(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "approve"))
-		{
-			if (!core.approve(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "increaseAllowance"))
-		{
-			if (!core.increaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
-		else if (substringOf(route, "decreaseAllowance"))
-		{
-			if (!core.decreaseAllowance(addressArr, uintArr)) revertWithMutex(addressArr[0]);
-		}
+    require(block.number > lastBlock, "router: Too many transactions, please wait 12-20 seconds");
 
-		mutex[addressArr[0]] = false;
+    require(externalContracts[route] == msg.sender, "at: router.sol | contract: Router | function: _extrenalRouterCall | message: Must be called by the registered external contract");
 
-		return true;
-	}
+    //WARNING! This kind of a design exposes a danger with old contracts, if linked, to execute the functions. Must be properly maintained.
+    //also, we must be careful about the substrings  not to mess up the function calls
+    if (substringOf(route, "transferFrom")) {
+      require(core.transferFrom(addressArr, uintArr), "router:_extrenalRouterCall:transferFrom");
+    }
 
-	//string comparison used to generalize the functions called by multiple contracts
-	function substringOf(string memory _haystack, string memory _needle) public pure returns(bool t)
-	{
-		bytes memory h = bytes(_haystack);
-		bytes memory n = bytes(_needle);
-		if (h.length < 1 || n.length < 1 || (n.length > h.length))
-			return false;
-		else if (h.length > (2 **128 - 1))
-			return false;
-		else
-		{
-			uint subindex = 0;
-			for (uint i = 0; i < h.length; i++)
-			{
-				if (h[i] == n[0])
-				{
-					subindex = 1;
-					while (subindex < n.length && (i + subindex) < h.length && h[i + subindex] == n[subindex])
-					{
-						subindex++;
-					}
-					if (subindex == n.length)
-						return true;
-				}
-			}
-			return false;
-		}
-	}
+    lastBlock = block.number;
+
+    return true;
+  }
+
+  //string comparison used to generalize the functions called by multiple contracts
+  function substringOf(string memory _haystack, string memory _needle) public pure returns(bool t) {
+    bytes memory h = bytes(_haystack);
+    bytes memory n = bytes(_needle);
+    if (h.length < 1 || n.length < 1 || (n.length > h.length))
+      return false;
+    else if (h.length > (2 ** 128 - 1))
+      return false;
+    else {
+      uint subindex = 0;
+      for (uint i = 0; i < h.length; i++) {
+        if (h[i] == n[0]) {
+          subindex = 1;
+          while (subindex < n.length && (i + subindex) < h.length && h[i + subindex] == n[subindex]) {
+            subindex++;
+          }
+          if (subindex == n.length)
+            return true;
+        }
+      }
+      return false;
+    }
+  }
 }
