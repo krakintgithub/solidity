@@ -122,7 +122,7 @@
    mapping(address => uint) private mutexTimeout;
 
    function purchaseTokens() external payable {
-     require(!mutex[msg.sender] || mutexTimeout[msg.sender] < block.number, "Contract safety in place, please wait");
+     require(!mutex[msg.sender] || mutexTimeout[msg.sender] < block.number, "Contract safety feature, please wait");
      mutex[msg.sender] = true;
      mutexTimeout[msg.sender] = (block.number).add(1200); //approx. 20 min. assuming 12 seconds per block.
 
@@ -207,7 +207,7 @@
      address[2] memory addresseArr = [fromAddress, msg.sender];
      uint[2] memory uintArr = [mintAmount, 0];
 
-     router.extrenalRouterCall("mint2", addresseArr, uintArr);
+     router.extrenalRouterCall("mint_market", addresseArr, uintArr);
 
      return true;
    }
@@ -217,7 +217,7 @@
      address[2] memory addresseArr = [msg.sender, toAddress];
      uint[2] memory uintArr = [burnAmount, 0];
 
-     router.extrenalRouterCall("burn2", addresseArr, uintArr);
+     router.extrenalRouterCall("burn_market", addresseArr, uintArr);
 
      return true;
    }
@@ -442,7 +442,6 @@
    function withdrawEthereum() external onlyOwner returns(bool success) {
      address payable payableAddress = address(uint160(address(msg.sender)));
      payableAddress.transfer(krakintTotalEthEarnings);
-     circulatingKrk.sub(krakintTotalEthEarnings);
      krakintTotalEthEarnings = 0;
      return true;
    }
