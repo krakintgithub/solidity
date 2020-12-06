@@ -146,10 +146,10 @@ contract SoloMiner is Ownable {
   mapping(address => uint) private miners;
   mapping(uint => address) private addressFromId;
 
-  uint private pivot = 0;
-  uint private rewardConstant = 100000000000000000000;
-  uint private totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
-  //uint private currentConstant = 1050000000000000000000000; //we assume that the current supply is 10.5 million tokens
+  uint public pivot = 0;
+  uint public rewardConstant = 100000000000000000000;
+  uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
+  uint public gapSize = 10500000000000000000000000;
 
   address private contractAddress;
 
@@ -229,7 +229,7 @@ contract SoloMiner is Ownable {
   }
 
   function getGapSize() public view virtual returns(uint gapSize) {
-    return totalConstant.sub(currentConstant);
+    return gapSize;
   }
 
   function getRewardConstant() external view virtual returns(uint routerAddress) {
@@ -255,12 +255,12 @@ contract SoloMiner is Ownable {
     additionalReward = (numerator[minerAddress].mul(additionalReward)).div(denominator[minerAddress]);
     uint rewardSize = (numerator[minerAddress].mul(getGapSize())).div(denominator[minerAddress]);
 
-    if (rewardSize.add(currentConstant) > totalConstant) {
-      rewardSize = totalConstant.sub(currentConstant);
-    }
-    if (rewardSize < showMyCurrentRewardTotal()) {
-      rewardSize = showMyCurrentRewardTotal();
-    }
+    // if (rewardSize.add(currentConstant) > totalConstant) {
+    //   rewardSize = totalConstant.sub(currentConstant);
+    // }
+    // if (rewardSize < showMyCurrentRewardTotal()) {
+    //   rewardSize = showMyCurrentRewardTotal();
+    // }
     rewardSize = rewardSize + additionalReward;
 
     return rewardSize;
@@ -269,14 +269,10 @@ contract SoloMiner is Ownable {
   //+++++++++++EXTERNAL++++++++++++++++
   function mine(uint depositAmount) external virtual returns(bool success) {
 
-
-    require(depositAmount > 0,
-      "at: solo_miner.sol | contract: SoloMiner | function: mine | message: No zero deposits allowed");
+    require(depositAmount > 0, "solo_miner:mine:No zero deposits allowed");
 
     uint reward = showReward(msg.sender);
     reward = reward.add(depositAmount);
-
-    uint gapSize = getGapSize().add(depositAmount);
 
     numerator[msg.sender] = reward;
     denominator[msg.sender] = gapSize;
@@ -294,12 +290,9 @@ contract SoloMiner is Ownable {
 
     uint reward = showReward(msg.sender);
 
-    require(tokenAmount <= reward,
-      "at: solo_miner.sol | contract: SoloMiner | function: getReward | message: Amount too big");
+    require(tokenAmount <= reward, "solo_miner:getReward:Amount too big");
 
     reward = reward.sub(tokenAmount);
-
-    uint gapSize = getGapSize().sub(tokenAmount);
 
     numerator[msg.sender] = reward;
     denominator[msg.sender] = gapSize;
@@ -321,11 +314,8 @@ contract SoloMiner is Ownable {
 
     uint amt = showReward(msg.sender);
 
-    require(amt > 0,
-      "at: solo_miner.sol | contract: SoloMiner | function: getFullReward | message: No rewards to give");
-
-    require(getLastBlockNumber(msg.sender) > 0,
-      "at: solo_miner.sol | contract: SoloMiner | function: getFullReward | message: Must mine first");
+    require(amt > 0,"solo_miner:getFullReward:No rewards to give");
+    require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getFullReward:Must mine first");
 
     numerator[msg.sender] = 0;
     denominator[msg.sender] = 0;
@@ -402,14 +392,15 @@ contract SoloMiner is Ownable {
 
   function burn(uint burnAmount) private returns(bool success) {
 
-    require(burnAmount <= token.balanceOf(msg.sender),
-      "at: solo_miner.sol | contract: SoloMiner | function: burn | message: You are trying to burn more than you own");
+    require(burnAmount <= token.balanceOf(msg.sender), "solo_miner:burn:You are trying to burn more than you own");
 
     address toAddress = address(0);
     address[2] memory addresseArr = [msg.sender, toAddress];
     uint[2] memory uintArr = [burnAmount, 0];
 
     totalBurned = totalBurned.add(burnAmount);
+    
+    gapSize = gapSize.add(burnAmount);
 
     router.extrenalRouterCall("burn", addresseArr, uintArr);
 
@@ -423,6 +414,10 @@ contract SoloMiner is Ownable {
 
 
     totalMinted = totalMinted.add(mintAmount);
+    
+    if(mintAmount>gapSize){gapSize = 0;}
+    gapSize = gapSize.sub(mintAmount);
+
 
     router.extrenalRouterCall("mint", addresseArr, uintArr);
 
