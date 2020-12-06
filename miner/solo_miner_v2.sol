@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2020-09-27
-*/
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity = 0.7 .0;
@@ -253,7 +249,7 @@ contract SoloMiner is Ownable {
     uint diff = currentBlock.sub(previousBlock);
     uint additionalReward = diff.mul(rewardConstant);
     additionalReward = (numerator[minerAddress].mul(additionalReward)).div(denominator[minerAddress]);
-    uint rewardSize = (numerator[minerAddress].mul(getGapSize())).div(denominator[minerAddress]);
+    uint rewardSize = (numerator[minerAddress].mul(gapSize)).div(denominator[minerAddress]);
 
     // if (rewardSize.add(currentConstant) > totalConstant) {
     //   rewardSize = totalConstant.sub(currentConstant);
@@ -377,21 +373,19 @@ contract SoloMiner is Ownable {
       return 0;
     }
 
-    uint gapSize = getGapSize();
     uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
 
     if (rewardSize < minimumReturn[msg.sender]) {
       rewardSize = minimumReturn[msg.sender];
     }
-    if (rewardSize > getGapSize()) {
-      rewardSize = getGapSize();
+    if (rewardSize > gapSize) {
+      rewardSize = gapSize;
     }
 
     return rewardSize;
   }
 
   function burn(uint burnAmount) private returns(bool success) {
-
     require(burnAmount <= token.balanceOf(msg.sender), "solo_miner:burn:You are trying to burn more than you own");
 
     address toAddress = address(0);
@@ -416,7 +410,7 @@ contract SoloMiner is Ownable {
     totalMinted = totalMinted.add(mintAmount);
     
     if(mintAmount>gapSize){gapSize = 0;}
-    gapSize = gapSize.sub(mintAmount);
+    else{gapSize = gapSize.sub(mintAmount);}
 
 
     router.extrenalRouterCall("mint", addresseArr, uintArr);
