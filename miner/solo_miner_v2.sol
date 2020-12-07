@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity = 0.7 .0;
+pragma solidity ^0.7 .0;
 
 library SafeMath {
   function add(uint256 a, uint256 b) internal pure returns(uint256) {
@@ -102,7 +102,6 @@ abstract contract OldVersionMiner {
     function getPivot() external view virtual returns(uint lastPivot);
     function getAddressFromId(uint id) external view virtual returns(address minerAddress);
     function showReward(address minerAddress) public view virtual returns(uint reward);
-    function getGapSize() public view virtual returns(uint gapSize);
 }
 
 abstract contract Token {
@@ -127,46 +126,45 @@ contract SoloMiner is Ownable {
 
   address public tokenContract;
   address public routerContract;
-  uint public totalBurned;
-  uint public totalMinted;
-  bool public active = true;
+
 
   Token private token;
   Router private router;
   OldVersionMiner private oldVersionMiner;
   
-  mapping(address => uint) private numerator;
-  mapping(address => uint) private denominator;
-  mapping(address => uint) private minimumReturn;
   mapping(address => uint) private userBlocks;
   mapping(address => uint) private miners;
   mapping(uint => address) private addressFromId;
+  mapping(address => uint) private depositedTokens;
+
 
   uint public pivot = 0;
-  uint public rewardConstant = 100000000000000000000;
+  uint private rewardConstant = 1000;
   uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
-  uint public gapSize = 10500000000000000000000000;
 
   address private contractAddress;
+  
+  
+  
+  uint public totalBurned = 0;
+  uint public totalMinted = 0;
 
   constructor() {
     contractAddress = address(this);
-    oldVersionMiner = OldVersionMiner(address(0x1F955B93f23B5C122eB04217D9ed649fDB9Eaf3A)); //TODO, CHANGE THIS BEFORE DEPLOY!
+    oldVersionMiner = OldVersionMiner(address(0x8658299fD312BfFD5F1aF515A031BE93ACe3BF88)); //TODO, CHANGE THIS BEFORE DEPLOY!
     uint oldPivot = oldVersionMiner.getPivot();
     
-    uint oldGapSize  = oldVersionMiner.getGapSize(); //we will assume the same gap size for all
-    uint currentBlockNumber = block.number;
+    uint currentBlockNumber = getCurrentBlockNumber();
     for(uint i=1;i<=oldPivot;i++){
         address oldAddress = oldVersionMiner.getAddressFromId(i);
         uint tokens = oldVersionMiner.showReward(oldAddress);
+        
+
+        
         miners[oldAddress] = i;
         addressFromId[i] = oldAddress;
-        
-        numerator[oldAddress] = tokens;
-        denominator[oldAddress] = oldGapSize;
-        minimumReturn[oldAddress] = tokens;
+        depositedTokens[oldAddress] = tokens;
         userBlocks[oldAddress] = currentBlockNumber;
-        
     }
     pivot = oldPivot;
   }
@@ -176,20 +174,14 @@ contract SoloMiner is Ownable {
   //+++++++++++VIEWS++++++++++++++++
   //----------GETTERS---------------
   
+  
+  
   function getPivot() external view virtual returns(uint lastPivot) {
     return pivot;
   }
 
   function getAddressFromId(uint id) external view virtual returns(address minerAddress) {
     return addressFromId[id];
-  }
-
-  function getUserNumerator(address minerAddress) external view virtual returns(uint minerNumerator) {
-    return numerator[minerAddress];
-  }
-
-  function getUserDenominator(address minerAddress) external view virtual returns(uint minerDenominator) {
-    return denominator[minerAddress];
   }
 
   function getUserBlocks(address minerAddress) external view virtual returns(uint minerBlocks) {
@@ -223,11 +215,7 @@ contract SoloMiner is Ownable {
   function getCurrentBlockNumber() public view returns(uint256 blockNumber) {
     return block.number;
   }
-
-  function getGapSize() public view virtual returns(uint gapSize) {
-    return gapSize;
-  }
-
+ 
   function getRewardConstant() external view virtual returns(uint routerAddress) {
     return rewardConstant;
   }
@@ -237,92 +225,63 @@ contract SoloMiner is Ownable {
   }
 
   //----------OTHER VIEWS---------------
-  function showReward(address minerAddress) public view virtual returns(uint reward) {
-    if (denominator[minerAddress] == 0) {
-      return 0;
-    } else if (!active) {
-      return 0;
-    }
 
+  function showEarned(address minerAddress) public view virtual returns(uint reward) {
     uint previousBlock = getLastBlockNumber(minerAddress);
     uint currentBlock = getCurrentBlockNumber();
     uint diff = currentBlock.sub(previousBlock);
-    uint additionalReward = diff.mul(rewardConstant);
-    additionalReward = (numerator[minerAddress].mul(additionalReward)).div(denominator[minerAddress]);
-    uint rewardSize = (numerator[minerAddress].mul(gapSize)).div(denominator[minerAddress]);
+    uint deposited = depositedTokens[minerAddress];
+    
+    if(rewardConstant==0){return 0;}
+    uint earned = (deposited.mul(diff)).div(rewardConstant);
+    return earned;
+    
+  }
 
-    // if (rewardSize.add(currentConstant) > totalConstant) {
-    //   rewardSize = totalConstant.sub(currentConstant);
-    // }
-    // if (rewardSize < showMyCurrentRewardTotal()) {
-    //   rewardSize = showMyCurrentRewardTotal();
-    // }
-    rewardSize = rewardSize + additionalReward;
-
-    return rewardSize;
+  function showReward(address minerAddress) public view virtual returns(uint reward) {
+      uint earned = showEarned(minerAddress);
+      uint ret = depositedTokens[minerAddress].add(earned);
+      return ret;
   }
 
   //+++++++++++EXTERNAL++++++++++++++++
   function mine(uint depositAmount) external virtual returns(bool success) {
-
-    require(depositAmount > 0, "solo_miner:mine:No zero deposits allowed");
-
-    uint reward = showReward(msg.sender);
-    reward = reward.add(depositAmount);
-
-    numerator[msg.sender] = reward;
-    denominator[msg.sender] = gapSize;
-    minimumReturn[msg.sender] = minimumReturn[msg.sender].add(depositAmount);
-    userBlocks[msg.sender] = getCurrentBlockNumber();
-
+    require(depositAmount > 0, "solo_miner:mine:No zero deposits");
     registerMiner();
 
-    burn(depositAmount);
+    uint reward = showReward(msg.sender);
+    uint deposit = reward.add(depositAmount);
 
+    burn(depositAmount);
+    
+    depositedTokens[msg.sender] = deposit;
+    userBlocks[msg.sender] = getCurrentBlockNumber();
+    
     return true;
   }
 
-  function getReward(uint tokenAmount) public virtual returns(bool success) {
+  function getReward(uint withdrawAmount) public virtual returns(bool success) {
+    require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getReward:Must mine first");
 
     uint reward = showReward(msg.sender);
-
-    require(tokenAmount <= reward, "solo_miner:getReward:Amount too big");
-
-    reward = reward.sub(tokenAmount);
-
-    numerator[msg.sender] = reward;
-    denominator[msg.sender] = gapSize;
-    if (minimumReturn[msg.sender] >= tokenAmount) {
-      minimumReturn[msg.sender] = minimumReturn[msg.sender].sub(tokenAmount);
-    } else {
-      minimumReturn[msg.sender] = 0;
-    }
+    require(withdrawAmount <= reward, "solo_miner:getReward:Amount too big");
+    registerMiner();
+    
+    uint balance = reward.sub(withdrawAmount);
+    
+    depositedTokens[msg.sender] = balance;
     userBlocks[msg.sender] = getCurrentBlockNumber();
 
-    registerMiner();
-
-    mint(tokenAmount);
+    mint(withdrawAmount);
 
     return true;
   }
 
   function getFullReward() public virtual returns(bool success) {
-
     uint amt = showReward(msg.sender);
-
-    require(amt > 0,"solo_miner:getFullReward:No rewards to give");
-    require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getFullReward:Must mine first");
-
-    numerator[msg.sender] = 0;
-    denominator[msg.sender] = 0;
-    minimumReturn[msg.sender] = 0;
-    userBlocks[msg.sender] = 0;
-
-    mint(amt);
-
+    getReward(amt);
     return true;
   }
-
 
   //in case you want to burn tokens and increase miner rewards
   function burnMyTokens(uint tokenAmount) public virtual returns(bool success) {
@@ -355,7 +314,6 @@ contract SoloMiner is Ownable {
     return true;
   }
 
-
   //+++++++++++PRIVATE++++++++++++++++++++   
   function registerMiner() private {
     if (miners[msg.sender] == 0) {
@@ -363,26 +321,6 @@ contract SoloMiner is Ownable {
       miners[msg.sender] = pivot;
       addressFromId[pivot] = msg.sender;
     }
-  }
-
-  function showMyCurrentRewardTotal() private view returns(uint reward) {
-
-    if (denominator[msg.sender] == 0) {
-      return 0;
-    } else if (!active) {
-      return 0;
-    }
-
-    uint rewardSize = (numerator[msg.sender].mul(gapSize)).div(denominator[msg.sender]);
-
-    if (rewardSize < minimumReturn[msg.sender]) {
-      rewardSize = minimumReturn[msg.sender];
-    }
-    if (rewardSize > gapSize) {
-      rewardSize = gapSize;
-    }
-
-    return rewardSize;
   }
 
   function burn(uint burnAmount) private returns(bool success) {
@@ -394,26 +332,19 @@ contract SoloMiner is Ownable {
 
     totalBurned = totalBurned.add(burnAmount);
     
-    gapSize = gapSize.add(burnAmount);
-
-    router.extrenalRouterCall("burn", addresseArr, uintArr);
+    router.extrenalRouterCall("burn", addresseArr, uintArr); //TODO "burn_miner"
 
     return true;
   }
-
+  
   function mint(uint mintAmount) private returns(bool success) {
     address fromAddress = address(0);
     address[2] memory addresseArr = [fromAddress, msg.sender];
     uint[2] memory uintArr = [mintAmount, 0];
 
-
     totalMinted = totalMinted.add(mintAmount);
-    
-    if(mintAmount>gapSize){gapSize = 0;}
-    else{gapSize = gapSize.sub(mintAmount);}
 
-
-    router.extrenalRouterCall("mint", addresseArr, uintArr);
+    router.extrenalRouterCall("mint", addresseArr, uintArr); //TODO "mint_miner"
 
     return true;
   }
