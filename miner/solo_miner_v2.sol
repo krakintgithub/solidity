@@ -1,3 +1,9 @@
+/*
+
+
+
+*/
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.7 .0;
@@ -141,7 +147,11 @@ contract SoloMiner is Ownable {
   uint public pivot = 0;
   uint private rewardConstant = 100000000000000000000;
   uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
-  uint public countdownConstant = 138888888888888; //starts with 1% earning per day
+  uint public countdownConstant = 69444444444444; //starts with 1% earning per day, decreases to 190258751902 in 20 years, 1317612 per block
+  uint public decreaseConstant = 1317612;
+  uint public withdrawNum = 0;
+  uint public depositNum = 0;
+  uint public startBlock = 0;
 
   address private contractAddress;
   
@@ -156,6 +166,7 @@ contract SoloMiner is Ownable {
     uint oldPivot = oldVersionMiner.getPivot();
     
     uint currentBlockNumber = getCurrentBlockNumber();
+    startBlock = currentBlockNumber;
     for(uint i=1;i<=oldPivot;i++){
         address oldAddress = oldVersionMiner.getAddressFromId(i);
         uint tokens = oldVersionMiner.showReward(oldAddress);
@@ -234,7 +245,8 @@ contract SoloMiner is Ownable {
     uint deposited = depositedTokens[minerAddress];
     
     if(rewardConstant==0){return 0;}
-    uint earned = ((deposited.mul(diff)).mul(countdownConstant)).div(rewardConstant);
+    uint constantCntDwn = countdownConstant.sub(withdrawNum);
+    uint earned = ((deposited.mul(diff)).mul(constantCntDwn)).div(rewardConstant);
     return earned;
     
   }
@@ -257,6 +269,7 @@ contract SoloMiner is Ownable {
     
     depositedTokens[msg.sender] = deposit;
     userBlocks[msg.sender] = getCurrentBlockNumber();
+    depositNum = depositNum.add(1);
     
     return true;
   }
@@ -272,6 +285,8 @@ contract SoloMiner is Ownable {
     
     depositedTokens[msg.sender] = balance;
     userBlocks[msg.sender] = getCurrentBlockNumber();
+
+    withdrawNum = withdrawNum.add(1);
 
     mint(withdrawAmount);
 
