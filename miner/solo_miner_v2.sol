@@ -139,8 +139,9 @@ contract SoloMiner is Ownable {
 
 
   uint public pivot = 0;
-  uint private rewardConstant = 1000;
+  uint private rewardConstant = 100000000000000000000;
   uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
+  uint public countdownConstant = 138888888888888; //starts with 1% earning per day
 
   address private contractAddress;
   
@@ -233,7 +234,7 @@ contract SoloMiner is Ownable {
     uint deposited = depositedTokens[minerAddress];
     
     if(rewardConstant==0){return 0;}
-    uint earned = (deposited.mul(diff)).div(rewardConstant);
+    uint earned = ((deposited.mul(diff)).mul(countdownConstant)).div(rewardConstant);
     return earned;
     
   }
