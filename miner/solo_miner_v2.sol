@@ -43,15 +43,7 @@ library SafeMath {
 
     return c;
   }
-
-  function mod(uint256 a, uint256 b) internal pure returns(uint256) {
-    return mod(a, b, "SafeMath: modulo by zero");
-  }
-
-  function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns(uint256) {
-    require(b != 0, errorMessage);
-    return a % b;
-  }
+  
 }
 
 abstract contract Context {
@@ -99,22 +91,16 @@ contract Ownable is Context {
 
 abstract contract OldVersionMiner {
   function getPivot() external view virtual returns(uint lastPivot);
-
   function getAddressFromId(uint id) external view virtual returns(address minerAddress);
-
   function showReward(address minerAddress) public view virtual returns(uint reward);
 }
 
 abstract contract Token {
-
   function balanceOf(address account) external view virtual returns(uint256 data);
-
 }
 
 abstract contract Router {
-
   function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
-
   function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
 }
 
