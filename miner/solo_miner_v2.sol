@@ -155,7 +155,6 @@ contract SoloMiner_v2 is Ownable {
 
     }
     pivot = oldPivot;
-
   }
   
   //constructor helper
