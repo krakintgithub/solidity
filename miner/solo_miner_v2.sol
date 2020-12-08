@@ -316,7 +316,6 @@ contract SoloMiner_v2 is Ownable {
 
   function getReward(uint withdrawalAmount) public virtual returns(bool success) {
     require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getReward:Must mine first");
-    require(mintDecreaseConstant <= difficultyConstant, "solo_miner:getReward:difficulty constants error");
 
     uint reward = showReward(msg.sender);
     require(withdrawalAmount <= reward, "solo_miner:getReward:Amount too big");
@@ -334,7 +333,6 @@ contract SoloMiner_v2 is Ownable {
     userNumOfWithdrawals[msg.sender] = userNumOfWithdrawals[msg.sender].add(1);
     circulatingTokens = circulatingTokens.add(withdrawalAmount);
     
-    difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
     updateDifficulty(msg.sender);
 
     return true;
@@ -400,8 +398,14 @@ contract SoloMiner_v2 is Ownable {
 
     if (decreaseBy > difficultyConstant) {
       userDifficultyConstant[minerAddress] = 1;
-    } else {
+    } 
+    else if(mintDecreaseConstant.mul(userNumOfWithdrawals[minerAddress]) > userDifficultyConstant[minerAddress]){
+        userDifficultyConstant[minerAddress] = 1;
+    }
+    else {
       userDifficultyConstant[minerAddress] = difficultyConstant.sub(decreaseBy);
+      userDifficultyConstant[minerAddress] = userDifficultyConstant[minerAddress]
+                .sub(mintDecreaseConstant.mul(userNumOfWithdrawals[minerAddress]));
     }
   }
 
