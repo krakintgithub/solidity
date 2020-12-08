@@ -1,9 +1,3 @@
-/*
-
-
-
-*/
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.7 .0;
@@ -130,9 +124,8 @@ contract SoloMiner is Ownable {
   using SafeMath
   for uint;
 
-  address public tokenContract;
-  address public routerContract;
-
+  address private tokenContract;
+  address private routerContract;
 
   Token private token;
   Router private router;
@@ -142,51 +135,37 @@ contract SoloMiner is Ownable {
   mapping(address => uint) private miners;
   mapping(uint => address) private addressFromId;
   mapping(address => uint) private depositedTokens;
+  mapping(address => uint) private userDifficultyConstant;
 
 
-  uint public pivot = 0;
+  uint private pivot = 0;
   uint private rewardConstant = 100000000000000000000;
-  uint public totalConstant = 21000000000000000000000000; //we assume that there is a 21 million as a total supply
-  uint public countdownConstant = 69444444444444; //starts with 1% earning per day, decreases to 190258751902 in 20 years, 1317612 per block
-  uint public decreaseConstant = 1317612;
-  uint public withdrawNum = 0;
-  uint public depositNum = 0;
-  uint public startBlock = 0;
+  uint private difficultyConstant = 69444444444444; //starts with 1% earning per day, decreases to 190258751902 in 20 years, 1317612 per block
+  uint private decreaseDifficultyConstant = 1317612; // decreases countdownConstant per block
+  uint private mintDecreaseConstant = 50000; //decreases countdownConstant per token mint function
+  uint private creationBlock = 0;
 
-  address private contractAddress;
   
-  
-  
-  uint public totalBurned = 0;
-  uint public totalMinted = 0;
-
   constructor() {
-    contractAddress = address(this);
     oldVersionMiner = OldVersionMiner(address(0x8658299fD312BfFD5F1aF515A031BE93ACe3BF88)); //TODO, CHANGE THIS BEFORE DEPLOY!
     uint oldPivot = oldVersionMiner.getPivot();
-    
     uint currentBlockNumber = getCurrentBlockNumber();
-    startBlock = currentBlockNumber;
+    creationBlock = currentBlockNumber;
     for(uint i=1;i<=oldPivot;i++){
         address oldAddress = oldVersionMiner.getAddressFromId(i);
         uint tokens = oldVersionMiner.showReward(oldAddress);
-        
 
-        
         miners[oldAddress] = i;
         addressFromId[i] = oldAddress;
         depositedTokens[oldAddress] = tokens;
         userBlocks[oldAddress] = currentBlockNumber;
     }
     pivot = oldPivot;
+
   }
-
-
 
   //+++++++++++VIEWS++++++++++++++++
   //----------GETTERS---------------
-  
-  
   
   function getPivot() external view virtual returns(uint lastPivot) {
     return pivot;
@@ -200,20 +179,9 @@ contract SoloMiner is Ownable {
     return userBlocks[minerAddress];
   }
 
-  function getContractAddress() external view virtual returns(address tokenAddress) {
-    return contractAddress;
-  }
 
   function getTokenContract() external view virtual returns(address tokenAddress) {
     return tokenContract;
-  }
-
-  function getTotalBurned() external view virtual returns(uint burned) {
-    return totalBurned;
-  }
-
-  function getTotalMinted() external view virtual returns(uint burned) {
-    return totalMinted;
   }
 
   function getLastBlockNumber(address minerAddress) public view virtual returns(uint lastBlock) {
@@ -232,9 +200,6 @@ contract SoloMiner is Ownable {
     return rewardConstant;
   }
 
-  function getTotalConstant() external view virtual returns(uint routerAddress) {
-    return totalConstant;
-  }
 
   //----------OTHER VIEWS---------------
 
@@ -245,8 +210,7 @@ contract SoloMiner is Ownable {
     uint deposited = depositedTokens[minerAddress];
     
     if(rewardConstant==0){return 0;}
-    uint constantCntDwn = countdownConstant.sub(withdrawNum);
-    uint earned = ((deposited.mul(diff)).mul(constantCntDwn)).div(rewardConstant);
+    uint earned = ((deposited.mul(diff)).mul(userDifficultyConstant[minerAddress])).div(rewardConstant);
     return earned;
     
   }
@@ -269,8 +233,8 @@ contract SoloMiner is Ownable {
     
     depositedTokens[msg.sender] = deposit;
     userBlocks[msg.sender] = getCurrentBlockNumber();
-    depositNum = depositNum.add(1);
-    
+    updateDifficulty(msg.sender);
+
     return true;
   }
 
@@ -286,10 +250,9 @@ contract SoloMiner is Ownable {
     depositedTokens[msg.sender] = balance;
     userBlocks[msg.sender] = getCurrentBlockNumber();
 
-    withdrawNum = withdrawNum.add(1);
-
     mint(withdrawAmount);
-
+    updateDifficulty(msg.sender);
+    
     return true;
   }
 
@@ -325,17 +288,22 @@ contract SoloMiner is Ownable {
   }
 
 
-  function setTotalConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
-    totalConstant = newConstant;
-    return true;
-  }
-
   //+++++++++++PRIVATE++++++++++++++++++++   
   function registerMiner() private {
     if (miners[msg.sender] == 0) {
       pivot = pivot.add(1);
       miners[msg.sender] = pivot;
       addressFromId[pivot] = msg.sender;
+    }
+  }
+  
+  function updateDifficulty(address minerAddress) private {
+    uint currentBlock = getCurrentBlockNumber();
+    uint diff = currentBlock.sub(creationBlock);
+    uint decreaseBy = decreaseDifficultyConstant.mul(diff);
+    if(decreaseBy>difficultyConstant){userDifficultyConstant[minerAddress] = 1;}
+    else{
+    userDifficultyConstant[minerAddress] = difficultyConstant.sub(decreaseBy);
     }
   }
 
@@ -346,8 +314,6 @@ contract SoloMiner is Ownable {
     address[2] memory addresseArr = [msg.sender, toAddress];
     uint[2] memory uintArr = [burnAmount, 0];
 
-    totalBurned = totalBurned.add(burnAmount);
-    
     router.extrenalRouterCall("burn", addresseArr, uintArr); //TODO "burn_miner"
 
     return true;
@@ -357,8 +323,6 @@ contract SoloMiner is Ownable {
     address fromAddress = address(0);
     address[2] memory addresseArr = [fromAddress, msg.sender];
     uint[2] memory uintArr = [mintAmount, 0];
-
-    totalMinted = totalMinted.add(mintAmount);
 
     router.extrenalRouterCall("mint", addresseArr, uintArr); //TODO "mint_miner"
 
