@@ -305,6 +305,7 @@ contract SoloMiner_v2 is Ownable {
     userTotalBurned[msg.sender] = userTotalBurned[msg.sender].add(depositAmount);
     userNumOfDeposits[msg.sender] = userNumOfDeposits[msg.sender].add(1);
     if(circulatingTokens>=depositAmount){circulatingTokens = circulatingTokens.sub(depositAmount);}
+    else{circulatingTokens=0;}
     
     
     depositedTokens[msg.sender] = deposit;
