@@ -273,12 +273,12 @@ contract SoloMiner_v2 is Ownable {
   function mine(uint depositAmount) external virtual returns(bool success) {
     require(depositAmount > 0, "solo_miner:mine:No zero deposits");
     registerMiner();
-
+    
+    burn(depositAmount);
+    
     uint reward = showReward(msg.sender);
     uint deposit = reward.add(depositAmount);
 
-    burn(depositAmount);
-    
     totalBurned = totalBurned.add(depositAmount);
     userTotalBurned[msg.sender] = userTotalBurned[msg.sender].add(depositAmount);
     userNumOfDeposits[msg.sender] = userNumOfDeposits[msg.sender].add(1);
@@ -298,14 +298,14 @@ contract SoloMiner_v2 is Ownable {
     uint reward = showReward(msg.sender);
     require(withdrawalAmount <= reward, "solo_miner:getReward:Amount too big");
     registerMiner();
+    
+    mint(withdrawalAmount);
 
     uint balance = reward.sub(withdrawalAmount);
 
     depositedTokens[msg.sender] = balance;
     userBlocks[msg.sender] = getCurrentBlockNumber();
 
-    mint(withdrawalAmount);
-    
     totalMinted = totalMinted.add(withdrawalAmount);
     userTotalMinted[msg.sender] = userTotalMinted[msg.sender].add(withdrawalAmount);
     userNumOfWithdrawals[msg.sender] = userNumOfWithdrawals[msg.sender].add(1);
