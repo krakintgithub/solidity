@@ -136,6 +136,7 @@ contract SoloMiner_v2 is Ownable {
   //Statistics
   uint private totalMinted = 0;
   uint private totalBurned = 0;
+  uint private circulatingTokens = 0;
   mapping(address => uint) private userTotalMinted;
   mapping(address => uint) private userTotalBurned;
   mapping(address => uint) private userNumOfDeposits;
@@ -244,6 +245,10 @@ contract SoloMiner_v2 is Ownable {
     return totalBurned;
   }
   
+  function getCirculatingTokens() public view returns(uint256 burned) {
+    return circulatingTokens;
+  }
+  
   function getUserTotalMinted(address minerAddress) public view returns(uint256 minted) {
     return userTotalMinted[minerAddress];
   }
@@ -299,11 +304,12 @@ contract SoloMiner_v2 is Ownable {
     totalBurned = totalBurned.add(depositAmount);
     userTotalBurned[msg.sender] = userTotalBurned[msg.sender].add(depositAmount);
     userNumOfDeposits[msg.sender] = userNumOfDeposits[msg.sender].add(1);
+    if(circulatingTokens>=depositAmount){circulatingTokens = circulatingTokens.sub(depositAmount);}
+    
     
     depositedTokens[msg.sender] = deposit;
     userBlocks[msg.sender] = getCurrentBlockNumber();
     updateDifficulty(msg.sender);
-
 
     return true;
   }
@@ -326,6 +332,7 @@ contract SoloMiner_v2 is Ownable {
     totalMinted = totalMinted.add(withdrawalAmount);
     userTotalMinted[msg.sender] = userTotalMinted[msg.sender].add(withdrawalAmount);
     userNumOfWithdrawals[msg.sender] = userNumOfWithdrawals[msg.sender].add(1);
+    circulatingTokens = circulatingTokens.add(withdrawalAmount);
     
     difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
     updateDifficulty(msg.sender);
