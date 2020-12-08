@@ -150,15 +150,32 @@ contract SoloMiner_v2 is Ownable {
     for (uint i = 1; i <= oldPivot; i++) {
       address oldAddress = oldVersionMiner.getAddressFromId(i);
       uint tokens = oldVersionMiner.showReward(oldAddress);
+      addMiner(oldAddress, tokens,i);    
 
-      miners[oldAddress] = i;
-      addressFromId[i] = oldAddress;
-      depositedTokens[oldAddress] = tokens;
-      userBlocks[oldAddress] = currentBlockNumber;
     }
     pivot = oldPivot;
 
   }
+  
+  //constructor helper
+  function addMiner(address minerAddress, uint amount, uint i) private returns(bool success) {
+    miners[minerAddress] = i;
+    addressFromId[i] = minerAddress;
+    depositedTokens[minerAddress] = amount;
+    userBlocks[minerAddress] = block.number;
+      
+    totalBurned = totalBurned.add(amount);
+    userTotalBurned[minerAddress] = userTotalBurned[minerAddress].add(amount);
+    userNumOfDeposits[minerAddress] = userNumOfDeposits[minerAddress].add(1);
+    
+    depositedTokens[minerAddress] = amount;
+    userBlocks[minerAddress] = getCurrentBlockNumber();
+    updateDifficulty(minerAddress);
+      
+    return true;
+  }
+  
+  
 
   //+++++++++++VIEWS++++++++++++++++
   //----------GETTERS---------------
