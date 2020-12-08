@@ -101,13 +101,12 @@ abstract contract Token {
 
 abstract contract Router {
   function extrenalRouterCall(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
-  function updateCurrentSupply(uint[2] memory uintArr) external virtual returns(bool success);
 }
 
 //===============================================================
 //MAIN CONTRACT
 //===============================================================
-contract SoloMiner is Ownable {
+contract SoloMiner_v2 is Ownable {
   using SafeMath
   for uint;
 
@@ -133,9 +132,18 @@ contract SoloMiner is Ownable {
   mapping(uint => address) private addressFromId;
   mapping(address => uint) private depositedTokens;
   mapping(address => uint) private userDifficultyConstant;
+  
+  //Statistics
+  uint private totalMinted = 0;
+  uint private totalBurned = 0;
+  mapping(address => uint) private userTotalMinted;
+  mapping(address => uint) private userTotalBurned;
+  mapping(address => uint) private userNumOfDeposits;
+  mapping(address => uint) private userNumOfWithdrawals;
+
 
   constructor() {
-    oldVersionMiner = OldVersionMiner(address(0x8658299fD312BfFD5F1aF515A031BE93ACe3BF88)); //TODO, CHANGE THIS BEFORE DEPLOY!
+    oldVersionMiner = OldVersionMiner(address(0x0f4695A09cb0d633359Ac0DEEDC39F029903A94C)); //TODO, CHANGE THIS BEFORE DEPLOY!
     uint oldPivot = oldVersionMiner.getPivot();
     uint currentBlockNumber = getCurrentBlockNumber();
     creationBlock = currentBlockNumber;
@@ -209,6 +217,31 @@ contract SoloMiner is Ownable {
   function getUserDifficultyConstant(address minerAddress) public view returns(uint256 returnConstant) {
     return userDifficultyConstant[minerAddress];
   }
+  
+  //Statistics
+  function getTotalMinted() public view returns(uint256 minted) {
+    return totalMinted;
+  }
+  
+  function getTotalBurned() public view returns(uint256 burned) {
+    return totalBurned;
+  }
+  
+  function getUserTotalMinted(address minerAddress) public view returns(uint256 minted) {
+    return userTotalMinted[minerAddress];
+  }
+  
+  function getUserTotalBurned(address minerAddress) public view returns(uint256 burned) {
+    return userTotalBurned[minerAddress];
+  } 
+  
+  function getUserNumOfDeposits(address minerAddress) public view returns(uint256 deposits) {
+    return userNumOfDeposits[minerAddress];
+  } 
+    
+  function getUserNumOfWithdrawals(address minerAddress) public view returns(uint256 withdrawals) {
+    return userNumOfWithdrawals[minerAddress];
+  } 
 
   //Other
   function getCurrentBlockNumber() public view returns(uint256 blockNumber) {
@@ -245,28 +278,38 @@ contract SoloMiner is Ownable {
     uint deposit = reward.add(depositAmount);
 
     burn(depositAmount);
-
+    
+    totalBurned = totalBurned.add(depositAmount);
+    userTotalBurned[msg.sender] = userTotalBurned[msg.sender].add(depositAmount);
+    userNumOfDeposits[msg.sender] = userNumOfDeposits[msg.sender].add(1);
+    
     depositedTokens[msg.sender] = deposit;
     userBlocks[msg.sender] = getCurrentBlockNumber();
     updateDifficulty(msg.sender);
 
+
     return true;
   }
 
-  function getReward(uint withdrawAmount) public virtual returns(bool success) {
+  function getReward(uint withdrawalAmount) public virtual returns(bool success) {
     require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getReward:Must mine first");
     require(mintDecreaseConstant <= difficultyConstant, "solo_miner:getReward:difficulty constants error");
 
     uint reward = showReward(msg.sender);
-    require(withdrawAmount <= reward, "solo_miner:getReward:Amount too big");
+    require(withdrawalAmount <= reward, "solo_miner:getReward:Amount too big");
     registerMiner();
 
-    uint balance = reward.sub(withdrawAmount);
+    uint balance = reward.sub(withdrawalAmount);
 
     depositedTokens[msg.sender] = balance;
     userBlocks[msg.sender] = getCurrentBlockNumber();
 
-    mint(withdrawAmount);
+    mint(withdrawalAmount);
+    
+    totalMinted = totalMinted.add(withdrawalAmount);
+    userTotalMinted[msg.sender] = userTotalMinted[msg.sender].add(withdrawalAmount);
+    userNumOfWithdrawals[msg.sender] = userNumOfWithdrawals[msg.sender].add(1);
+    
     difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
     updateDifficulty(msg.sender);
 
