@@ -120,7 +120,7 @@ contract SoloMiner_v2 is Ownable {
 
   //Global
   uint private rewardConstant = 100000000000000000000;
-  uint private difficultyConstant = 69383798541667; //Tuned in to closely match the previous miner version
+  uint private difficultyConstant = 64383798541667; //Tuned in to closely match the previous miner version
   uint private decreaseDifficultyConstant = 1317621; // decreases countdownConstant per block
   uint private mintDecreaseConstant = 500000; //decreases countdownConstant per token mint function
   uint private creationBlock = 0;
@@ -179,10 +179,6 @@ contract SoloMiner_v2 is Ownable {
     return true;
   }
   
-
- 
-  
-
   //+++++++++++VIEWS++++++++++++++++
   //----------GETTERS---------------
 
@@ -380,9 +376,6 @@ contract SoloMiner_v2 is Ownable {
     return true;
   }
   
-  
-  
-
   //----------SETTERS--------------------
 
   //Contract addresses
