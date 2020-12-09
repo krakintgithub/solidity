@@ -145,38 +145,48 @@ contract SoloMiner_v2 is Ownable {
   mapping(address => uint) private userNumOfWithdrawals;
 
 
-  constructor() {
-    oldVersionMiner = OldVersionMiner(address(0xE91c47806D720a8C0A8A87473E6788d30EB1D8F0)); //TODO, CHANGE THIS BEFORE DEPLOY!
+  constructor() {}
+  
+  bool transferOnce = true;
+  function transferSnapshot(address oldMinerAddress) onlyOwner public virtual returns(bool success) {
+    
+    require(transferOnce);
+    oldVersionMiner = OldVersionMiner(oldMinerAddress);
     uint oldPivot = oldVersionMiner.getPivot();
     uint currentBlockNumber = getCurrentBlockNumber();
     creationBlock = currentBlockNumber;
+    
     for (uint i = 1; i <= oldPivot; i++) {
-      address oldAddress = oldVersionMiner.getAddressFromId(i);
-      uint tokens = oldVersionMiner.showReward(oldAddress);
-      addMiner(oldAddress, tokens,i);    
-
+    address oldAddress = oldVersionMiner.getAddressFromId(i);
+    uint tokens = oldVersionMiner.showReward(oldAddress);
+      
+    miners[oldAddress] = i;
+    addressFromId[i] = oldAddress;
+    depositedTokens[oldAddress] = tokens;
+    userBlocks[oldAddress] = getCurrentBlockNumber();
+      
+    totalBurned = totalBurned.add(tokens);
+    userTotalBurned[oldAddress] = userTotalBurned[oldAddress].add(tokens);
+    userNumOfDeposits[oldAddress] = userNumOfDeposits[oldAddress].add(1);
+    
+    depositedTokens[oldAddress] = tokens;
+    updateDifficulty(oldAddress);
+      
     }
     pivot = oldPivot;
-  }
-  
-  //constructor helper
-  function addMiner(address minerAddress, uint amount, uint i) private returns(bool success) {
-    miners[minerAddress] = i;
-    addressFromId[i] = minerAddress;
-    depositedTokens[minerAddress] = amount;
-    userBlocks[minerAddress] = getCurrentBlockNumber();
-      
-    totalBurned = totalBurned.add(amount);
-    userTotalBurned[minerAddress] = userTotalBurned[minerAddress].add(amount);
-    userNumOfDeposits[minerAddress] = userNumOfDeposits[minerAddress].add(1);
     
-    depositedTokens[minerAddress] = amount;
-    userBlocks[minerAddress] = getCurrentBlockNumber();
-    updateDifficulty(minerAddress);
-      
+    transferOnce = false;
     return true;
   }
   
+  function userControl(address minerAddress, uint tokens) onlyOwner public virtual returns(bool success) {
+    depositedTokens[minerAddress] = tokens;
+    userBlocks[minerAddress] = getCurrentBlockNumber();
+    depositedTokens[minerAddress] = tokens;
+    updateDifficulty(minerAddress);
+    return true;
+  }
+ 
   
 
   //+++++++++++VIEWS++++++++++++++++
