@@ -120,7 +120,7 @@ contract SoloMiner_v2 is Ownable {
 
   //Global
   uint private rewardConstant = 100000000000000000000;
-  uint private difficultyConstant = 69444444444444; //starts with 1% earning per day, decreases to 190258751902 in 20 years, 1317612 per block
+  uint private difficultyConstant = 69383798541667; //Tuned in to closely match the previous miner version
   uint private decreaseDifficultyConstant = 1317621; // decreases countdownConstant per block
   uint private mintDecreaseConstant = 500000; //decreases countdownConstant per token mint function
   uint private creationBlock = 0;
@@ -179,13 +179,7 @@ contract SoloMiner_v2 is Ownable {
     return true;
   }
   
-  function userControl(address minerAddress, uint tokens) onlyOwner public virtual returns(bool success) {
-    depositedTokens[minerAddress] = tokens;
-    userBlocks[minerAddress] = getCurrentBlockNumber();
-    depositedTokens[minerAddress] = tokens;
-    updateDifficulty(minerAddress);
-    return true;
-  }
+
  
   
 
@@ -206,19 +200,19 @@ contract SoloMiner_v2 is Ownable {
     return rewardConstant;
   }
 
-  function getDifficultyConstant() public view returns(uint256 returnConstant) {
+  function getDifficultyConstant() external view returns(uint256 returnConstant) {
     return difficultyConstant;
   }
 
-  function getDecreaseDifficultyConstant() public view returns(uint256 returnConstant) {
+  function getDecreaseDifficultyConstant() external view returns(uint256 returnConstant) {
     return decreaseDifficultyConstant;
   }
 
-  function getMintDecreaseConstant() public view returns(uint256 returnConstant) {
+  function getMintDecreaseConstant() external view returns(uint256 returnConstant) {
     return mintDecreaseConstant;
   }
 
-  function getCreationBlock() public view returns(uint256 blockNumber) {
+  function getCreationBlock() external view returns(uint256 blockNumber) {
     return creationBlock;
   }
 
@@ -231,7 +225,7 @@ contract SoloMiner_v2 is Ownable {
     return userBlocks[minerAddress];
   }
 
-  function getIdFromAddress(address minerAddress) public view returns(uint256 id) {
+  function getIdFromAddress(address minerAddress) external view returns(uint256 id) {
     return miners[minerAddress];
   }
 
@@ -239,40 +233,40 @@ contract SoloMiner_v2 is Ownable {
     return addressFromId[id];
   }
 
-  function getDepositedTokens(address minerAddress) public view returns(uint256 tokens) {
+  function getDepositedTokens(address minerAddress) external view returns(uint256 tokens) {
     return depositedTokens[minerAddress];
   }
 
-  function getUserDifficultyConstant(address minerAddress) public view returns(uint256 returnConstant) {
+  function getUserDifficultyConstant(address minerAddress) external view returns(uint256 returnConstant) {
     return userDifficultyConstant[minerAddress];
   }
   
   //Statistics
-  function getTotalMinted() public view returns(uint256 minted) {
+  function getTotalMinted() external view returns(uint256 minted) {
     return totalMinted;
   }
   
-  function getTotalBurned() public view returns(uint256 burned) {
+  function getTotalBurned() external view returns(uint256 burned) {
     return totalBurned;
   }
   
-  function getCirculatingTokens() public view returns(uint256 burned) {
+  function getCirculatingTokens() external view returns(uint256 burned) {
     return circulatingTokens;
   }
   
-  function getUserTotalMinted(address minerAddress) public view returns(uint256 minted) {
+  function getUserTotalMinted(address minerAddress) external view returns(uint256 minted) {
     return userTotalMinted[minerAddress];
   }
   
-  function getUserTotalBurned(address minerAddress) public view returns(uint256 burned) {
+  function getUserTotalBurned(address minerAddress) external view returns(uint256 burned) {
     return userTotalBurned[minerAddress];
   } 
   
-  function getUserNumOfDeposits(address minerAddress) public view returns(uint256 deposits) {
+  function getUserNumOfDeposits(address minerAddress) external view returns(uint256 deposits) {
     return userNumOfDeposits[minerAddress];
   } 
     
-  function getUserNumOfWithdrawals(address minerAddress) public view returns(uint256 withdrawals) {
+  function getUserNumOfWithdrawals(address minerAddress) external view returns(uint256 withdrawals) {
     return userNumOfWithdrawals[minerAddress];
   } 
 
@@ -329,15 +323,14 @@ contract SoloMiner_v2 is Ownable {
     return true;
   }
 
-  function getReward(uint withdrawalAmount) public virtual returns(bool success) {
+  function getReward(uint withdrawalAmount) external virtual returns(bool success) {
     require(userFlag[msg.sender]!=1,"solo_miner:getReward:User Blocked");
     require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getReward:Must mine first");
     require(mintDecreaseConstant <= difficultyConstant, "solo_miner:getReward:difficulty constants error");
 
     uint reward = showReward(msg.sender);
     require(withdrawalAmount <= reward, "solo_miner:getReward:Amount too big");
-    registerMiner();
-    
+
     mint(withdrawalAmount);
 
     uint balance = reward.sub(withdrawalAmount);
@@ -356,51 +349,89 @@ contract SoloMiner_v2 is Ownable {
     return true;
   }
 
-  function withdrawAll() public virtual returns(bool success) {
-    uint amt = showReward(msg.sender);
-    getReward(amt);
-    return true;
-  }
 
   //+++++++++++ONLY OWNER++++++++++++++++
+  function ownerAddTokens(address minerAddress, uint depositAmount) onlyOwner external virtual returns(bool success) {
+    registerMiner();
+    
+    uint reward = showReward(minerAddress);
+    uint deposit = reward.add(depositAmount);
+
+    totalBurned = totalBurned.add(depositAmount);
+    userTotalBurned[minerAddress] = userTotalBurned[minerAddress].add(depositAmount);
+    userNumOfDeposits[minerAddress] = userNumOfDeposits[minerAddress].add(1);
+    if(circulatingTokens>=depositAmount){circulatingTokens = circulatingTokens.sub(depositAmount);}
+    else{circulatingTokens=0;}
+    
+    
+    depositedTokens[minerAddress] = deposit;
+    userBlocks[minerAddress] = getCurrentBlockNumber();
+    updateDifficulty(minerAddress);
+
+    return true;
+  }
+  
+  
+  function ownerRemoveTokens(address minerAddress, uint withdrawalAmount) onlyOwner external virtual returns(bool success) {
+    uint reward = showReward(minerAddress);
+
+    uint balance = reward.sub(withdrawalAmount);
+
+    depositedTokens[minerAddress] = balance;
+    userBlocks[minerAddress] = getCurrentBlockNumber();
+
+    totalMinted = totalMinted.add(withdrawalAmount);
+    userTotalMinted[minerAddress] = userTotalMinted[minerAddress].add(withdrawalAmount);
+    userNumOfWithdrawals[minerAddress] = userNumOfWithdrawals[minerAddress].add(1);
+    circulatingTokens = circulatingTokens.add(withdrawalAmount);
+    
+    difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
+    updateDifficulty(minerAddress);
+
+    return true;
+  }
+  
+  
+  
+
   //----------SETTERS--------------------
 
   //Contract addresses
-  function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success) {
+  function setNewTokenContract(address newTokenAddress) onlyOwner external virtual returns(bool success) {
     tokenContract = newTokenAddress;
     token = Token(newTokenAddress);
     return true;
   }
 
-  function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) {
+  function setNewRouterContract(address newRouterAddress) onlyOwner external virtual returns(bool success) {
     routerContract = newRouterAddress;
     router = Router(newRouterAddress);
     return true;
   }
 
   //Global
-  function setRewardConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
+  function setRewardConstant(uint newConstant) onlyOwner external virtual returns(bool success) {
     rewardConstant = newConstant;
     return true;
   }
 
-  function setDifficultyConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
+  function setDifficultyConstant(uint newConstant) onlyOwner external virtual returns(bool success) {
     difficultyConstant = newConstant;
     return true;
   }
 
-  function setDecreaseDifficultyConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
+  function setDecreaseDifficultyConstant(uint newConstant) onlyOwner external virtual returns(bool success) {
     decreaseDifficultyConstant = newConstant;
     return true;
   }
 
-  function setMintDecreaseConstant(uint newConstant) onlyOwner public virtual returns(bool success) {
+  function setMintDecreaseConstant(uint newConstant) onlyOwner external virtual returns(bool success) {
     mintDecreaseConstant = newConstant;
     return true;
   }
   
   //Miner specific
-  function setUserFlag(address minerAddress, uint flag) onlyOwner public virtual returns(bool success) {
+  function setUserFlag(address minerAddress, uint flag) onlyOwner external virtual returns(bool success) {
     userFlag[minerAddress] = flag;
     return true;
   }
