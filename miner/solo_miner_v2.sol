@@ -146,7 +146,7 @@ contract SoloMiner_v2 is Ownable {
 
 
   constructor() {
-    oldVersionMiner = OldVersionMiner(address(0x0f4695A09cb0d633359Ac0DEEDC39F029903A94C)); //TODO, CHANGE THIS BEFORE DEPLOY!
+    oldVersionMiner = OldVersionMiner(address(0xE91c47806D720a8C0A8A87473E6788d30EB1D8F0));
     uint oldPivot = oldVersionMiner.getPivot();
     uint currentBlockNumber = getCurrentBlockNumber();
     creationBlock = currentBlockNumber;
