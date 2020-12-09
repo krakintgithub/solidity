@@ -43,7 +43,7 @@ library SafeMath {
 
     return c;
   }
-
+  
 }
 
 abstract contract Context {
@@ -91,9 +91,7 @@ contract Ownable is Context {
 
 abstract contract OldVersionMiner {
   function getPivot() external view virtual returns(uint lastPivot);
-
   function getAddressFromId(uint id) external view virtual returns(address minerAddress);
-
   function showReward(address minerAddress) public view virtual returns(uint reward);
 }
 
@@ -136,6 +134,7 @@ contract SoloMiner_v2 is Ownable {
   mapping(address => uint) private userDifficultyConstant;
   mapping(address => uint) private userFlag;
 
+  
   //Statistics
   uint private totalMinted = 0;
   uint private totalBurned = 0;
@@ -145,40 +144,44 @@ contract SoloMiner_v2 is Ownable {
   mapping(address => uint) private userNumOfDeposits;
   mapping(address => uint) private userNumOfWithdrawals;
 
+
   constructor() {}
-
+  
   bool transferOnce = true;
-
   function transferSnapshot(address oldMinerAddress) onlyOwner public virtual returns(bool success) {
-
+    
     require(transferOnce);
     oldVersionMiner = OldVersionMiner(oldMinerAddress);
     uint oldPivot = oldVersionMiner.getPivot();
     uint currentBlockNumber = getCurrentBlockNumber();
     creationBlock = currentBlockNumber;
-
+    
     for (uint i = 1; i <= oldPivot; i++) {
-      address oldAddress = oldVersionMiner.getAddressFromId(i);
-      uint tokens = oldVersionMiner.showReward(oldAddress);
-
-      miners[oldAddress] = i;
-      addressFromId[i] = oldAddress;
-      depositedTokens[oldAddress] = tokens;
-      userBlocks[oldAddress] = getCurrentBlockNumber();
-
-      totalBurned = totalBurned.add(tokens);
-      userTotalBurned[oldAddress] = userTotalBurned[oldAddress].add(tokens);
-      userNumOfDeposits[oldAddress] = userNumOfDeposits[oldAddress].add(1);
-
-      depositedTokens[oldAddress] = tokens;
-      updateDifficulty(oldAddress);
-
+    address oldAddress = oldVersionMiner.getAddressFromId(i);
+    uint tokens = oldVersionMiner.showReward(oldAddress);
+      
+    miners[oldAddress] = i;
+    addressFromId[i] = oldAddress;
+    depositedTokens[oldAddress] = tokens;
+    userBlocks[oldAddress] = getCurrentBlockNumber();
+      
+    totalBurned = totalBurned.add(tokens);
+    userTotalBurned[oldAddress] = userTotalBurned[oldAddress].add(tokens);
+    userNumOfDeposits[oldAddress] = userNumOfDeposits[oldAddress].add(1);
+    
+    depositedTokens[oldAddress] = tokens;
+    updateDifficulty(oldAddress);
+      
     }
     pivot = oldPivot;
-
+    
     transferOnce = false;
     return true;
   }
+  
+
+ 
+  
 
   //+++++++++++VIEWS++++++++++++++++
   //----------GETTERS---------------
@@ -237,35 +240,35 @@ contract SoloMiner_v2 is Ownable {
   function getUserDifficultyConstant(address minerAddress) external view returns(uint256 returnConstant) {
     return userDifficultyConstant[minerAddress];
   }
-
+  
   //Statistics
   function getTotalMinted() external view returns(uint256 minted) {
     return totalMinted;
   }
-
+  
   function getTotalBurned() external view returns(uint256 burned) {
     return totalBurned;
   }
-
+  
   function getCirculatingTokens() external view returns(uint256 burned) {
     return circulatingTokens;
   }
-
+  
   function getUserTotalMinted(address minerAddress) external view returns(uint256 minted) {
     return userTotalMinted[minerAddress];
   }
-
+  
   function getUserTotalBurned(address minerAddress) external view returns(uint256 burned) {
     return userTotalBurned[minerAddress];
-  }
-
+  } 
+  
   function getUserNumOfDeposits(address minerAddress) external view returns(uint256 deposits) {
     return userNumOfDeposits[minerAddress];
-  }
-
+  } 
+    
   function getUserNumOfWithdrawals(address minerAddress) external view returns(uint256 withdrawals) {
     return userNumOfWithdrawals[minerAddress];
-  }
+  } 
 
   //Other
   function getCurrentBlockNumber() public view returns(uint256 blockNumber) {
@@ -273,7 +276,7 @@ contract SoloMiner_v2 is Ownable {
   }
 
   function showEarned(address minerAddress) public view virtual returns(uint tokensEarned) {
-    require(userFlag[minerAddress] != 1, "solo_miner:showEarned:User Blocked");
+    require(userFlag[minerAddress]!=1,"solo_miner:showEarned:User Blocked");
     uint previousBlock = getLastBlockNumber(minerAddress);
     uint currentBlock = getCurrentBlockNumber();
     require(previousBlock <= currentBlock, "solo_miner:showEarned:bad block numbers");
@@ -289,7 +292,7 @@ contract SoloMiner_v2 is Ownable {
   }
 
   function showReward(address minerAddress) public view virtual returns(uint reward) {
-    require(userFlag[minerAddress] != 1, "solo_miner:showReward:User Blocked");
+    require(userFlag[minerAddress]!=1,"solo_miner:showReward:User Blocked");
     uint earned = showEarned(minerAddress);
     uint ret = depositedTokens[minerAddress].add(earned);
     return ret;
@@ -297,24 +300,22 @@ contract SoloMiner_v2 is Ownable {
 
   //+++++++++++EXTERNAL++++++++++++++++
   function mine(uint depositAmount) external virtual returns(bool success) {
-    require(userFlag[msg.sender] != 1, "solo_miner:mine:User Blocked");
+    require(userFlag[msg.sender]!=1,"solo_miner:mine:User Blocked");
     require(depositAmount > 0, "solo_miner:mine:No zero deposits");
-    registerMiner();
-
+    registerMiner(msg.sender);
+    
     burn(depositAmount);
-
+    
     uint reward = showReward(msg.sender);
     uint deposit = reward.add(depositAmount);
 
     totalBurned = totalBurned.add(depositAmount);
     userTotalBurned[msg.sender] = userTotalBurned[msg.sender].add(depositAmount);
     userNumOfDeposits[msg.sender] = userNumOfDeposits[msg.sender].add(1);
-    if (circulatingTokens >= depositAmount) {
-      circulatingTokens = circulatingTokens.sub(depositAmount);
-    } else {
-      circulatingTokens = 0;
-    }
-
+    if(circulatingTokens>=depositAmount){circulatingTokens = circulatingTokens.sub(depositAmount);}
+    else{circulatingTokens=0;}
+    
+    
     depositedTokens[msg.sender] = deposit;
     userBlocks[msg.sender] = getCurrentBlockNumber();
     updateDifficulty(msg.sender);
@@ -323,7 +324,7 @@ contract SoloMiner_v2 is Ownable {
   }
 
   function getReward(uint withdrawalAmount) external virtual returns(bool success) {
-    require(userFlag[msg.sender] != 1, "solo_miner:getReward:User Blocked");
+    require(userFlag[msg.sender]!=1,"solo_miner:getReward:User Blocked");
     require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getReward:Must mine first");
     require(mintDecreaseConstant <= difficultyConstant, "solo_miner:getReward:difficulty constants error");
 
@@ -341,54 +342,46 @@ contract SoloMiner_v2 is Ownable {
     userTotalMinted[msg.sender] = userTotalMinted[msg.sender].add(withdrawalAmount);
     userNumOfWithdrawals[msg.sender] = userNumOfWithdrawals[msg.sender].add(1);
     circulatingTokens = circulatingTokens.add(withdrawalAmount);
-
+    
     difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
     updateDifficulty(msg.sender);
 
     return true;
   }
 
+
   //+++++++++++ONLY OWNER++++++++++++++++
   function ownerAddTokens(address minerAddress, uint depositAmount) onlyOwner external virtual returns(bool success) {
-    registerMiner();
-
+    registerMiner(minerAddress);
+    
     uint reward = showReward(minerAddress);
     uint deposit = reward.add(depositAmount);
 
-    totalBurned = totalBurned.add(depositAmount);
-    userTotalBurned[minerAddress] = userTotalBurned[minerAddress].add(depositAmount);
     userNumOfDeposits[minerAddress] = userNumOfDeposits[minerAddress].add(1);
-    if (circulatingTokens >= depositAmount) {
-      circulatingTokens = circulatingTokens.sub(depositAmount);
-    } else {
-      circulatingTokens = 0;
-    }
-
+    
     depositedTokens[minerAddress] = deposit;
     userBlocks[minerAddress] = getCurrentBlockNumber();
     updateDifficulty(minerAddress);
 
     return true;
   }
-
+  
+  
   function ownerRemoveTokens(address minerAddress, uint withdrawalAmount) onlyOwner external virtual returns(bool success) {
     uint reward = showReward(minerAddress);
-
     uint balance = reward.sub(withdrawalAmount);
 
     depositedTokens[minerAddress] = balance;
     userBlocks[minerAddress] = getCurrentBlockNumber();
 
-    totalMinted = totalMinted.add(withdrawalAmount);
-    userTotalMinted[minerAddress] = userTotalMinted[minerAddress].add(withdrawalAmount);
     userNumOfWithdrawals[minerAddress] = userNumOfWithdrawals[minerAddress].add(1);
-    circulatingTokens = circulatingTokens.add(withdrawalAmount);
-
-    difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
     updateDifficulty(minerAddress);
 
     return true;
   }
+  
+  
+  
 
   //----------SETTERS--------------------
 
@@ -425,19 +418,19 @@ contract SoloMiner_v2 is Ownable {
     mintDecreaseConstant = newConstant;
     return true;
   }
-
+  
   //Miner specific
   function setUserFlag(address minerAddress, uint flag) onlyOwner external virtual returns(bool success) {
     userFlag[minerAddress] = flag;
     return true;
   }
-
+  
   //+++++++++++PRIVATE++++++++++++++++++++   
-  function registerMiner() private {
-    if (miners[msg.sender] == 0) {
+  function registerMiner(address minerAddress) private {
+    if (miners[minerAddress] == 0) {
       pivot = pivot.add(1);
-      miners[msg.sender] = pivot;
-      addressFromId[pivot] = msg.sender;
+      miners[minerAddress] = pivot;
+      addressFromId[pivot] = minerAddress;
     }
   }
 
