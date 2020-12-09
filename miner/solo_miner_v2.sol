@@ -180,7 +180,6 @@ contract SoloMiner_v2 is Ownable {
   }
   
   //+++++++++++VIEWS++++++++++++++++
-  //----------GETTERS---------------
 
   //Contract addresses
   function getRouterContract() external view virtual returns(address routerAddress) {
@@ -294,7 +293,7 @@ contract SoloMiner_v2 is Ownable {
     return ret;
   }
 
-  //+++++++++++EXTERNAL++++++++++++++++
+  //+++++++++++FUNCTIONS++++++++++++++++
   function mine(uint depositAmount) external virtual returns(bool success) {
     require(userFlag[msg.sender]!=1,"solo_miner:mine:User Blocked");
     require(depositAmount > 0, "solo_miner:mine:No zero deposits");
