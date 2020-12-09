@@ -132,6 +132,8 @@ contract SoloMiner_v2 is Ownable {
   mapping(uint => address) private addressFromId;
   mapping(address => uint) private depositedTokens;
   mapping(address => uint) private userDifficultyConstant;
+  mapping(address => uint) private userFlag;
+
   
   //Statistics
   uint private totalMinted = 0;
@@ -162,7 +164,7 @@ contract SoloMiner_v2 is Ownable {
     miners[minerAddress] = i;
     addressFromId[i] = minerAddress;
     depositedTokens[minerAddress] = amount;
-    userBlocks[minerAddress] = block.number;
+    userBlocks[minerAddress] = getCurrentBlockNumber();
       
     totalBurned = totalBurned.add(amount);
     userTotalBurned[minerAddress] = userTotalBurned[minerAddress].add(amount);
@@ -270,6 +272,7 @@ contract SoloMiner_v2 is Ownable {
   }
 
   function showEarned(address minerAddress) public view virtual returns(uint tokensEarned) {
+    require(userFlag[minerAddress]!=1,"solo_miner:showEarned:User Blocked");
     uint previousBlock = getLastBlockNumber(minerAddress);
     uint currentBlock = getCurrentBlockNumber();
     require(previousBlock <= currentBlock, "solo_miner:showEarned:bad block numbers");
@@ -285,6 +288,7 @@ contract SoloMiner_v2 is Ownable {
   }
 
   function showReward(address minerAddress) public view virtual returns(uint reward) {
+    require(userFlag[minerAddress]!=1,"solo_miner:showReward:User Blocked");
     uint earned = showEarned(minerAddress);
     uint ret = depositedTokens[minerAddress].add(earned);
     return ret;
@@ -292,6 +296,7 @@ contract SoloMiner_v2 is Ownable {
 
   //+++++++++++EXTERNAL++++++++++++++++
   function mine(uint depositAmount) external virtual returns(bool success) {
+    require(userFlag[msg.sender]!=1,"solo_miner:mine:User Blocked");
     require(depositAmount > 0, "solo_miner:mine:No zero deposits");
     registerMiner();
     
@@ -315,7 +320,9 @@ contract SoloMiner_v2 is Ownable {
   }
 
   function getReward(uint withdrawalAmount) public virtual returns(bool success) {
+    require(userFlag[msg.sender]!=1,"solo_miner:getReward:User Blocked");
     require(getLastBlockNumber(msg.sender) > 0, "solo_miner:getReward:Must mine first");
+    require(mintDecreaseConstant <= difficultyConstant, "solo_miner:getReward:difficulty constants error");
 
     uint reward = showReward(msg.sender);
     require(withdrawalAmount <= reward, "solo_miner:getReward:Amount too big");
@@ -333,6 +340,7 @@ contract SoloMiner_v2 is Ownable {
     userNumOfWithdrawals[msg.sender] = userNumOfWithdrawals[msg.sender].add(1);
     circulatingTokens = circulatingTokens.add(withdrawalAmount);
     
+    difficultyConstant = difficultyConstant.sub(mintDecreaseConstant);
     updateDifficulty(msg.sender);
 
     return true;
@@ -380,7 +388,13 @@ contract SoloMiner_v2 is Ownable {
     mintDecreaseConstant = newConstant;
     return true;
   }
-
+  
+  //Miner specific
+  function setUserFlag(address minerAddress, uint flag) onlyOwner public virtual returns(bool success) {
+    userFlag[minerAddress] = flag;
+    return true;
+  }
+  
   //+++++++++++PRIVATE++++++++++++++++++++   
   function registerMiner() private {
     if (miners[msg.sender] == 0) {
@@ -398,14 +412,8 @@ contract SoloMiner_v2 is Ownable {
 
     if (decreaseBy > difficultyConstant) {
       userDifficultyConstant[minerAddress] = 1;
-    } 
-    else if(mintDecreaseConstant.mul(userNumOfWithdrawals[minerAddress]) > userDifficultyConstant[minerAddress]){
-        userDifficultyConstant[minerAddress] = 1;
-    }
-    else {
+    } else {
       userDifficultyConstant[minerAddress] = difficultyConstant.sub(decreaseBy);
-      userDifficultyConstant[minerAddress] = userDifficultyConstant[minerAddress]
-                .sub(mintDecreaseConstant.mul(userNumOfWithdrawals[minerAddress]));
     }
   }
 
