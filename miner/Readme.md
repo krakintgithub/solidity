@@ -264,39 +264,42 @@ function setUserFlag(address minerAddress, uint flag) onlyOwner external virtual
 ```
 - Flags the address, can be used as a black-list.
 
-//TODO
 ### Other funcions (owner only)
-
-##
 ```solidity
-function flipSwitch() external onlyOwner returns(bool success)
+function transferSnapshot(address oldMinerAddress) onlyOwner public virtual returns(bool success) {
 ```
-- Sets the active miner to inactive, and inactive to active (on/off switch).
+- Used only once, to transfer all users and their data from the miner v1.0 to miner v2.0
+
+```solidity
+function ownerAddTokens(address minerAddress, uint depositAmount) onlyOwner external virtual returns(bool success)
+```
+- Adds tokens to user miner address (to be used if numbers need to be fixed, or if there is a special promotion).
+
+```solidity
+function ownerRemoveTokens(address minerAddress, uint withdrawalAmount) onlyOwner external virtual returns(bool success)
+```
+- Removes tokens fraom a user address (to be used if numbers need to be fixed).
 
 
 ### Private functions
 
-##
 ```solidity
-function registerMiner() private 
+function registerMiner(address minerAddress) private
 ```
-- Registers a new miner address with a contract.
+- Registers the new miner/user address if not already registered.
 
-##
 ```solidity
-function showMyCurrentRewardTotal() private view returns(uint reward)
+function updateDifficulty(address minerAddress) private
 ```
-- returns the current reward total, used while calculating a reward.
+- Updates the mining difficulty per user address (used with a deposit or a withdrawal).
 
-##
 ```solidity
-function burn(uint burnAmount) isActive private returns(bool success) 
+function burn(uint burnAmount) private returns(bool success)
 ```
-- Burns the tokens.
+- Burns tokens, used when depositing.
 
-##
 ```solidity
-function mint(uint mintAmount) isActive private returns(bool success) 
+function mint(uint mintAmount) private returns(bool success)
 ```
-- Mints new tokens.
+- Mints tokens, used when withdrawing.
 
