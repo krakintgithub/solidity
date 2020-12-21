@@ -4,25 +4,22 @@
 </p>
 
 
-## <p align="center">0xE91c47806D720a8C0A8A87473E6788d30EB1D8F0 (OBSOLETE)</p>
-new: 0xe24F992D6E34357cF67D741769eAAD7bC44E32DD
+## <p align="center">0xe24F992D6E34357cF67D741769eAAD7bC44E32DD</p>
 
 ## Introduction
 ### General overview
-The miner contract is connected to a Router component/contract of the Krakin't token. It mainly uses two functions: mint and burn. The miner contract does not store any tokens and whenever the user deposits the tokens, they are burned. When tokens are withdrawn, they are minted again from the address(0). Therefore, the miner is simply keeping a track of how many tokens were deposited or withdrawn by whom and when. To apply the proof of a burn, we are simply keeping a ratio of the total supply in comparison to the current supply as well as the number of tokens that were burned, per user. Since we want the Krakin't token supplies to be loosely related to the actual token supplies, we have initiated the miner with the assumed total and a current supply. For example, if an exchange needs more tokens to be minted and deposited for liquidity, then it should not have any impact on the miner and the reward amounts. For this reason, we cannot directly relate to the actual token supply. Nevertheless, whenever the tokens are minted or burned by the miner, those tokens are included within the actual supply. Simply, all the ratio is related to an initial assumption regarding the supply, while the minting and burning are related to the actual token supply.
+The miner contract is connected to a Router component/contract of the Krakin't token. It mainly uses two functions: mint and burn. The miner contract does not store any tokens and whenever the user deposits the tokens, they are burned. When tokens are withdrawn, they are minted again from the address(0). Therefore, the miner is simply keeping a track of how many tokens were deposited or withdrawn by whom and when. In the previous version of Krakin’t miner, we have mentioned a mechanism that balances impact of minting and burning tokens by using the miner. However, we have removed this mechanism and simplified the mining process. We gave some advantages to early miners, while the mining difficulty is slowly increasing with time. Furthermore, the mining difficulty does not decrease, unless we do it manually. Since it is impossible to update everyone’s tables without wasting too much Ethereum GAS, we have introduced an asynchronous mining difficulty. 
+
+### Asynchronous mining difficulty
+Asynchronous mining difficulty works by making two calculations. First, we keep a track of the global time that passed since the mining contract got deployed on the Ethereum network. We use the Ethereum block numbers instead of the time-units such as seconds. Mining one block on Ethereum takes 12-20 seconds. As soon as the miner deposits or withdraws tokens from the miner contract, we increase the mining difficulty for them by assigning them a new Ethereum block number. As long as they do not make any changes (this includes adding more tokens to a miner), their mining difficulty will remain the same. This is how the mining difficulty is asynchronous. 
 
 ### Differences between BTC, ETH, ... and the KRK mining approach
-- The first main difference is the fact that there is no hash-rate. Since we are using the time and deposited amount of KRK to determine the power, the only process we need is a chronometer. The chronometer is the Ethereum block mining, and therefore, this is how we are avoiding the use of any specialized hardware.
+- The first main difference is that there is no hash-rate. Since we are using the time and deposited amount of KRK to determine the power, the only process we need is a chronometer. The chronometer is the Ethereum block mining, and therefore, this is how we are avoiding the use of any specialized hardware.
 
 - We do not need to measure the mining difficulty since we are correlating it with the speed at which Ethereum blocks are mined.
 
-- We are not using any halving and the rewards per block are a constant in relation to deposited tokens. Halving is removed in order to avoid the unfair early advantages.
-
-- Every time tokens are burned by the miner, the mining rewards increase according to an assumed total versus current supply ratio.
-
-- The supply of tokens increases by demand and not the time, whenever the tokens are minted with the miner.
-
 - Mining pools are not necessary since the miner is a mining pool, while difficulty is regulated by the amount of an investment and burned tokens.
+
 
 ## Source-code
 ### General overview
@@ -35,37 +32,46 @@ All variables are private, and they are accessed by the getter or setter methods
 
 `routerContract` - pointer to the Router contract of a Krakin't token.
 
-`totalBurned` - tells us the overall number of tokens that were burned by the miner.
+`OldVersionMiner` - pointer to the Miner v1.0.
 
-`totalMinted` - tells us the overall number of tokens that were minted by the miner.
+`rewardConstant` - constant used to calculate the reward.
 
-`active` - the miner off/on switch, in case we decide to stop/continue the miner contract.
+`difficultyConstant` - constant used to calculate difficulty.
 
-`numerator` - used for calculating user's rewards, since Solidity does not allow decimals.
+`decreaseDifficultyConstant` - constant used to calculate difficulty.
 
-`denominator` - used for calculating user's rewards, since Solidity does not allow decimals.
+`mintDecreaseConstant` - constant used to calculate difficulty.
 
-`minimumReturn` - this is the number of tokens (deposited amount) that user will get back regardless even if the miner is stopped.
-
-`userBlocks` - the last block that was mined when a deposit was made. This is used to calculate the reward according to a passed time.
-
-`miners` - allows us to get the miner ID knowing the miner address. Also, to determine if the address is a miner.
-
-`addressFromId` - returns the address of a miner providing an incremental ID. We can use this to see the current status of a miner.
-
-`mutex` - safety protocol to avoid the contract attacks by overflowing it.
+`creationBlock` - the block number at which the miner got deployed
 
 `pivot` - the last miner ID, also tells us how many miners we have in total.
 
-`rewardConstant` - a constant used to determine how much the users are earning by block. Changing this value would change everyone's rewards. This is why it is important not to change it, unless necessary.
+`userBlocks` - the last block that was mined when a deposit was made. This is used to calculate the reward according to a passed time.
 
-`totalConstant` - assumed total supply of Krakin't tokens.
+`miners` - allows us to get the miner ID knowing the miner/user address. Also, to determine if the address is a miner/user.
 
-`currentConstant` - assumed current supply of Krakin't tokens.
+`addressFromId` - allows us to get the miner address knowing the miner/user ID.
 
-`inflationBuffer` - we use this buffer to regulate the point at which the minting the new tokens will affect the rewards of a collective. Otherwise, if this number is not reached, we continue introducing new tokens by the means of inflation. We may alter this variable as necessary. Initially, we allow 10 million tokens to be introduced.
+`depositedTokens` - number of tokens that the user deposited (total).
 
-`contractAddress` - the address of a miner contract.
+`userDifficultyConstant` - user's own difficulty constant.
+
+`userFlag` - for marking the users, also a blacklist (when necessary to apply).
+
+`totalMinted` - tells us the overall number of tokens that were minted.
+
+`totalBurned` - tells us the overall number of tokens that were burned by the miner.
+
+`userTotalMinted` - tells us the overall number of tokens that were minted by the miner/user.
+
+`userTotalBurned` - tells us the overall number of tokens that were burned by the miner/user.
+
+`userNumOfDeposits` - total number of user deposits
+
+`userNumOfWithdrawals` - total number of user withdrawals
+
+ 
+ 
 
 ### View functions (getters)
 
