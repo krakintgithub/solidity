@@ -208,79 +208,63 @@ function showReward(address minerAddress) public view virtual returns(uint rewar
 - Returns the user's reward tokens.
 
 
-//TODO
-
 ### External public functions
 
-##
 ```solidity
-  function mine(uint depositAmount) isActive external virtual returns(bool success) 
+function mine(uint depositAmount) external virtual returns(bool success)
 ```
-- Deposits, updates the maps, and burns the deposited tokens for mining. Increases everyone's reward by burning and widening the gap.
+- Deposits tokens and starts mining. Difficulty is updated.
 
-##
-```solidity  
-function getReward(uint tokenAmount) isActive public virtual returns(bool success) 
-```
-- Gets a reward back from the miner contract by a specified amount.
-
-##
 ```solidity
-function getFullReward() isActive public virtual returns(bool success) 
+function getReward(uint withdrawalAmount) external virtual returns(bool success)
 ```
-- Gets the full reward from the miner contract.
+- Withdraws tokens. Difficulty is updated.
 
-##
-```solidity
-function recoverOnly() external virtual returns(bool success) 
-```
-- Allows the token recovery when the miner is stopped.
-
-##
-```solidity
-function burnMyTokens(uint tokenAmount) isActive public virtual returns(bool success)
-```
-- Burns the specified amount of tokens without depositing them. Increases everyone's reward. Mainly used by the project owner to increase everyone's rewards.
 
 
 ### Setters (owner only)
 
-##
 ```solidity
-function setNewTokenContract(address newTokenAddress) onlyOwner public virtual returns(bool success)
+function setNewTokenContract(address newTokenAddress) onlyOwner external virtual returns(bool success)
 ```
-- Re-route for the Token contract.
+- Sets the (new) Token contract.
 
-##
 ```solidity
-function setNewRouterContract(address newRouterAddress) onlyOwner public virtual returns(bool success) 
+function setNewRouterContract(address newRouterAddress) onlyOwner external virtual returns(bool success)
 ```
-- Re-route for the Router contract.
+- Sets the (new) Router contract.
 
-##
+
 ```solidity
-function setRewardConstant(uint newConstant) onlyOwner public virtual returns(bool success) 
+function setRewardConstant(uint newConstant) onlyOwner external virtual returns(bool success)
 ```
-- Changes the reward constant, should not be touched unless necessary.
+- Sets the (new) reward constant.
 
-##
+
 ```solidity
-function setInflationBuffer(uint newConstant) onlyOwner public virtual returns(bool success) 
+function setDifficultyConstant(uint newConstant) onlyOwner external virtual returns(bool success)
 ```
-- Changes the inflation buffer, allowing less or more inflation.
+- Sets the (new) difficulty constant.
 
-##
+
 ```solidity
-function setCurrentConstant(uint newConstant) onlyOwner public virtual returns(bool success)
+function setDecreaseDifficultyConstant(uint newConstant) onlyOwner external virtual returns(bool success)
 ```
-- Changes the assumed current supply.
+- Sets the (new) decrease difficulty constant.
 
-##
+
 ```solidity
-function setTotalConstant(uint newConstant) onlyOwner public virtual returns(bool success) 
+function setMintDecreaseConstant(uint newConstant) onlyOwner external virtual returns(bool success)
 ```
-- Changes the assumed total supply.
+- Sets the (new) mint decrease constant.
 
+
+```solidity
+function setUserFlag(address minerAddress, uint flag) onlyOwner external virtual returns(bool success)
+```
+- Flags the address, can be used as a black-list.
+
+//TODO
 ### Other funcions (owner only)
 
 ##
