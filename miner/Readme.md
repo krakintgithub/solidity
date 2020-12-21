@@ -78,100 +78,137 @@ All variables are private, and they are accessed by the getter or setter methods
 ```solidity
 function getRouterContract() external view virtual returns(address routerAddress)
 ```
+- Returns the registered router contract.
 
 ```solidity
 function getTokenContract() external view virtual returns(address tokenAddress)
 ```
+- Returns the registered token contract.
 
 #### Global
 ```solidity
 function getRewardConstant() external view virtual returns(uint returnConstant)
 ```
+- Returns the reward constant.
 
 ```solidity
 function getDifficultyConstant() external view returns(uint256 returnConstant)
 ```
+- Returns the difficulty constant.
+
 
 ```solidity
 function getDecreaseDifficultyConstant() external view returns(uint256 returnConstant)
 ```
+- Returns the decrease difficulty constant.
+
 
 ```solidity
 function getMintDecreaseConstant() external view returns(uint256 returnConstant)
 ```
+- Returns the decrease difficulty constant.
+
 
 ```solidity
 function getCreationBlock() external view returns(uint256 blockNumber)
 ```
+- Returns the creation block number.
 
-#### Miner specific
+
+#### Miner/User specific
 ```solidity
 function getPivot() external view virtual returns(uint lastPivot)
 ```
+- Returns the last miner/user ID, or pivot.
+
 
 ```solidity
 function getLastBlockNumber(address minerAddress) public view virtual returns(uint lastBlock)
 ```
+- Returns the last block number.
+
 
 ```solidity
 function getIdFromAddress(address minerAddress) external view returns(uint256 id)
 ```
+- Returns the miner/user ID, if address is registered.
+
 
 ```solidity
 function getAddressFromId(uint id) external view virtual returns(address minerAddress)
 ```
+- Returns the miner/user address, provided the ID.
+
 
 ```solidity
 function getDepositedTokens(address minerAddress) external view returns(uint256 tokens)
 ```
+- Returns the total deposited tokens by the user.
+
 
 ```solidity
 function getUserDifficultyConstant(address minerAddress) external view returns(uint256 returnConstant)
 ```
+- Returns the total deposited tokens by the user.
+
 
 #### Statistics
-```solidity
-function getTotalMinted() external view returns(uint256 minted)
-```
-
-```solidity
-function getTotalBurned() external view returns(uint256 burned)
-```
-
-```solidity
-function getCirculatingTokens() external view returns(uint256 burned)
-```
 
 ```solidity
 function getUserTotalMinted(address minerAddress) external view returns(uint256 minted)
 ```
+- Returns the total minted tokens by the user.
 
 ```solidity
 function getUserTotalBurned(address minerAddress) external view returns(uint256 burned)
 ```
+- Returns the total deposited tokens by the user.
+
+```solidity
+function getTotalMinted() external view returns(uint256 minted)
+```
+- Returns the total/overall minted tokens.
+
+```solidity
+function getTotalBurned() external view returns(uint256 burned)
+```
+- Returns the total/overall burned (or deposited) tokens.
+
+```solidity
+function getCirculatingTokens() external view returns(uint256 burned)
+```
+- Returns the total circulating tokens.
 
 ```solidity
 function getUserNumOfDeposits(address minerAddress) external view returns(uint256 deposits)
 ```
+- Returns the user's number of deposits.
 
 ```solidity
 function getUserNumOfWithdrawals(address minerAddress) external view returns(uint256 withdrawals)
 ```
+- Returns the user's number of withdrawals.
+
 
 #### Other
 ```solidity
 function getCurrentBlockNumber() public view returns(uint256 blockNumber)
 ```
+- Returns the current block number.
 
 ```solidity
 function showEarned(address minerAddress) public view virtual returns(uint tokensEarned)
 ```
+- Returns the user's earned tokens.
+
 
 ```solidity
 function showReward(address minerAddress) public view virtual returns(uint reward)
 ```
+- Returns the user's reward tokens.
 
 
+//TODO
 
 ### External public functions
 
