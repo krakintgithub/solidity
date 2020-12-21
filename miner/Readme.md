@@ -74,125 +74,103 @@ All variables are private, and they are accessed by the getter or setter methods
  
 
 ### View functions (getters)
-
+#### Contract addresses
 ```solidity
-function getLastPivot() external view virtual returns (uint lastPivot)
+function getRouterContract() external view virtual returns(address routerAddress)
 ```
-- Returns the pivot variable as well as the amount of miners.
-
-##
-```solidity
-function getAddressFromId(uint id) external view virtual returns(address minerAddress)
-```
-- Returns the miner address provided an ID (pivot).
-
-```solidity
-function getUserNumerator(address minerAddress) external view virtual returns(uint minerNumerator)
-```
-- To calculate the user reward as well as a deposit.
-
-##
-
-```solidity
-function getUserDenominator(address minerAddress) external view virtual returns(uint minerDenominator)
-```
-- To calculate the user reward as well as a deposit.
-
-##
-
-```solidity
-function getUserBlocks(address minerAddress) external view virtual returns(uint minerBlocks)
-```
-- To get the last block of the last deposit by the user.
-
-##
-
-```solidity
-function getContractAddress() external view virtual returns(address tokenAddress)
-```
-- Returns THIS contract address.
-
-##
 
 ```solidity
 function getTokenContract() external view virtual returns(address tokenAddress)
 ```
-- Returns the Krakin't Token contract the miner is pointing to.
 
-##
+#### Global
+```solidity
+function getRewardConstant() external view virtual returns(uint returnConstant)
+```
 
 ```solidity
-function getTotalBurned() external view virtual returns(uint burned)
+function getDifficultyConstant() external view returns(uint256 returnConstant)
 ```
-- Returns the total number of burned tokens (by the miner).
-
-##
 
 ```solidity
-function getTotalMinted() external view virtual returns(uint burned)
+function getDecreaseDifficultyConstant() external view returns(uint256 returnConstant)
 ```
-- Returns the total number of minted tokens (by the miner).
 
-##
+```solidity
+function getMintDecreaseConstant() external view returns(uint256 returnConstant)
+```
+
+```solidity
+function getCreationBlock() external view returns(uint256 blockNumber)
+```
+
+#### Miner specific
+```solidity
+function getPivot() external view virtual returns(uint lastPivot)
+```
 
 ```solidity
 function getLastBlockNumber(address minerAddress) public view virtual returns(uint lastBlock)
 ```
-- Returns last transaction block number for the miner.
-
-##
 
 ```solidity
-function getRouterContract() external view virtual returns(address routerAddress)
+function getIdFromAddress(address minerAddress) external view returns(uint256 id)
 ```
-- Returns the Krakin't Router contract the miner is pointing to.
 
-##
+```solidity
+function getAddressFromId(uint id) external view virtual returns(address minerAddress)
+```
 
+```solidity
+function getDepositedTokens(address minerAddress) external view returns(uint256 tokens)
+```
+
+```solidity
+function getUserDifficultyConstant(address minerAddress) external view returns(uint256 returnConstant)
+```
+
+#### Statistics
+```solidity
+function getTotalMinted() external view returns(uint256 minted)
+```
+
+```solidity
+function getTotalBurned() external view returns(uint256 burned)
+```
+
+```solidity
+function getCirculatingTokens() external view returns(uint256 burned)
+```
+
+```solidity
+function getUserTotalMinted(address minerAddress) external view returns(uint256 minted)
+```
+
+```solidity
+function getUserTotalBurned(address minerAddress) external view returns(uint256 burned)
+```
+
+```solidity
+function getUserNumOfDeposits(address minerAddress) external view returns(uint256 deposits)
+```
+
+```solidity
+function getUserNumOfWithdrawals(address minerAddress) external view returns(uint256 withdrawals)
+```
+
+#### Other
 ```solidity
 function getCurrentBlockNumber() public view returns(uint256 blockNumber)
 ```
-- Returns the latest Ethereum block number.
-
-##
 
 ```solidity
-function getGapSize() public view virtual returns(uint gapSize)
+function showEarned(address minerAddress) public view virtual returns(uint tokensEarned)
 ```
-- Returns a difference between the assumed total and current supplies, for calculating the rewards.
-
-##
-
-```solidity
-function getRewardConstant() external view virtual returns(uint routerAddress)
-```
-- Returns the reward constant used to determine how much the users are earning per block.
-
-##
-
-```solidity
-function getTotalConstant() external view virtual returns(uint totalConstant)
-```
-- Returns the assumed total supply.
-
-##
-```solidity
-function getCurrentConstant() external view virtual returns(uint currentConstant)
-```
-- Returns the assumed current supply.
-
-##
-```solidity
-function getinflationBuffer() external view virtual returns(uint inflationBuffer)
-```
-- Returns the inflationBuffer constant.
-
-### View functions (other)
 
 ```solidity
 function showReward(address minerAddress) public view virtual returns(uint reward)
 ```
-- Returns the current user reward.
+
 
 
 ### External public functions
