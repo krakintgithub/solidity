@@ -20,7 +20,7 @@ Contract-Side
 2. Registration providing a block number, add encrypted message
 3. Withdrawal approval
 4. Withdrawal of tokens and/or deposited ETH
-5. Blacklist
+5. Blacklist of tokens and wallets
 6. Admin list, add or remove
 7. GAS calculation before execution
 8. Prevent owner/admin from stealing tokens or ETH
