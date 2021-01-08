@@ -27,6 +27,7 @@ Contract-Side
 
 Backend-side
 1. API call to blockchain to get deposit data providing a block number
-2. Encryption/Decryption
+2. Encryption/Decryption/Confirmation
 3. Allowing of withdrawals by admin or owner
 4. General DB management
+5. Safe storage of private keys (Encryption and admin wallet)
