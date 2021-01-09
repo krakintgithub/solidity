@@ -133,7 +133,7 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
 
 
 //==== TOKEN ====
-
+//initial transfer is a web3 frontend function, block.number detection is a web3 too.
 //TODO register token (assuming a deposit happened) by admin only!
 //TODO withdraw by sending, by admin only!
 
