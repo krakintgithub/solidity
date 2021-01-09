@@ -44,6 +44,18 @@
      _owner = newOwner;
    }
  }
+ 
+ 
+ 
+ 
+abstract contract Transfer1 {
+   function transfer(address toAddress, uint256 amount) external virtual returns(bool);
+}
+abstract contract Transfer2 {
+   function transfer(address toAddress, uint256 amount) external virtual;
+}
+ 
+ 
 library SafeMath {
 
    function add(uint256 a, uint256 b) internal pure returns(uint256) {
@@ -75,10 +87,17 @@ using SafeMath for uint;
 mapping(address => uint) private depositedEth;
 mapping(address => uint) private adminEth;
 mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
+mapping(address => uint) depositedAssets;
 
 mapping(address => uint) private lastBlock;
 
 address private adminAddress;
+
+Transfer1 private transfer1;
+Transfer2 private transfer2;
+
+//TODO figure out a way to calculate dust ETH
+
 
 constructor() {
     adminAddress = msg.sender;
@@ -133,9 +152,45 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
 
 
 //==== TOKEN ====
-//initial transfer is a web3 frontend function, block.number detection is a web3 too.
-//TODO register token (assuming a deposit happened) by admin only!
-//TODO withdraw by sending, by admin only!
+
+//initial transfer is a web3 frontend function
+
+function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) public virtual returns (bool success){
+    require(msg.sender == adminAddress);
+    depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
+    depositedAssets[tokenAddress] = depositedAssets[tokenAddress].add(amount);
+    return true;
+}
+
+
+//TODO TEST THIS!
+function withdrawAssets(address userAddress, address tokenAddress, uint amount) public virtual returns (bool success){
+    require(msg.sender == adminAddress);
+
+    transfer1 = Transfer1(tokenAddress);
+    transfer2 = Transfer2(tokenAddress);
+    
+    depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].sub(amount);
+
+    bool tr1;
+    
+    try transfer1.transfer(userAddress, amount){
+        tr1=true;
+     } catch Error(string memory) {
+         tr1=false;
+     }
+     
+     if(!tr1){
+        try transfer2.transfer(userAddress, amount){
+            tr1=true;
+        } catch Error(string memory) {}
+     }
+    
+    transfer1 = Transfer1(0);
+    transfer2 = Transfer2(0);
+    return true;
+}
+
 
 //----------views------
    function getEthBalance(address userAddress) public view virtual returns(uint ethAmount) {
@@ -150,6 +205,9 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
    }
    function getContractEth() public view virtual returns(uint contractEth){
        return address(this).balance;
+   }
+   function getAssetBalace(address userAddress, address tokenAddress) public view virtual returns(uint assetAmount){
+       return depositedTokens[userAddress][tokenAddress];
    }
 //-------only owner---------
    function setAdminAddress(address newAdminAddress) public onlyOwner virtual returns(bool success){
