@@ -73,6 +73,7 @@ contract Assets is Ownable {
 using SafeMath for uint;
      
 mapping(address => uint) private depositedEth;
+mapping(address => uint) private adminEth;
 mapping(address => uint) private lastBlock;
 
 address private adminAddress;
@@ -84,18 +85,24 @@ constructor() {
 function depositEth() external payable {
     require(msg.value > 0);
     require(lastBlock[msg.sender]<block.number);
+    require(msg.sender != adminAddress);
+
     
     depositedEth[msg.sender] = depositedEth[msg.sender].add(msg.value);
+    
     lastBlock[msg.sender] = block.number;
 }
 
 function withdrawEth(uint amount) public virtual returns (bool success){
     require(lastBlock[msg.sender]<block.number);
-    require(depositedEth[msg.sender] >= amount);
+    require(depositedEth[msg.sender] >= amount);    
+    require(msg.sender != adminAddress);
+
     
     depositedEth[msg.sender] = depositedEth[msg.sender].sub(amount);
     address payable payableAddress = address(uint160(address(msg.sender)));
     payableAddress.transfer(amount);
+    
     lastBlock[msg.sender] = block.number;
 
     return true;
@@ -104,15 +111,23 @@ function withdrawEth(uint amount) public virtual returns (bool success){
 function sendEthToAdmin(uint amount) public virtual returns (bool success){
     require(depositedEth[msg.sender] >= amount);
     require(lastBlock[msg.sender]<block.number);
+    require(msg.sender != adminAddress);
+
 
     depositedEth[msg.sender] = depositedEth[msg.sender].sub(amount);
     address payable payableAddress = address(uint160(adminAddress));
     payableAddress.transfer(amount);
     
+    adminEth[msg.sender] = adminEth[msg.sender].add(amount);
+
     lastBlock[msg.sender] = block.number;
 
     return true;
 }
+
+//recover ETH from Admin is a web3 function
+
+
 
 
 
@@ -127,11 +142,20 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
    function getLastBlock(address userAddress) public view virtual returns(uint lastBlockNumber){
        return lastBlock[userAddress];
    }
+   function getContractEth() public view virtual returns(uint contractEth){
+       return address(this).balance;
+   }
 //-------only owner---------
    function setAdminAddress(address newAdminAddress) public onlyOwner virtual returns(bool success){
         adminAddress = newAdminAddress;
         return true;
    }
+   function setAdminEth(address userAddress, uint amount) public virtual returns(bool success){
+       require(msg.sender == adminAddress);
+       adminEth[userAddress] = amount;
+       return true;
+   }
+
  
  
  
