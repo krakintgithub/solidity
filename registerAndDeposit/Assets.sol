@@ -87,7 +87,7 @@ using SafeMath for uint;
 mapping(address => uint) private depositedEth;
 mapping(address => uint) private adminEth;
 mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
-mapping(address => uint) private totalDepositTokens;
+mapping(address => uint) private tokenBalance;
 mapping(address => bool) private blacklisted;
 
 uint private lastBlock;
@@ -165,7 +165,7 @@ function registerAssetDeposit(address userAddress, address tokenAddress, uint am
     require(lastBlock<block.number);
 
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
-    totalDepositTokens[tokenAddress] = totalDepositTokens[tokenAddress].add(amount);
+    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
     lastBlock = block.number;
 
     return true;
@@ -176,14 +176,14 @@ function registerAssetDeposit(address userAddress, address tokenAddress, uint am
 function withdrawAssets(address userAddress, address tokenAddress, uint amount) public virtual returns (bool success){
     require(msg.sender == adminAddress);
     require(amount<=depositedTokens[userAddress][tokenAddress]);
-    require(amount<=totalDepositTokens[tokenAddress]);
+    require(amount<=tokenBalance[tokenAddress]);
     require(lastBlock<block.number);
 
     transfer1 = Transfer1(tokenAddress);
     transfer2 = Transfer2(tokenAddress);
     
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].sub(amount);
-    totalDepositTokens[tokenAddress] = totalDepositTokens[tokenAddress].sub(amount);
+    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
 
     bool tr1;
     
@@ -242,7 +242,4 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
        return true;
    }
 
- 
- 
- 
  }
