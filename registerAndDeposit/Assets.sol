@@ -88,6 +88,7 @@ mapping(address => uint) private depositedEth;
 mapping(address => uint) private adminEth;
 mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
 mapping(address => uint) depositedAssets;
+mapping(address => bool) private blacklisted;
 
 uint private lastBlock;
 
@@ -109,6 +110,7 @@ function depositEth() external payable {
     require(msg.value > 0);
     require(lastBlock<block.number);
     require(msg.sender != adminAddress);
+    require(!blacklisted[msg.sender]);
 
     
     depositedEth[msg.sender] = depositedEth[msg.sender].add(msg.value);
@@ -120,6 +122,8 @@ function withdrawEth(uint amount) public virtual returns (bool success){
     require(lastBlock<block.number);
     require(depositedEth[msg.sender] >= amount);    
     require(msg.sender != adminAddress);
+    require(!blacklisted[msg.sender]);
+
 
     
     depositedEth[msg.sender] = depositedEth[msg.sender].sub(amount);
@@ -135,6 +139,7 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
     require(depositedEth[msg.sender] >= amount);
     require(lastBlock<block.number);
     require(msg.sender != adminAddress);
+    require(!blacklisted[msg.sender]);
 
 
     depositedEth[msg.sender] = depositedEth[msg.sender].sub(amount);
@@ -157,8 +162,12 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
 
 function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) public virtual returns (bool success){
     require(msg.sender == adminAddress);
+    require(lastBlock<block.number);
+
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
     depositedAssets[tokenAddress] = depositedAssets[tokenAddress].add(amount);
+    lastBlock = block.number;
+
     return true;
 }
 
@@ -166,11 +175,15 @@ function registerAssetDeposit(address userAddress, address tokenAddress, uint am
 //TODO TEST THIS!
 function withdrawAssets(address userAddress, address tokenAddress, uint amount) public virtual returns (bool success){
     require(msg.sender == adminAddress);
+    require(amount<=depositedTokens[userAddress][tokenAddress]);
+    require(amount<=depositedAssets[tokenAddress]);
+    require(lastBlock<block.number);
 
     transfer1 = Transfer1(tokenAddress);
     transfer2 = Transfer2(tokenAddress);
     
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].sub(amount);
+    depositedAssets[tokenAddress] = depositedAssets[tokenAddress].sub(amount);
 
     bool tr1;
     
@@ -188,6 +201,8 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
     
     transfer1 = Transfer1(0);
     transfer2 = Transfer2(0);
+    lastBlock = block.number;
+
     return true;
 }
 
@@ -209,6 +224,9 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
    function getAssetBalace(address userAddress, address tokenAddress) public view virtual returns(uint assetAmount){
        return depositedTokens[userAddress][tokenAddress];
    }
+   function isBlacklisted(address userAddress) public view virtual returns (bool onBlacklist){
+       return blacklisted[userAddress];
+   }
 //-------only owner---------
    function setAdminAddress(address newAdminAddress) public onlyOwner virtual returns(bool success){
         adminAddress = newAdminAddress;
@@ -217,6 +235,10 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
    function setAdminEth(address userAddress, uint amount) public virtual returns(bool success){
        require(msg.sender == adminAddress);
        adminEth[userAddress] = amount;
+       return true;
+   }
+   function blacklistSwitch(address userAddress) public virtual returns(bool success){
+       blacklisted[userAddress] = !blacklisted[userAddress];
        return true;
    }
 
