@@ -89,7 +89,7 @@ mapping(address => uint) private adminEth;
 mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
 mapping(address => uint) depositedAssets;
 
-mapping(address => uint) private lastBlock;
+uint private lastBlock;
 
 address private adminAddress;
 
@@ -107,17 +107,17 @@ constructor() {
  
 function depositEth() external payable {
     require(msg.value > 0);
-    require(lastBlock[msg.sender]<block.number);
+    require(lastBlock<block.number);
     require(msg.sender != adminAddress);
 
     
     depositedEth[msg.sender] = depositedEth[msg.sender].add(msg.value);
     
-    lastBlock[msg.sender] = block.number;
+    lastBlock = block.number;
 }
 
 function withdrawEth(uint amount) public virtual returns (bool success){
-    require(lastBlock[msg.sender]<block.number);
+    require(lastBlock<block.number);
     require(depositedEth[msg.sender] >= amount);    
     require(msg.sender != adminAddress);
 
@@ -126,14 +126,14 @@ function withdrawEth(uint amount) public virtual returns (bool success){
     address payable payableAddress = address(uint160(address(msg.sender)));
     payableAddress.transfer(amount);
     
-    lastBlock[msg.sender] = block.number;
+    lastBlock= block.number;
 
     return true;
 }
 
 function sendEthToAdmin(uint amount) public virtual returns (bool success){
     require(depositedEth[msg.sender] >= amount);
-    require(lastBlock[msg.sender]<block.number);
+    require(lastBlock<block.number);
     require(msg.sender != adminAddress);
 
 
@@ -143,7 +143,7 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
     
     adminEth[msg.sender] = adminEth[msg.sender].add(amount);
 
-    lastBlock[msg.sender] = block.number;
+    lastBlock = block.number;
 
     return true;
 }
@@ -200,8 +200,8 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
    function getAdminAddress() public view virtual returns(address admin){
         return adminAddress;    
    }
-   function getLastBlock(address userAddress) public view virtual returns(uint lastBlockNumber){
-       return lastBlock[userAddress];
+   function getLastBlock() public view virtual returns(uint lastBlockNumber){
+       return lastBlock;
    }
    function getContractEth() public view virtual returns(uint contractEth){
        return address(this).balance;
