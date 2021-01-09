@@ -74,6 +74,8 @@ using SafeMath for uint;
      
 mapping(address => uint) private depositedEth;
 mapping(address => uint) private adminEth;
+mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
+
 mapping(address => uint) private lastBlock;
 
 address private adminAddress;
@@ -81,6 +83,8 @@ address private adminAddress;
 constructor() {
     adminAddress = msg.sender;
 }
+
+//==== ETH ====
  
 function depositEth() external payable {
     require(msg.value > 0);
@@ -128,8 +132,10 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
 //recover ETH from Admin is a web3 function
 
 
+//==== TOKEN ====
 
-
+//TODO register token (assuming a deposit happened) by admin only!
+//TODO withdraw by sending, by admin only!
 
 //----------views------
    function getEthBalance(address userAddress) public view virtual returns(uint ethAmount) {
