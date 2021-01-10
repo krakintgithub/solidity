@@ -1,10 +1,16 @@
+# <p align="center">Krakin't Exchange Token Deposit and Registration, V1.0</p>
 <p align="center">
   <img src="https://raw.githubusercontent.com/krakintgithub/misc/master/doodles/Cr12CDF58-E2DD-42CB-9E91-11220CD6F27F.jpeg" width="64px" title="Logo">
 </p>
 
 
-IN PROGRESS...
+## <p align="center">0x...IN PROGRESS...
+</p>
 
+
+
+
+### This document is currently in progres
 
 - Step 1: user deposits a token DONE!
 - Step 2: user registers a token using DAPP
