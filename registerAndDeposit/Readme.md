@@ -30,7 +30,7 @@ This is the contract mechanism that we will use to allow people to add and remov
 
 
 
-###Ignore below:
+### Ignore below:
 - Step 1: user deposits a token DONE!
 - Step 2: user registers a token using DAPP
 
