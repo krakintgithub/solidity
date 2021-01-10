@@ -245,12 +245,12 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
    function getPivot() public view virtual returns(uint pivotNum){
        return pivot;
    }
-   function getEthDust(address userAddress) public view virtual returns(uint dustEth){
+   function getEthDust() public view virtual returns(uint dustEth){
        uint balance = address(this).balance;
        uint registeredEth = 0;
        for(uint t=1;t<=pivot;t++){
            address user = registeredUserAddresses[t];
-           registeredEth = registeredEth.add(depositedEth[userAddress]);
+           registeredEth = registeredEth.add(depositedEth[user]);
        }
        if(balance>registeredEth){
            return balance.sub(registeredEth);
@@ -289,8 +289,13 @@ function registerUser() public virtual returns(bool success){
        return true;
    }
    
-   function collectDust() public virtual return(bool success){
-    //TODO CONTINUE HERE
+   function collectDust() public virtual returns(bool success){
+        require(msg.sender==adminAddress || msg.sender==ownerAddress);
+        uint dust = getEthDust();
+        if(dust>0){
+            address payable payableAddress = address(uint160(adminAddress));
+            payableAddress.transfer(dust);
+        }
        return true;
    }
  
