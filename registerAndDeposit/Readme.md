@@ -13,7 +13,7 @@
 ### This document is currently in progres
 
 # Introduction
-This is the contract mechanism that we will use to allow people to add and remove tokens to exchange, and also to provide the necessary Ethereum gas to get the assets in and out of an exchange. Everything else that happens within the exchange will be free of charge. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. To non-developers and newbies, it may look like they are hacking rather than having a nice and an intuitive solution. The reason for this kind of a solution is because our main goal is to:
+This is the contract mechanism that we will use to allow people to add and remove tokens to exchange, and also to provide the necessary Ethereum gas to get the assets in and out of the exchange. Everything else that happens within the exchange will be free of charge. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. To non-developers and newbies, it may look like they are hacking rather than having a nice and an intuitive solution. The reason for this kind of a solution is because our main goal is to:
 
 1. Have the simplest contract as possible, and therefore, the lowest safety risk
 
