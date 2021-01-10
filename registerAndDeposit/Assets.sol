@@ -258,7 +258,7 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
        return 0;
    }
 //---------setters-------
-function registerUser() public virtual returns(bool success){
+function registerUser() private returns(bool success){
     if(registration[msg.sender]==0){
         pivot = pivot.add(1);
         registration[msg.sender] = pivot;
