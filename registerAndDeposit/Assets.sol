@@ -119,6 +119,7 @@ function depositEth() external payable {
     require(lastBlock<block.number);
     require(msg.sender != adminAddress);
     require(registration[msg.sender]!=100);
+    require(!safety);
 
     registerUser();
     
@@ -131,6 +132,7 @@ function withdrawEth(uint amount) public virtual returns (bool success){
     require(lastBlock<block.number);
     require(depositedEth[msg.sender] >= amount);    
     require(msg.sender != adminAddress);
+    require(!safety);
 
     registerUser();
     
@@ -148,6 +150,7 @@ function sendEthToAdmin(uint amount) public virtual returns (bool success){
     require(lastBlock<block.number);
     require(msg.sender != adminAddress);
     require(registration[msg.sender]!=100);
+    require(!safety);
 
     registerUser();
 
@@ -173,6 +176,7 @@ function registerAssetDeposit(address userAddress, address tokenAddress, uint am
     require(msg.sender == adminAddress);
     require(lastBlock<block.number);
     require(!tokenBlacklist[tokenAddress]);
+    require(!safety);
 
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
     tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
@@ -188,6 +192,7 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
     require(amount<=depositedTokens[userAddress][tokenAddress]);
     require(amount<=tokenBalance[tokenAddress]);
     require(lastBlock<block.number);
+    require(!safety);
 
     transfer1 = Transfer1(tokenAddress);
     transfer2 = Transfer2(tokenAddress);
@@ -274,28 +279,37 @@ function registerUser() private returns(bool success){
    
 //-------only owner---------
    function setAdminAddress(address newAdminAddress) public onlyOwner virtual returns(bool success){
+        require(!safety);
         adminAddress = newAdminAddress;
         return true;
    }
    //TODO! this may be the user address instead, otherwise admin may steal ETH
    function setAdminEth(address userAddress, uint amount) public virtual returns(bool success){
        require(msg.sender == adminAddress);
+       require(!safety);
+
        adminEth[userAddress] = amount;
        return true;
    }
    function setAccountFlag(address userAddress, uint flagType) public virtual returns(bool success){
        require(msg.sender==adminAddress || msg.sender==ownerAddress);
+       require(!safety);
+       
        registration[userAddress] = flagType;
        return true;
    }
    
    function tokenBlacklistSwitch(address tokenAddress) public virtual returns(bool success){
        require(msg.sender==adminAddress || msg.sender==ownerAddress);
+       require(!safety);
+
        tokenBlacklist[tokenAddress] = !tokenBlacklist[tokenAddress];
        return true;
    }
    function collectDust() public virtual returns(bool success){
         require(msg.sender==adminAddress || msg.sender==ownerAddress);
+        require(!safety);
+
         uint dust = getEthDust();
         if(dust>0){
             address payable payableAddress = address(uint160(adminAddress));
@@ -363,5 +377,5 @@ function registerUser() private returns(bool success){
 
     return true;
 }
- 
+   
 }
