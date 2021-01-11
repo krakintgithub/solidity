@@ -19,11 +19,13 @@ This is the contract mechanism that we will use to allow people to add and remov
 
 2. Have the least amount of expenses rather than using the expensive and decentralized oracles
 
-3. Users must have as much power as possible without exposing their private keys
+3. Have an exchange where liquidity deposits are not necessary
 
-4. To disable any potential risk that may involve the theft using the Krakin't private keys
+4. Users must have as much power as possible without exposing their private keys
 
-5. To have a fail-safe mechanism in case something bad happens, allowing users to get their money back
+5. To disable any potential risk that may involve the theft using the Krakin't private keys
+
+6. To have a fail-safe mechanism in case something bad happens, allowing users to get their money back
 
 
 ### Centralized and Decentralized Components Diagram
@@ -31,17 +33,52 @@ This is the contract mechanism that we will use to allow people to add and remov
   <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/registerAndDeposit/diagram1.png" title="Logo">
 </p>
 
-This diagram is a brief overview of what goes on in the background while depositing or withdrawing a token/eth.
-All actions are done via backend, while Admin account is responsible for taking some of the actions commuinicating strictly with the server-side backend.
+This diagram is a brief overview of what goes on in the background while depositing or withdrawing a Token/ETH.
+All actions are done via backend, while Administrator account is responsible for taking some of the actions commuinicating strictly with the server-side backend.
 A decentralized DAPP is also necessary, while it is communicating with the backend that will be connected to API such as Etherscan.
 
 The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses, and nothing else. The Administrator account can also accumulate the ETH dust, since we will charge just a bit more ETH to cover the GAS price and to make sure that everything processed without interruptions. The dust can be collected and therefore used by the Admin account to assist creating the new Admin account or cover any other GAS fees that we need for the maintenance.
 
+#### Important details to note
+- We only process one transaction or function execution per block (approximately 12 seconds). Otherwise, the error is thrown. This can be managed via DAPP simply by showing the wait message, until the block number increases on the blockchain. This is also a security feature.
+
+- Nobody can steal the assets from a contract, and you are responsible for your own private keys.
+
+- We have a switch implemented to cancel all exchange and simply let people withdraw whatever they put onto contract, as a fail-safe mechanism.
+
+- We will make sure that nobody, not even the project owners, can access the Administrator private key.
+
+- There is no physical and actual person as an administrator, while everything is automated using the Ethereum contract, web3j and a Java version of the web3.
+
 #### User deposits ETH to a contract
+
+Dapp takes care of the contract interaction, while it collects the Ethereum transaction ID to send it to a backend server and store it in a database. Once everything is processed, user can continue using the Dapp for depositing the assets, while everything is updated via the API call to Etherscan to read the blockchain data and the state of a transfer. In the meantime, while waiting for transaction to complete, users can trade with their previously deposited assets and earnings. They won't be able to deposit or withdraw from the contract. It is important not to select the cheapest transfer as an option, since DAPP may appear frozen until transaction is finally completed or rejected.
 
 ```
 mapping(address => uint) private depositedEth;
 ```
+This map is used to keep a track of how much ETH has been deposited to a contract. This ETH can be used for trading or for forwarding it to the Admin account. DO NOT send any ETH directly to the Admin account, since we must register all the ETH deposits.
+
+```
+function depositEth() external payable {
+```
+The payable function where user can input the amount of ETH they wish to transfer to a contract. This ETH can stay for exchange or be transferred to the Administrator to pay for the GAS fees.
+
+#### User sends ETH to administrator account
+
+DAPP is used to send ETH to a contract. Please do not send any ETH directly to a contract address, it will be complicated to process or retrieve it. 
+
+```
+mapping(address => uint) private adminEth;
+```
+This map is used to track how much Eth was sent to Administrator account to cover the GAS fees.
+
+```
+function sendEthToAdmin(uint amount) public virtual returns (bool success){
+```
+This function is executed using a DAPP, while it also updates the adminEth map.
+
+
 
 
 ### Ignore below:
