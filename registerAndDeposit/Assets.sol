@@ -15,6 +15,7 @@ abstract contract Context {
 
 contract Ownable is Context {
   address private _owner;
+  bool private pause;
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -30,6 +31,11 @@ contract Ownable is Context {
 
   modifier onlyOwner() {
     require(_owner == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
+
+  modifier notPaused() {
+    require(!pause, "Pause: contract is paused");
     _;
   }
 
@@ -85,11 +91,13 @@ contract Assets is Ownable {
   mapping(address => uint) private registration; //for account flagging, 100 is blacklisted
   mapping(address => bool) private tokenBlacklist;
   mapping(uint => address) private registeredUserAddresses;
+  mapping(address => string) private registerData; //for registering tokens, projects, etc
 
   uint private lastBlock;
   uint private pivot;
 
   bool private safety;
+  bool private pause;
 
   address private adminAddress;
   address private ownerAddress;
@@ -106,7 +114,7 @@ contract Assets is Ownable {
 
   //==== ETH ====
 
-  function depositEth() external payable {
+  function depositEth() external payable notPaused {
     require(msg.value > 0);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
@@ -120,7 +128,7 @@ contract Assets is Ownable {
     lastBlock = block.number;
   }
 
-  function withdrawEth(uint amount) public virtual returns(bool success) {
+  function withdrawEth(uint amount) public virtual notPaused returns(bool success) {
     require(lastBlock < block.number);
     require(depositedEth[msg.sender] >= amount);
     require(msg.sender != adminAddress);
@@ -137,7 +145,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function sendEthToAdmin(uint amount) public virtual returns(bool success) {
+  function sendEthToAdmin(uint amount) public virtual notPaused returns(bool success) {
     require(depositedEth[msg.sender] >= amount);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
@@ -163,7 +171,7 @@ contract Assets is Ownable {
 
   //initial transfer is a web3 frontend function
 
-  function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) public virtual returns(bool success) {
+  function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) public virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(lastBlock < block.number);
     require(!tokenBlacklist[tokenAddress]);
@@ -177,7 +185,7 @@ contract Assets is Ownable {
   }
 
   //TODO TEST THIS!
-  function withdrawAssets(address userAddress, address tokenAddress, uint amount) public virtual returns(bool success) {
+  function withdrawAssets(address userAddress, address tokenAddress, uint amount) public virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(amount <= depositedTokens[userAddress][tokenAddress]);
     require(amount <= tokenBalance[tokenAddress]);
@@ -266,7 +274,7 @@ contract Assets is Ownable {
     return safety;
   }
   //---------setters-------
-  function registerUser() private returns(bool success) {
+  function registerUser() private notPaused returns(bool success) {
     if (registration[msg.sender] == 0) {
       pivot = pivot.add(1);
       registration[msg.sender] = pivot;
@@ -275,13 +283,13 @@ contract Assets is Ownable {
   }
 
   //-------only owner---------
-  function setAdminAddress(address newAdminAddress) public onlyOwner virtual returns(bool success) {
+  function setAdminAddress(address newAdminAddress) public onlyOwner notPaused virtual returns(bool success) {
     require(!safety);
     adminAddress = newAdminAddress;
     return true;
   }
   //TODO! this may be the user address instead, otherwise admin may steal ETH
-  function setAdminEth(address userAddress, uint amount) public virtual returns(bool success) {
+  function setAdminEth(address userAddress, uint amount) public virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(!safety);
 
@@ -289,7 +297,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function setAccountFlag(address userAddress, uint flagType) public virtual returns(bool success) {
+  function setAccountFlag(address userAddress, uint flagType) public virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     require(!safety);
 
@@ -297,7 +305,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function tokenBlacklistSwitch(address tokenAddress) public virtual returns(bool success) {
+  function tokenBlacklistSwitch(address tokenAddress) public virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     require(!safety);
 
@@ -305,7 +313,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function collectDust() public virtual returns(bool success) {
+  function collectDust() public virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     require(!safety);
 
@@ -317,13 +325,24 @@ contract Assets is Ownable {
     return true;
   }
 
+  function updateRegisterData(address userAddress, string memory data) public virtual onlyOwner notPaused returns(bool success) {
+    require(msg.sender == adminAddress || msg.sender == ownerAddress);
+    registerData[userAddress] = data;
+    return true;
+  }
+
   //-------SAFETY SWITCH---------
-  function flipSafetySwitch() public onlyOwner virtual returns(bool success) {
+  function flipSafetySwitch() public onlyOwner virtual notPaused returns(bool success) {
     safety = !safety;
     return true;
   }
 
-  function emergencyWithdrawEth() public virtual returns(bool success) {
+  function flipPauseSwitch() public onlyOwner virtual returns(bool success) {
+    pause = !pause;
+    return true;
+  }
+
+  function emergencyWithdrawEth() public virtual notPaused returns(bool success) {
     require(safety);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
@@ -341,7 +360,7 @@ contract Assets is Ownable {
   }
 
   //TODO: TEST THIS!!!
-  function emergencyWithdrawAssets(address tokenAddress) public virtual returns(bool success) {
+  function emergencyWithdrawAssets(address tokenAddress) public virtual notPaused returns(bool success) {
     require(safety);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
