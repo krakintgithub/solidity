@@ -13,7 +13,7 @@
 ### This document is currently in progres
 
 # Introduction
-This is the contract mechanism that we will use to allow people to add and remove tokens to exchange, and also to provide the necessary Ethereum gas to get the assets in and out of the exchange. Everything else that happens within the exchange will be free of charge. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. To non-developers and newbies, it may look like they are hacking rather than having a nice and an intuitive solution. The reason for this kind of a solution is because our main goal is to:
+This is the contract mechanism that we will use to allow people to add and remove tokens to exchange, and also to provide the necessary Ethereum gas to get the assets in and out of the exchange. Everything else that happens within the exchange will be free. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. To non-developers and newbies, it may look like they are hacking rather than having a nice solution. The reason for this kind of solution is because our primary goal is to:
 
 1. Have the simplest contract as possible, and therefore, the lowest safety risk
 
@@ -26,8 +26,18 @@ This is the contract mechanism that we will use to allow people to add and remov
 5. To have a fail-safe mechanism in case something bad happens, allowing users to get their money back
 
 
+### Centralized and Decentralized Components Diagram
+<p align="center">
+  <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/registerAndDeposit/diagram1.png" title="Logo">
+</p>
 
+This diagram is a brief overview of what goes on in the background while depositing or withdrawing a token/eth.
+All actions are done via backend, while Admin account is responsible for taking some of the actions commuinicating strictly with the server-side backend.
+A decentralized DAPP is also necessary, while it is communicating with the backend that will be connected to API such as Etherscan.
 
+The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses, and nothing else. The Administrator account can also accumulate the ETH dust, since we will charge just a bit more ETH to cover the GAS price and to make sure that everything processed without interruptions. The dust can be collected and therefore used by the Admin account to assist creating the new Admin account or cover any other GAS fees that we need for the maintenance.
+
+#### User deposits ETH to a contract
 
 
 ### Ignore below:
