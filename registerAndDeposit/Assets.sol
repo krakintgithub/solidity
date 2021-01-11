@@ -96,6 +96,8 @@ mapping(uint => address) private registeredUserAddresses;
 uint private lastBlock;
 uint private pivot;
 
+bool private safety;
+
 address private adminAddress;
 address private ownerAddress;
 
@@ -129,7 +131,6 @@ function withdrawEth(uint amount) public virtual returns (bool success){
     require(lastBlock<block.number);
     require(depositedEth[msg.sender] >= amount);    
     require(msg.sender != adminAddress);
-    require(registration[msg.sender]!=100);
 
     registerUser();
     
@@ -245,6 +246,8 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
    function getPivot() public view virtual returns(uint pivotNum){
        return pivot;
    }
+   
+   //TODO: might be wrong to only process the registeredEth, double check!!!
    function getEthDust() public view virtual returns(uint dustEth){
        uint balance = address(this).balance;
        uint registeredEth = 0;
@@ -256,6 +259,9 @@ function withdrawAssets(address userAddress, address tokenAddress, uint amount) 
            return balance.sub(registeredEth);
        }
        return 0;
+   }
+   function isSafetyOn() public view virtual returns(bool safetySwitch){
+       return safety;
    }
 //---------setters-------
 function registerUser() private returns(bool success){
@@ -288,7 +294,6 @@ function registerUser() private returns(bool success){
        tokenBlacklist[tokenAddress] = !tokenBlacklist[tokenAddress];
        return true;
    }
-   
    function collectDust() public virtual returns(bool success){
         require(msg.sender==adminAddress || msg.sender==ownerAddress);
         uint dust = getEthDust();
@@ -298,5 +303,65 @@ function registerUser() private returns(bool success){
         }
        return true;
    }
+   
+//-------SAFETY SWITCH---------
+   function flipSafetySwitch() public onlyOwner virtual returns(bool success){
+        safety = !safety;
+        return true;
+   }
+
+   function emergencyWithdrawEth() public virtual returns(bool success){
+    require(safety);
+    require(lastBlock<block.number);
+    require(msg.sender != adminAddress);
+
+    registerUser();
+    
+    uint amount = depositedEth[msg.sender];
+    depositedEth[msg.sender] = 0;
+    address payable payableAddress = address(uint160(address(msg.sender)));
+    payableAddress.transfer(amount);
+    
+    lastBlock= block.number;
+
+    return true;
+   }
+   
+   
+   //TODO: TEST THIS!!!
+   function emergencyWithdrawAssets(address tokenAddress) public virtual returns (bool success){
+    require(safety);
+    require(lastBlock<block.number);
+    require(msg.sender != adminAddress);
+
+
+    transfer1 = Transfer1(tokenAddress);
+    transfer2 = Transfer2(tokenAddress);
+    
+    uint amount = depositedTokens[msg.sender][tokenAddress];
+    require(tokenBalance[tokenAddress]>=amount);
+    depositedTokens[msg.sender][tokenAddress] = 0;
+    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
+
+    bool tr1;
+    
+    try transfer1.transfer(msg.sender, amount){
+        tr1=true;
+     } catch Error(string memory) {
+         tr1=false;
+     }
+     
+     if(!tr1){
+        try transfer2.transfer(msg.sender, amount){
+            tr1=true;
+        } catch Error(string memory) {}
+     }
+    
+    transfer1 = Transfer1(0);
+    transfer2 = Transfer2(0);
+    lastBlock = block.number;
+
+    return true;
+}
  
 }
