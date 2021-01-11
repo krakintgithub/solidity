@@ -27,6 +27,8 @@ This is the contract mechanism that we will use to allow people to add and remov
 
 6. To have a fail-safe mechanism in case something bad happens, allowing users to get their money back
 
+7. To have a solution that is modular and that will become decentralized (similar to Krakin't token architecture)
+
 
 ### Centralized and Decentralized Components Diagram
 <p align="center">
