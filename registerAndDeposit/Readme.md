@@ -39,6 +39,10 @@ The frequent change of the Administrator account (with hidden private keys) is a
 
 #### User deposits ETH to a contract
 
+```
+mapping(address => uint) private depositedEth;
+```
+
 
 ### Ignore below:
 - Step 1: user deposits a token DONE!
