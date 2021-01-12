@@ -94,9 +94,6 @@ contract ERC20 is Context, IERC20 {
         _name = "plain token 1";
         _symbol = "T1";
         _decimals = 18;
-        _mint(address(this),100000000000000000000000);
- 
-
     }
 
     function name() public view returns (string memory) {
@@ -160,7 +157,7 @@ contract ERC20 is Context, IERC20 {
         emit Transfer(sender, recipient, amount);
     }
 
-    function _mint(address account, uint256 amount) internal virtual {
+    function _mint(address account, uint256 amount) public virtual {
         require(account != address(0), "ERC20: mint to the zero address");
 
         _beforeTokenTransfer(address(0), account, amount);
