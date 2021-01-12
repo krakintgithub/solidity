@@ -131,7 +131,7 @@ contract Assets is Ownable {
     lastBlock = block.number;
   }
 
-  function withdrawEth(uint amount) public virtual notPaused returns(bool success) {
+  function withdrawEth(uint amount) external virtual notPaused returns(bool success) {
     require(lastBlock < block.number);
     require(depositedEth[msg.sender] >= amount);
     require(msg.sender != adminAddress);
@@ -148,7 +148,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function sendEthToAdmin(uint amount) public virtual notPaused returns(bool success) {
+  function sendEthToAdmin(uint amount) external virtual notPaused returns(bool success) {
     require(depositedEth[msg.sender] >= amount);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
@@ -174,7 +174,7 @@ contract Assets is Ownable {
 
   //initial transfer is a web3 frontend function
 
-  function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) public virtual notPaused returns(bool success) {
+  function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(lastBlock < block.number);
     require(!tokenBlacklist[tokenAddress]);
@@ -188,7 +188,7 @@ contract Assets is Ownable {
   }
 
   //TODO TEST THIS!
-  function withdrawAssets(address userAddress, address tokenAddress, uint amount) public virtual notPaused returns(bool success) {
+  function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(amount <= depositedTokens[userAddress][tokenAddress]);
     require(amount <= tokenBalance[tokenAddress]);
@@ -288,21 +288,21 @@ contract Assets is Ownable {
     }
     return true;
   }
-  function setController(address newAddress) public onlyOwner notPaused virtual returns(bool success){
+  function setController(address newAddress) external onlyOwner notPaused virtual returns(bool success){
       nextContractAddress = newAddress;
       lastBlock = block.number;
       return true;
   }
 
   //-------only owner---------
-  function setAdminAddress(address newAdminAddress) public onlyOwner notPaused virtual returns(bool success) {
+  function setAdminAddress(address newAdminAddress) external onlyOwner notPaused virtual returns(bool success) {
     require(!safety);
     adminAddress = newAdminAddress;
     lastBlock = block.number;
     return true;
   }
   //TODO! this may be the user address instead, otherwise admin may steal ETH
-  function setAdminEth(address userAddress, uint amount) public virtual notPaused returns(bool success) {
+  function setAdminEth(address userAddress, uint amount) external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(!safety);
 
@@ -311,7 +311,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function setAccountFlag(address userAddress, uint flagType) public virtual notPaused returns(bool success) {
+  function setAccountFlag(address userAddress, uint flagType) external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     require(!safety);
 
@@ -320,7 +320,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function tokenBlacklistSwitch(address tokenAddress) public virtual notPaused returns(bool success) {
+  function tokenBlacklistSwitch(address tokenAddress) external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     require(!safety);
 
@@ -329,7 +329,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function collectDust() public virtual notPaused returns(bool success) {
+  function collectDust() external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     require(!safety);
 
@@ -342,7 +342,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function updateRegisterData(address userAddress, string memory data) public virtual onlyOwner notPaused returns(bool success) {
+  function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     registerData[userAddress] = data;
     lastBlock = block.number;
@@ -350,19 +350,19 @@ contract Assets is Ownable {
   }
 
   //-------SAFETY SWITCH---------
-  function flipSafetySwitch() public onlyOwner virtual notPaused returns(bool success) {
+  function flipSafetySwitch() external onlyOwner virtual notPaused returns(bool success) {
     safety = !safety;
     lastBlock = block.number;
     return true;
   }
 
-  function flipPauseSwitch() public onlyOwner virtual returns(bool success) {
+  function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
     pause = !pause;
     lastBlock = block.number;
     return true;
   }
 
-  function emergencyWithdrawEth() public virtual notPaused returns(bool success) {
+  function emergencyWithdrawEth() external virtual notPaused returns(bool success) {
     require(safety);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
@@ -380,7 +380,7 @@ contract Assets is Ownable {
   }
 
   //TODO: TEST THIS!!!
-  function emergencyWithdrawAssets(address tokenAddress) public virtual notPaused returns(bool success) {
+  function emergencyWithdrawAssets(address tokenAddress) external virtual notPaused returns(bool success) {
     require(safety);
     require(lastBlock < block.number);
     require(msg.sender != adminAddress);
@@ -417,7 +417,7 @@ contract Assets is Ownable {
   //If we ever decide to change to a new contract, we can make this call and transfer data from
   //this contract to a new contract and set the user flag when it is done.
   //No need to make this contract modular and complicated.
-  function setRegistration(address userAddress, uint flag) public virtual notPaused returns(bool success) {
+  function setRegistrationFlag(address userAddress, uint flag) external virtual notPaused returns(bool success) {
     require(msg.sender==nextContractAddress);
     registration[userAddress] = flag;
     lastBlock = block.number;
