@@ -82,7 +82,6 @@ contract Assets is Ownable {
   using SafeMath
   for uint;
 
-  mapping(address => uint) private depositedEth;
   mapping(address => uint) private adminEth;
   mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
   mapping(address => uint) private tokenBalance;
@@ -112,73 +111,39 @@ contract Assets is Ownable {
   }
 
   //==== ETH ====
-
-  function depositEth() external payable notPaused {
-    require(msg.value > 0);
+  
+  /*
+    Backend checks if the ETH transfer is completed, and executes this function as admin if it has enough GAS.
+    It reduces the amount of gas needed to execute this function and dusts the remainder
+  */
+  function registerEthDeposit(address userAddress, uint amount) external virtual notPaused returns(bool success){
     require(lastBlock < block.number);
-    require(msg.sender != adminAddress);
-    require(registration[msg.sender] != 100);
+    require(msg.sender == adminAddress);
     require(!safety);
-
     registerUser();
 
-    depositedEth[msg.sender] = depositedEth[msg.sender].add(msg.value);
-
+    adminEth[userAddress] = adminEth[userAddress].add(amount);
     lastBlock = block.number;
-  }
-
-  function withdrawEth(uint amount) external virtual notPaused returns(bool success) {
-    require(lastBlock < block.number);
-    require(depositedEth[msg.sender] >= amount);
-    require(msg.sender != adminAddress);
-    require(!safety);
-
-    registerUser();
-
-    depositedEth[msg.sender] = depositedEth[msg.sender].sub(amount);
-    address payable payableAddress = address(uint160(address(msg.sender)));
-    payableAddress.transfer(amount);
-
-    lastBlock = block.number;
-
     return true;
   }
 
-  function sendEthToAdmin(uint amount) external virtual notPaused returns(bool success) {
-    require(depositedEth[msg.sender] >= amount);
-    require(lastBlock < block.number);
-    require(msg.sender != adminAddress);
-    require(registration[msg.sender] != 100);
-    require(!safety);
 
-    registerUser();
-
-    depositedEth[msg.sender] = depositedEth[msg.sender].sub(amount);
-    address payable payableAddress = address(uint160(adminAddress));
-    payableAddress.transfer(amount);
-
-    adminEth[msg.sender] = adminEth[msg.sender].add(amount);
-
-    lastBlock = block.number;
-
-    return true;
-  }
-
-  //recover ETH from Admin is a web3 function
+  //recover ETH from Admin is a web3 function, not a contract
 
   //==== TOKEN ====
 
-  //initial approval is a web3 function
-      function transferFromUser(address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
+  /*
+    Backend checks if the Token transfer to contract is completed, and executes this function as admin if it has enough GAS.
+    It reduces the amount of gas needed to execute this function and dusts the remainder
+  */
+  function registerTokenDeposit(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
         require(lastBlock < block.number);
-        require(!tokenBlacklist[tokenAddress]);
+        require(msg.sender == adminAddress);
         require(!safety);
-        require(registration[msg.sender] != 100);
-          
-        transfer1 = Transfer1(tokenAddress);
-        transfer1.transferFrom(msg.sender, address(this), amount);
         
-        depositedTokens[msg.sender][tokenAddress] = depositedTokens[msg.sender][tokenAddress].add(amount);
+        registerUser();
+        
+        depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
         tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
 
         transfer1 = Transfer1(0);
@@ -199,6 +164,7 @@ contract Assets is Ownable {
 
     transfer1 = Transfer1(tokenAddress);
 
+    //TODO: if amount is greater than what is available, needs a better mechanism!!!
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].sub(amount);
     tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
 
@@ -212,7 +178,7 @@ contract Assets is Ownable {
 
   //----------views------
   function getEthBalance(address userAddress) public view virtual returns(uint ethAmount) {
-    return depositedEth[userAddress];
+    return adminEth[userAddress];
   }
 
   function getAdminAddress() public view virtual returns(address admin) {
@@ -221,6 +187,10 @@ contract Assets is Ownable {
 
   function getOwnerAddress() public view virtual returns(address admin) {
     return ownerAddress;
+  }
+  
+  function getNextContractAddress() public view virtual returns(address admin) {
+    return nextContractAddress;
   }
 
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
@@ -253,7 +223,6 @@ contract Assets is Ownable {
     uint registeredEth = 0;
     for (uint t = 1; t <= pivot; t++) {
       address user = registeredUserAddresses[t];
-      registeredEth = registeredEth.add(depositedEth[user]);
     }
     if (balance > registeredEth) {
       return balance.sub(registeredEth);
@@ -276,7 +245,7 @@ contract Assets is Ownable {
     }
     return true;
   }
-  function setController(address newAddress) external onlyOwner notPaused virtual returns(bool success){
+  function setNextContractAddress(address newAddress) external onlyOwner notPaused virtual returns(bool success){
       nextContractAddress = newAddress;
       lastBlock = block.number;
       return true;
@@ -350,22 +319,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  function emergencyWithdrawEth() external virtual notPaused returns(bool success) {
-    require(safety);
-    require(lastBlock < block.number);
-    require(msg.sender != adminAddress);
 
-    registerUser();
-
-    uint amount = depositedEth[msg.sender];
-    depositedEth[msg.sender] = 0;
-    address payable payableAddress = address(uint160(address(msg.sender)));
-    payableAddress.transfer(amount);
-
-    lastBlock = block.number;
-
-    return true;
-  }
 
   function emergencyWithdrawAssets(address tokenAddress) external virtual notPaused returns(bool success) {
     require(safety);
