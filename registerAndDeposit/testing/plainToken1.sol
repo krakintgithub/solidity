@@ -90,10 +90,13 @@ contract ERC20 is Context, IERC20 {
     string private _symbol;
     uint8 private _decimals;
 
-    constructor (string memory name_, string memory symbol_) public {
-        _name = name_;
-        _symbol = symbol_;
+    constructor ()  {
+        _name = "test1";
+        _symbol = "T1";
         _decimals = 18;
+        _mint(address(this),100000000000000000000000);
+ 
+
     }
 
     function name() public view returns (string memory) {
