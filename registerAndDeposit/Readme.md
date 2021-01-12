@@ -13,7 +13,7 @@
 ### This document is currently in progres
 
 # Introduction
-This is the contract mechanism that we will use to allow people to add and remove tokens to exchange, and also to provide the necessary Ethereum gas to get the assets in and out of the exchange. Everything else that happens within the exchange will be free. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. To non-developers and newbies, it may look like they are hacking rather than having a nice solution. The reason for this kind of solution is because our primary goal is to:
+This is the contract mechanism that we will use to allow people to add and remove tokens to (and from an) exchange, and also to provide the necessary Ethereum gas to get the assets from the exchange. Everything else that happens within the exchange will be free. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. Our primary goal is to:
 
 1. Have the simplest contract as possible, and therefore, the lowest safety risk
 
@@ -35,9 +35,9 @@ This is the contract mechanism that we will use to allow people to add and remov
   <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/registerAndDeposit/diagram1.png" title="Logo">
 </p>
 
-This diagram is a brief overview of what goes on in the background while depositing or withdrawing a Token/ETH.
+This diagram is a brief overview of the background processes for depositing or withdrawing a Token/ETH.
 All actions are done via backend, while Administrator account is responsible for taking some of the actions commuinicating strictly with the server-side backend.
-A decentralized DAPP is also necessary, while it is communicating with the backend that will be connected to API such as Etherscan.
+A decentralized DAPP is also necessary, while it is communicating with the backend that will be connected to API such as Etherscan via REST API.
 
 The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses, and nothing else. The Administrator account can also accumulate the ETH dust, since we will charge just a bit more ETH to cover the GAS price and to make sure that everything processed without interruptions. The dust can be collected and therefore used by the Admin account to assist creating the new Admin account or cover any other GAS fees that we need for the maintenance.
 
@@ -51,6 +51,31 @@ The frequent change of the Administrator account (with hidden private keys) is a
 - We will make sure that nobody, not even the project owners, can access the Administrator private key.
 
 - There is no physical and actual person as an administrator, while everything is automated using the Ethereum contract, web3j and a Java version of the web3.
+
+- We are not using the wrapped Ethereum (WETH).
+
+
+##### The list of views
+```
+function getEthBalance(address userAddress) public view virtual returns(uint ethAmount)
+function getAdminAddress() public view virtual returns(address admin)
+function getOwnerAddress() public view virtual returns(address admin)
+function getNextContractAddress() public view virtual returns(address admin)
+function getLastBlock() public view virtual returns(uint lastBlockNumber)
+function getContractEth() public view virtual returns(uint contractEth)
+function getAssetBalace(address userAddress, address tokenAddress) public view virtual returns(uint assetAmount)
+function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag)
+function isTokenBlacklisted(address tokenAddress) public view virtual returns(bool onBlacklist)
+function getPivot() public view virtual returns(uint pivotNum)
+function getEthDust() public view virtual returns(uint dustEth)
+function isSafetyOn() public view virtual returns(bool safetySwitch)
+function isPauseOn() public view virtual returns(bool safetySwitch)
+```
+
+##### The list of decentralized function calls:
+
+
+
 
 #### User deposits ETH to a contract
 
