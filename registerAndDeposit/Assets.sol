@@ -54,8 +54,6 @@ contract Ownable is Context {
 abstract contract Transfer1 {
   function transfer(address toAddress, uint256 amount) external virtual;
   function transferFrom(address sender, address recipient, uint256 amount) external virtual;
- // function allowance(address owner, address spender) public view virtual returns (uint256);
- // function increaseAllowance(address spender, uint addedValue) external virtual;
 }
 
 library SafeMath {
@@ -170,7 +168,7 @@ contract Assets is Ownable {
 
   //==== TOKEN ====
 
-  //initial transfer is a web3 frontend function
+  //initial approval is a web3 function
       function transferFromUser(address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
         require(lastBlock < block.number);
         require(!tokenBlacklist[tokenAddress]);
@@ -369,7 +367,6 @@ contract Assets is Ownable {
     return true;
   }
 
-  //TODO: TEST THIS!!!
   function emergencyWithdrawAssets(address tokenAddress) external virtual notPaused returns(bool success) {
     require(safety);
     require(lastBlock < block.number);
