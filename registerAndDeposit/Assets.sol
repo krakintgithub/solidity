@@ -53,6 +53,9 @@ contract Ownable is Context {
 
 abstract contract Transfer1 {
   function transfer(address toAddress, uint256 amount) external virtual;
+  function transferFrom(address sender, address recipient, uint256 amount) external virtual;
+ // function allowance(address owner, address spender) public view virtual returns (uint256);
+ // function increaseAllowance(address spender, uint addedValue) external virtual;
 }
 
 library SafeMath {
@@ -168,19 +171,25 @@ contract Assets is Ownable {
   //==== TOKEN ====
 
   //initial transfer is a web3 frontend function
+      function transferFromUser(address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
+        require(lastBlock < block.number);
+        require(!tokenBlacklist[tokenAddress]);
+        require(!safety);
+        require(registration[msg.sender] != 100);
+          
+        transfer1 = Transfer1(tokenAddress);
+        transfer1.transferFrom(msg.sender, address(this), amount);
+        
+        depositedTokens[msg.sender][tokenAddress] = depositedTokens[msg.sender][tokenAddress].add(amount);
+        tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
 
-  function registerAssetDeposit(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
-    require(msg.sender == adminAddress);
-    require(lastBlock < block.number);
-    require(!tokenBlacklist[tokenAddress]);
-    require(!safety);
+        transfer1 = Transfer1(0);
+        
+        lastBlock = block.number;
+        return true;
+      }
 
-    depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
-    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
-    lastBlock = block.number;
-
-    return true;
-  }
+ 
 
   //The admin must make this call!
   function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
