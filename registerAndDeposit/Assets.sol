@@ -52,9 +52,6 @@ contract Ownable is Context {
 }
 
 abstract contract Transfer1 {
-  function transfer(address toAddress, uint256 amount) external virtual returns(bool);
-}
-abstract contract Transfer2 {
   function transfer(address toAddress, uint256 amount) external virtual;
 }
 
@@ -104,7 +101,6 @@ contract Assets is Ownable {
   address private nextContractAddress;
 
   Transfer1 private transfer1;
-  Transfer2 private transfer2;
 
   constructor() {
     adminAddress = msg.sender;
@@ -112,7 +108,6 @@ contract Assets is Ownable {
     nextContractAddress = address(0);
     
     transfer1 = Transfer1(address(0));
-    transfer2 = Transfer2(address(0));
   }
 
   //==== ETH ====
@@ -187,7 +182,7 @@ contract Assets is Ownable {
     return true;
   }
 
-  //TODO TEST THIS!
+  //The admin must make this call!
   function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
     require(msg.sender == adminAddress);
     require(amount <= depositedTokens[userAddress][tokenAddress]);
@@ -196,27 +191,13 @@ contract Assets is Ownable {
     require(!safety);
 
     transfer1 = Transfer1(tokenAddress);
-    transfer2 = Transfer2(tokenAddress);
 
     depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].sub(amount);
     tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
 
-    bool tr1;
-
-    try transfer1.transfer(userAddress, amount) {
-      tr1 = true;
-    } catch Error(string memory) {
-      tr1 = false;
-    }
-
-    if (!tr1) {
-      try transfer2.transfer(userAddress, amount) {
-        tr1 = true;
-      } catch Error(string memory) {}
-    }
-
+    transfer1.transfer(userAddress, amount);
     transfer1 = Transfer1(0);
-    transfer2 = Transfer2(0);
+    
     lastBlock = block.number;
 
     return true;
@@ -386,29 +367,15 @@ contract Assets is Ownable {
     require(msg.sender != adminAddress);
 
     transfer1 = Transfer1(tokenAddress);
-    transfer2 = Transfer2(tokenAddress);
 
     uint amount = depositedTokens[msg.sender][tokenAddress];
     require(tokenBalance[tokenAddress] >= amount);
     depositedTokens[msg.sender][tokenAddress] = 0;
     tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
 
-    bool tr1;
-
-    try transfer1.transfer(msg.sender, amount) {
-      tr1 = true;
-    } catch Error(string memory) {
-      tr1 = false;
-    }
-
-    if (!tr1) {
-      try transfer2.transfer(msg.sender, amount) {
-        tr1 = true;
-      } catch Error(string memory) {}
-    }
+    transfer1.transfer(msg.sender, amount);
 
     transfer1 = Transfer1(0);
-    transfer2 = Transfer2(0);
     lastBlock = block.number;
 
     return true;
