@@ -57,6 +57,11 @@ abstract contract Transfer1 {
 abstract contract Transfer2 {
   function transfer(address toAddress, uint256 amount) external virtual;
 }
+abstract contract Controller { //to be used for the external contract calls, making everything modular
+  function callController(string memory route, address[2] memory addressArr, uint[2] memory uintArr) external virtual returns(bool success);
+  function _callController(string memory route, address[3] memory addressArr, uint[3] memory uintArr) external virtual returns(bool success);
+
+}
 
 library SafeMath {
 
@@ -101,15 +106,21 @@ contract Assets is Ownable {
 
   address private adminAddress;
   address private ownerAddress;
+  address private controllerAddress;
 
   Transfer1 private transfer1;
   Transfer2 private transfer2;
-
-  //TODO add option to add token website, and additional information
+  Controller private controller;
+  //todo, when all maps and vars are in, then make special functions that can be called by controllers to adjust values
 
   constructor() {
     adminAddress = msg.sender;
     ownerAddress = msg.sender;
+    controllerAddress = address(0);
+    
+    transfer1 = Transfer1(address(0));
+    transfer2 = Transfer2(address(0));
+    controller = Controller(address(0));
   }
 
   //==== ETH ====
@@ -280,6 +291,11 @@ contract Assets is Ownable {
       registration[msg.sender] = pivot;
     }
     return true;
+  }
+  function setController(address newAddress) public onlyOwner notPaused virtual returns(bool success){
+      controllerAddress = newAddress;
+      controller = Controller(newAddress);
+      return true;
   }
 
   //-------only owner---------
