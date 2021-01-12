@@ -91,7 +91,7 @@ contract ERC20 is Context, IERC20 {
     uint8 private _decimals;
 
     constructor ()  {
-        _name = "test1";
+        _name = "plain token 1";
         _symbol = "T1";
         _decimals = 18;
         _mint(address(this),100000000000000000000000);
