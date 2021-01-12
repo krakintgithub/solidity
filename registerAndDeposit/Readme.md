@@ -85,7 +85,7 @@ function transferFromUser(address tokenAddress, uint amount) external virtual no
 function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success)
 ```
 
-##### The list of administrator and/or owner function calls:
+##### The list of administrator and/or owner-only function calls:
 ```
 function setAdminEth(address userAddress, uint amount) external virtual notPaused returns(bool success)
 function setAccountFlag(address userAddress, uint flagType) external virtual notPaused returns(bool success)
@@ -94,6 +94,19 @@ function collectDust() external virtual notPaused returns(bool success)
 function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner notPaused returns(bool success)
 ```
 
+##### The list of owner-only function calls:
+```
+function setNextContractAddress(address newAddress) external onlyOwner notPaused virtual returns(bool success)
+function setAdminAddress(address newAdminAddress) external onlyOwner notPaused virtual returns(bool success)
+function flipSafetySwitch() external onlyOwner virtual notPaused returns(bool success)
+function flipPauseSwitch() external onlyOwner virtual returns(bool success)
+```
+
+##### The list of emergency-only function calls:
+```
+function emergencyWithdrawEth() external virtual notPaused returns(bool success)
+function emergencyWithdrawAssets(address tokenAddress) external virtual notPaused returns(bool success)
+````
 
 
 #### User deposits ETH to a contract
