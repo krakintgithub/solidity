@@ -101,7 +101,7 @@ contract Assets is Ownable {
 
   address private adminAddress;
   address private ownerAddress;
-  address private controllerAddress;
+  address private controllerAddress; //No need to call controller from this contract, all can be done with a controller call to this contract
 
   Transfer1 private transfer1;
   Transfer2 private transfer2;
@@ -401,5 +401,16 @@ contract Assets is Ownable {
 
     return true;
   }
+  //-----------CONTROLLER ACCESS----------
+  //If we ever decide to change to a new contract, we can make this call and transfer data from
+  //this contract to a new contract and set the user flag when it is done.
+  //No need to make this contract modular and complicated.
+  function setRegistration(address userAddress, uint flag) public virtual notPaused returns(bool success) {
+    require(msg.sender==controllerAddress);
+    registration[userAddress] = flag;
+    lastBlock = block.number;
+    return true;
+  }
+
 
 }
