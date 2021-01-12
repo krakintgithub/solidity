@@ -101,16 +101,15 @@ contract Assets is Ownable {
 
   address private adminAddress;
   address private ownerAddress;
-  address private controllerAddress; //No need to call controller from this contract, all can be done with a controller call to this contract
+  address private nextContractAddress;
 
   Transfer1 private transfer1;
   Transfer2 private transfer2;
-  //todo, when all maps and vars are in, then make special functions that can be called by controllers to adjust values
 
   constructor() {
     adminAddress = msg.sender;
     ownerAddress = msg.sender;
-    controllerAddress = address(0);
+    nextContractAddress = address(0);
     
     transfer1 = Transfer1(address(0));
     transfer2 = Transfer2(address(0));
@@ -277,6 +276,10 @@ contract Assets is Ownable {
   function isSafetyOn() public view virtual returns(bool safetySwitch) {
     return safety;
   }
+  
+  function isPauseOn() public view virtual returns(bool safetySwitch) {
+    return pause;
+  }
   //---------setters-------
   function registerUser() private notPaused returns(bool success) {
     if (registration[msg.sender] == 0) {
@@ -286,7 +289,8 @@ contract Assets is Ownable {
     return true;
   }
   function setController(address newAddress) public onlyOwner notPaused virtual returns(bool success){
-      controllerAddress = newAddress;
+      nextContractAddress = newAddress;
+      lastBlock = block.number;
       return true;
   }
 
@@ -294,6 +298,7 @@ contract Assets is Ownable {
   function setAdminAddress(address newAdminAddress) public onlyOwner notPaused virtual returns(bool success) {
     require(!safety);
     adminAddress = newAdminAddress;
+    lastBlock = block.number;
     return true;
   }
   //TODO! this may be the user address instead, otherwise admin may steal ETH
@@ -302,6 +307,7 @@ contract Assets is Ownable {
     require(!safety);
 
     adminEth[userAddress] = amount;
+    lastBlock = block.number;
     return true;
   }
 
@@ -310,6 +316,7 @@ contract Assets is Ownable {
     require(!safety);
 
     registration[userAddress] = flagType;
+    lastBlock = block.number;
     return true;
   }
 
@@ -318,6 +325,7 @@ contract Assets is Ownable {
     require(!safety);
 
     tokenBlacklist[tokenAddress] = !tokenBlacklist[tokenAddress];
+    lastBlock = block.number;
     return true;
   }
 
@@ -330,23 +338,27 @@ contract Assets is Ownable {
       address payable payableAddress = address(uint160(adminAddress));
       payableAddress.transfer(dust);
     }
+    lastBlock = block.number;
     return true;
   }
 
   function updateRegisterData(address userAddress, string memory data) public virtual onlyOwner notPaused returns(bool success) {
     require(msg.sender == adminAddress || msg.sender == ownerAddress);
     registerData[userAddress] = data;
+    lastBlock = block.number;
     return true;
   }
 
   //-------SAFETY SWITCH---------
   function flipSafetySwitch() public onlyOwner virtual notPaused returns(bool success) {
     safety = !safety;
+    lastBlock = block.number;
     return true;
   }
 
   function flipPauseSwitch() public onlyOwner virtual returns(bool success) {
     pause = !pause;
+    lastBlock = block.number;
     return true;
   }
 
@@ -406,7 +418,7 @@ contract Assets is Ownable {
   //this contract to a new contract and set the user flag when it is done.
   //No need to make this contract modular and complicated.
   function setRegistration(address userAddress, uint flag) public virtual notPaused returns(bool success) {
-    require(msg.sender==controllerAddress);
+    require(msg.sender==nextContractAddress);
     registration[userAddress] = flag;
     lastBlock = block.number;
     return true;
