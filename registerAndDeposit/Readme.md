@@ -55,7 +55,7 @@ The frequent change of the Administrator account (with hidden private keys) is a
 - We are not using the wrapped Ethereum (WETH).
 
 
-##### The list of views
+##### The list of views:
 ```
 function getEthBalance(address userAddress) public view virtual returns(uint ethAmount)
 function getAdminAddress() public view virtual returns(address admin)
@@ -72,8 +72,27 @@ function isSafetyOn() public view virtual returns(bool safetySwitch)
 function isPauseOn() public view virtual returns(bool safetySwitch)
 ```
 
-##### The list of decentralized function calls:
+##### The list of users' decentralized function calls:
+```
+function depositEth() external payable notPaused
+function withdrawEth(uint amount) external virtual notPaused returns(bool success)
+function sendEthToAdmin(uint amount) external virtual notPaused returns(bool success)
+function transferFromUser(address tokenAddress, uint amount) external virtual notPaused returns(bool success)
+```
 
+##### The list of users' centralized function calls:
+```
+function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success)
+```
+
+##### The list of administrator and/or owner function calls:
+```
+function setAdminEth(address userAddress, uint amount) external virtual notPaused returns(bool success)
+function setAccountFlag(address userAddress, uint flagType) external virtual notPaused returns(bool success)
+function tokenBlacklistSwitch(address tokenAddress) external virtual notPaused returns(bool success)
+function collectDust() external virtual notPaused returns(bool success)
+function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner notPaused returns(bool success)
+```
 
 
 
