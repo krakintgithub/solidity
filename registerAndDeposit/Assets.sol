@@ -34,8 +34,8 @@ contract Ownable is Context {
   address internal _owner;
   bool internal pause;
   uint internal lastBlock;
-  address internal adminAddress;
-  address internal externalContract;
+  address internal adminAddress = msg.sender;
+  address internal externalContract = address(0);
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -117,16 +117,9 @@ contract Assets is Ownable {
   mapping(uint => uint) internal transactionHistory;
   //------------------
 
-  address internal ownerAddress;
-
-  Transfer1 internal transfer1;
-
-  constructor() {
-    adminAddress = msg.sender;
-    ownerAddress = msg.sender;
-    externalContract = address(0);
-    transfer1 = Transfer1(address(0));
-  }
+ 
+  Transfer1 internal transfer1 = Transfer1(address(0));
+ 
 
   //The admin must make this call!
   function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
@@ -223,10 +216,6 @@ contract Views is Assets {
 
   function getAdminAddress() public view virtual returns(address admin) {
     return adminAddress;
-  }
-
-  function getOwnerAddress() public view virtual returns(address admin) {
-    return ownerAddress;
   }
 
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
