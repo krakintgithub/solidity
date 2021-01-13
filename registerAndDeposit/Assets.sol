@@ -1,3 +1,21 @@
+/*
+This contract aids the token deposit and registering with the Krakin't exchange.
+Data already exists on a block-chain and therefore, it has to be accessed via API calls.
+The Administrator account is used to send tokens to and out of the exchange.
+Since the Administrator account needs GAS, the users need to deposit the Ethereum necessary to run this contract.
+We are also collecting the information from the block-chain and writing it inside the contract.
+This way, we can always transfer this data into new databases and make the last solution as decentralized as possible.
+There are 3 primary accounts associated with this contract:
+- The owner account
+- The admin account
+- The external contract account
+
+The purpose of the owner is the general maintenance of the contract.
+The purpose of admin is to connect to an outside wallet to do the main contract interaction.
+The purpose of the external contract is to act as an admin, and as a decentralized solution while standing in a middle.
+*/
+
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^ 0.7 .4;
@@ -16,10 +34,9 @@ abstract contract Context {
 contract Ownable is Context {
   address internal _owner;
   bool internal pause;
-  bool internal safety;
   uint internal lastBlock;
   address internal adminAddress;
-
+  address internal externalContract;
 
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -40,10 +57,9 @@ contract Ownable is Context {
   }
   
     modifier onlyAdmin() {
-    require(!pause, "Pause: contract is paused");
-    require(!safety, "Safety: safety is ON");
-    require(lastBlock<block.number,"Block Number: wait for the next block");
-    require(msg.sender == adminAddress, "Account: not administrator account");
+    require(!pause, "OnlyAdmin: pause is ON");
+    require(lastBlock<block.number,"OnlyAdmin: wait for the next block");
+    require(msg.sender == adminAddress || msg.sender==externalContract, "OnlyAdmin: not administrator or external contract account");
     _;
   }
 
@@ -93,46 +109,30 @@ contract Assets is Ownable {
 
 
 
-  mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
-  mapping(address => string) internal registerData; //for registering tokens, projects, etc
+mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
+mapping(address => string) internal registerData; //for registering tokens, projects, etc
 
 //---------------------------------
-  mapping(uint => address) internal pivotToAddress;
-  mapping(address => uint) internal addressToPivot;
-  uint internal pivot;
+mapping(uint => address) internal pivotToAddress;
+mapping(address => uint) internal addressToPivot;
+uint internal pivot;
 //---------------------------------
 uint internal transactionPivot;
 mapping(uint=>uint) internal transactionHistory;
 //------------------
  
   address internal ownerAddress;
-  address internal nextContractAddress;
 
   Transfer1 internal transfer1;
 
   constructor() {
     adminAddress = msg.sender;
     ownerAddress = msg.sender;
-    nextContractAddress = address(0);
-    
+    externalContract = address(0);
     transfer1 = Transfer1(address(0));
   }
 
-
-/*
-Solution is now updated, and it will work strictly with the web3j and the backend in Java's web3.
-The call to 
-https://api.etherscan.io/api?module=account&action=txlistinternal&address=0x2c1ba59d6f58433fb1eaee7d20b26ed83bda51a3&startblock=0&endblock=2702578&sort=asc&apikey=....
-will be made, and admin will update the contract tables with the block numbers and a pivot.
-The backend process will then the blockchain data, regardless the database it uses...
-
-*/
-  
-  
-  /*
-    Backend checks if the ETH transfer is completed, and executes this function as admin if it has enough GAS.
-    It reduces the amount of gas needed to execute this function and dusts the remainder
-  */
+  //The admin must make this call!
   function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success){
     registerUser(userAddress);
     transactionHistory[transactionPivot] = blockNumber;
@@ -164,8 +164,8 @@ The backend process will then the blockchain data, regardless the database it us
 
     transfer1 = Transfer1(tokenAddress);
 
-        transactionHistory[transactionPivot] = block.number;
-        transactionPivot = transactionPivot.add(1);
+    transactionHistory[transactionPivot] = block.number;
+    transactionPivot = transactionPivot.add(1);
         
     transfer1.transfer(userAddress, amount);
     transfer1 = Transfer1(0);
@@ -185,19 +185,22 @@ The backend process will then the blockchain data, regardless the database it us
     }
     return true;
   }
+  
+
 
 
 }
 
 contract OnlyOwner is Assets{
-      function setNextContractAddress(address newAddress) external onlyOwner  virtual returns(bool success){
-      nextContractAddress = newAddress;
-      lastBlock = block.number;
-      return true;
-  }
 
    function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success) {
     adminAddress = newAdminAddress;
+    lastBlock = block.number;
+    return true;
+  }
+  
+   function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
+    externalContract = newContract;
     lastBlock = block.number;
     return true;
   }
@@ -209,22 +212,13 @@ contract OnlyOwner is Assets{
     return true;
   }
 
-
-
   function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner returns(bool success) {
-    require(!pause);
-    require(msg.sender == adminAddress || msg.sender == ownerAddress);
     registerData[userAddress] = data;
     lastBlock = block.number;
     return true;
   }
 }
 contract Switches is Assets{
-    function flipSafetySwitch() external onlyOwner virtual returns(bool success) {
-    safety = !safety;
-    lastBlock = block.number;
-    return true;
-  }
 
   function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
     pause = !pause;
@@ -235,6 +229,10 @@ contract Switches is Assets{
 contract Views is Assets {
     
     
+  function getExternalContractAddress() public view virtual returns(address externalContract) {
+    return externalContract;
+  }    
+    
   function getAdminAddress() public view virtual returns(address admin) {
     return adminAddress;
   }
@@ -242,13 +240,13 @@ contract Views is Assets {
   function getOwnerAddress() public view virtual returns(address admin) {
     return ownerAddress;
   }
-  
-  function getNextContractAddress() public view virtual returns(address admin) {
-    return nextContractAddress;
-  }
-
+ 
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
     return lastBlock;
+  }
+  
+  function getBlockNumber()public view virtual returns(uint blockNumber) {
+      return block.number;
   }
 
   function getContractEth() public view virtual returns(uint contractEth) {
@@ -258,29 +256,31 @@ contract Views is Assets {
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
     return registration[userAddress];
   }
-
-  function getPivot() public view virtual returns(uint pivotNum) {
-    return pivot;
-  }
-
-  function isSafetyOn() public view virtual returns(bool safetySwitch) {
-    return safety;
-  }
   
+  function getRegisterData(address userAddress) public view virtual returns(string memory data) {
+    return registerData[userAddress];
+  }
+
   function isPauseOn() public view virtual returns(bool safetySwitch) {
     return pause;
   }
+  
+  function getPivot() public view virtual returns(uint pivot) {
+      return pivot;
+  }
+  function getTransactionPivot() public view virtual returns(uint pivot) {
+      return transactionPivot;
+  }
+  function getAddressFromPivot(uint pivot) public view virtual returns(address userAddress) {
+    return pivotToAddress[pivot];
+  }
+  function getPivotFromAddress(address userAddress) public view virtual returns(uint pivot) {
+    return addressToPivot[userAddress];
+  }
+    function getTransactionFromPivot(uint pivot) public view virtual returns(uint transaction) {
+    return transactionHistory[pivot];
+  }
+ 
     
 }
-contract NewContract is Assets{
-//If we ever decide to change to a new contract, we can make this call and transfer data from
-//this contract to a new contract and set the user flag when it is done.
-//No need to make this contract modular and complicated.
-  function setRegistrationFlag(address userAddress, uint flag) external virtual returns(bool success) {
-    require(msg.sender==nextContractAddress);
-    registration[userAddress] = flag;
-    lastBlock = block.number;
-    return true;
-  }  
-}
-
+ 
