@@ -91,15 +91,19 @@ library SafeMath {
 contract Assets is Ownable {
   using SafeMath for uint;
 
-  mapping(address => uint) internal adminEth;
-  mapping(address => mapping(address => uint)) internal depositedTokens; // userAddress=>tokencontract=>amount
-  mapping(address => uint) internal tokenBalance;
+
+
   mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
-  mapping(uint => address) internal registeredUserAddresses;
   mapping(address => string) internal registerData; //for registering tokens, projects, etc
 
+//---------------------------------
+  mapping(uint => address) internal pivotToAddress;
+  mapping(address => uint) internal addressToPivot;
   uint internal pivot;
-
+//---------------------------------
+uint internal transactionPivot;
+mapping(uint=>uint) internal transactionHistory;
+//------------------
  
   address internal ownerAddress;
   address internal nextContractAddress;
@@ -114,32 +118,39 @@ contract Assets is Ownable {
     transfer1 = Transfer1(address(0));
   }
 
-  //==== ETH ====
+
+/*
+Solution is now updated, and it will work strictly with the web3j and the backend in Java's web3.
+The call to 
+https://api.etherscan.io/api?module=account&action=txlistinternal&address=0x2c1ba59d6f58433fb1eaee7d20b26ed83bda51a3&startblock=0&endblock=2702578&sort=asc&apikey=....
+will be made, and admin will update the contract tables with the block numbers and a pivot.
+The backend process will then the blockchain data, regardless the database it uses...
+
+*/
+  
   
   /*
     Backend checks if the ETH transfer is completed, and executes this function as admin if it has enough GAS.
     It reduces the amount of gas needed to execute this function and dusts the remainder
   */
-  function registerNewEthBalance(address userAddress, uint amount) external virtual onlyAdmin returns(bool success){
+  function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success){
     registerUser(userAddress);
-    adminEth[userAddress] = amount;
+    transactionHistory[transactionPivot] = blockNumber;
+    transactionPivot = transactionPivot.add(1);
     lastBlock = block.number;
     return true;
   }
 
-  //recover ETH from Admin is a web3 function, not a contract
+  //recover ETH from Admin is a web3 function, not a contract, then another call to registerNewEthBalance is made
 
   //==== TOKEN ====
 
-  /*
-    Backend checks if the Token transfer to contract is completed, and executes this function as admin if it has enough GAS.
-  */
-  function registerTokenDeposit(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success) {
+  function registerNewTokenBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
         registerUser(userAddress);
-        
-        depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
-        tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
 
+        transactionHistory[transactionPivot] = blockNumber;
+        transactionPivot = transactionPivot.add(1);
+        
         transfer1 = Transfer1(0);
         
         lastBlock = block.number;
@@ -149,17 +160,13 @@ contract Assets is Ownable {
  
 
   //The admin must make this call!
-  function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual returns(bool success) {
-    require(msg.sender == adminAddress);
-    require(amount <= depositedTokens[userAddress][tokenAddress]);
-    require(amount <= tokenBalance[tokenAddress]);
+  function withdrawTokens(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success) {
 
     transfer1 = Transfer1(tokenAddress);
 
-    //TODO: if amount is greater than what is available, needs a better mechanism!!!
-    depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].sub(amount);
-    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
-
+        transactionHistory[transactionPivot] = block.number;
+        transactionPivot = transactionPivot.add(1);
+        
     transfer1.transfer(userAddress, amount);
     transfer1 = Transfer1(0);
     
@@ -169,9 +176,13 @@ contract Assets is Ownable {
   }
 
   
-  //---------setters-------
+  //---------helpers-------
   function registerUser(address userAddress) private  returns(bool success) {
-    //TODO!!!!
+    if(addressToPivot[userAddress]==0){
+        pivot = pivot.add(1);
+        addressToPivot[userAddress] = pivot;
+        pivotToAddress[pivot] = userAddress;
+    }
     return true;
   }
 
@@ -208,29 +219,6 @@ contract OnlyOwner is Assets{
     return true;
   }
 }
-contract Emergency is Assets{
-using SafeMath for uint;
-
-  function emergencyWithdrawAssets(address tokenAddress) external virtual returns(bool success) {
-    require(safety);
-    require(lastBlock < block.number);
-    require(msg.sender != adminAddress);
-
-    transfer1 = Transfer1(tokenAddress);
-
-    uint amount = depositedTokens[msg.sender][tokenAddress];
-    require(tokenBalance[tokenAddress] >= amount);
-    depositedTokens[msg.sender][tokenAddress] = 0;
-    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
-
-    transfer1.transfer(msg.sender, amount);
-
-    transfer1 = Transfer1(0);
-    lastBlock = block.number;
-
-    return true;
-  } 
-}
 contract Switches is Assets{
     function flipSafetySwitch() external onlyOwner virtual returns(bool success) {
     safety = !safety;
@@ -259,20 +247,12 @@ contract Views is Assets {
     return nextContractAddress;
   }
 
-  function getEthBalance(address userAddress) public view virtual returns(uint ethAmount) {
-    return adminEth[userAddress];
-  }
-
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
     return lastBlock;
   }
 
   function getContractEth() public view virtual returns(uint contractEth) {
     return address(this).balance;
-  }
-
-  function getAssetBalace(address userAddress, address tokenAddress) public view virtual returns(uint assetAmount) {
-    return depositedTokens[userAddress][tokenAddress];
   }
 
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
