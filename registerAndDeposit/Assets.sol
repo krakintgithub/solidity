@@ -14,8 +14,13 @@ abstract contract Context {
 }
 
 contract Ownable is Context {
-  address private _owner;
-  bool private pause;
+  address internal _owner;
+  bool internal pause;
+  bool internal safety;
+  uint internal lastBlock;
+  address internal adminAddress;
+
+
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -33,11 +38,16 @@ contract Ownable is Context {
     require(_owner == _msgSender(), "Ownable: caller is not the owner");
     _;
   }
-
-  modifier notPaused() {
+  
+    modifier onlyAdmin() {
     require(!pause, "Pause: contract is paused");
+    require(!safety, "Safety: safety is ON");
+    require(lastBlock<block.number,"Block Number: wait for the next block");
+    require(msg.sender == adminAddress, "Account: not administrator account");
     _;
   }
+
+ 
 
   function renounceOwnership() public virtual onlyOwner {
     emit OwnershipTransferred(_owner, address(0));
@@ -79,28 +89,22 @@ library SafeMath {
 }
 
 contract Assets is Ownable {
-  using SafeMath
-  for uint;
+  using SafeMath for uint;
 
-  mapping(address => uint) private adminEth;
-  mapping(address => mapping(address => uint)) private depositedTokens; // userAddress=>tokencontract=>amount
-  mapping(address => uint) private tokenBalance;
-  mapping(address => uint) private registration; //for account flagging, 100 is blacklisted
-  mapping(address => bool) private tokenBlacklist;
-  mapping(uint => address) private registeredUserAddresses;
-  mapping(address => string) private registerData; //for registering tokens, projects, etc
+  mapping(address => uint) internal adminEth;
+  mapping(address => mapping(address => uint)) internal depositedTokens; // userAddress=>tokencontract=>amount
+  mapping(address => uint) internal tokenBalance;
+  mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
+  mapping(uint => address) internal registeredUserAddresses;
+  mapping(address => string) internal registerData; //for registering tokens, projects, etc
 
-  uint private lastBlock;
-  uint private pivot;
+  uint internal pivot;
 
-  bool private safety;
-  bool private pause;
+ 
+  address internal ownerAddress;
+  address internal nextContractAddress;
 
-  address private adminAddress;
-  address private ownerAddress;
-  address private nextContractAddress;
-
-  Transfer1 private transfer1;
+  Transfer1 internal transfer1;
 
   constructor() {
     adminAddress = msg.sender;
@@ -116,17 +120,12 @@ contract Assets is Ownable {
     Backend checks if the ETH transfer is completed, and executes this function as admin if it has enough GAS.
     It reduces the amount of gas needed to execute this function and dusts the remainder
   */
-  function registerEthDeposit(address userAddress, uint amount) external virtual notPaused returns(bool success){
-    require(lastBlock < block.number);
-    require(msg.sender == adminAddress);
-    require(!safety);
-    registerUser();
-
-    adminEth[userAddress] = adminEth[userAddress].add(amount);
+  function registerNewEthBalance(address userAddress, uint amount) external virtual onlyAdmin returns(bool success){
+    registerUser(userAddress);
+    adminEth[userAddress] = amount;
     lastBlock = block.number;
     return true;
   }
-
 
   //recover ETH from Admin is a web3 function, not a contract
 
@@ -134,14 +133,9 @@ contract Assets is Ownable {
 
   /*
     Backend checks if the Token transfer to contract is completed, and executes this function as admin if it has enough GAS.
-    It reduces the amount of gas needed to execute this function and dusts the remainder
   */
-  function registerTokenDeposit(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
-        require(lastBlock < block.number);
-        require(msg.sender == adminAddress);
-        require(!safety);
-        
-        registerUser();
+  function registerTokenDeposit(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success) {
+        registerUser(userAddress);
         
         depositedTokens[userAddress][tokenAddress] = depositedTokens[userAddress][tokenAddress].add(amount);
         tokenBalance[tokenAddress] = tokenBalance[tokenAddress].add(amount);
@@ -155,12 +149,10 @@ contract Assets is Ownable {
  
 
   //The admin must make this call!
-  function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success) {
+  function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual returns(bool success) {
     require(msg.sender == adminAddress);
     require(amount <= depositedTokens[userAddress][tokenAddress]);
     require(amount <= tokenBalance[tokenAddress]);
-    require(lastBlock < block.number);
-    require(!safety);
 
     transfer1 = Transfer1(tokenAddress);
 
@@ -176,11 +168,85 @@ contract Assets is Ownable {
     return true;
   }
 
-  //----------views------
-  function getEthBalance(address userAddress) public view virtual returns(uint ethAmount) {
-    return adminEth[userAddress];
+  
+  //---------setters-------
+  function registerUser(address userAddress) private  returns(bool success) {
+    //TODO!!!!
+    return true;
   }
 
+
+}
+
+contract OnlyOwner is Assets{
+      function setNextContractAddress(address newAddress) external onlyOwner  virtual returns(bool success){
+      nextContractAddress = newAddress;
+      lastBlock = block.number;
+      return true;
+  }
+
+   function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success) {
+    adminAddress = newAdminAddress;
+    lastBlock = block.number;
+    return true;
+  }
+
+
+  function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual  returns(bool success) {
+    registration[userAddress] = flagType;
+    lastBlock = block.number;
+    return true;
+  }
+
+
+
+  function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner returns(bool success) {
+    require(!pause);
+    require(msg.sender == adminAddress || msg.sender == ownerAddress);
+    registerData[userAddress] = data;
+    lastBlock = block.number;
+    return true;
+  }
+}
+contract Emergency is Assets{
+using SafeMath for uint;
+
+  function emergencyWithdrawAssets(address tokenAddress) external virtual returns(bool success) {
+    require(safety);
+    require(lastBlock < block.number);
+    require(msg.sender != adminAddress);
+
+    transfer1 = Transfer1(tokenAddress);
+
+    uint amount = depositedTokens[msg.sender][tokenAddress];
+    require(tokenBalance[tokenAddress] >= amount);
+    depositedTokens[msg.sender][tokenAddress] = 0;
+    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
+
+    transfer1.transfer(msg.sender, amount);
+
+    transfer1 = Transfer1(0);
+    lastBlock = block.number;
+
+    return true;
+  } 
+}
+contract Switches is Assets{
+    function flipSafetySwitch() external onlyOwner virtual returns(bool success) {
+    safety = !safety;
+    lastBlock = block.number;
+    return true;
+  }
+
+  function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
+    pause = !pause;
+    lastBlock = block.number;
+    return true;
+  }  
+}
+contract Views is Assets {
+    
+    
   function getAdminAddress() public view virtual returns(address admin) {
     return adminAddress;
   }
@@ -191,6 +257,10 @@ contract Assets is Ownable {
   
   function getNextContractAddress() public view virtual returns(address admin) {
     return nextContractAddress;
+  }
+
+  function getEthBalance(address userAddress) public view virtual returns(uint ethAmount) {
+    return adminEth[userAddress];
   }
 
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
@@ -209,25 +279,8 @@ contract Assets is Ownable {
     return registration[userAddress];
   }
 
-  function isTokenBlacklisted(address tokenAddress) public view virtual returns(bool onBlacklist) {
-    return tokenBlacklist[tokenAddress];
-  }
-
   function getPivot() public view virtual returns(uint pivotNum) {
     return pivot;
-  }
-
-  //TODO: might be wrong to only process the registeredEth, double check!!!
-  function getEthDust() public view virtual returns(uint dustEth) {
-    uint balance = address(this).balance;
-    uint registeredEth = 0;
-    for (uint t = 1; t <= pivot; t++) {
-      address user = registeredUserAddresses[t];
-    }
-    if (balance > registeredEth) {
-      return balance.sub(registeredEth);
-    }
-    return 0;
   }
 
   function isSafetyOn() public view virtual returns(bool safetySwitch) {
@@ -237,119 +290,17 @@ contract Assets is Ownable {
   function isPauseOn() public view virtual returns(bool safetySwitch) {
     return pause;
   }
-  //---------setters-------
-  function registerUser() private notPaused returns(bool success) {
-    if (registration[msg.sender] == 0) {
-      pivot = pivot.add(1);
-      registration[msg.sender] = pivot;
-    }
-    return true;
-  }
-  function setNextContractAddress(address newAddress) external onlyOwner notPaused virtual returns(bool success){
-      nextContractAddress = newAddress;
-      lastBlock = block.number;
-      return true;
-  }
-
-  //-------only owner---------
-  function setAdminAddress(address newAdminAddress) external onlyOwner notPaused virtual returns(bool success) {
-    require(!safety);
-    adminAddress = newAdminAddress;
-    lastBlock = block.number;
-    return true;
-  }
-  //TODO! this may be the user address instead, otherwise admin may steal ETH
-  function setAdminEth(address userAddress, uint amount) external virtual notPaused returns(bool success) {
-    require(msg.sender == adminAddress);
-    require(!safety);
-
-    adminEth[userAddress] = amount;
-    lastBlock = block.number;
-    return true;
-  }
-
-  function setAccountFlag(address userAddress, uint flagType) external virtual notPaused returns(bool success) {
-    require(msg.sender == adminAddress || msg.sender == ownerAddress);
-    require(!safety);
-
-    registration[userAddress] = flagType;
-    lastBlock = block.number;
-    return true;
-  }
-
-  function tokenBlacklistSwitch(address tokenAddress) external virtual notPaused returns(bool success) {
-    require(msg.sender == adminAddress || msg.sender == ownerAddress);
-    require(!safety);
-
-    tokenBlacklist[tokenAddress] = !tokenBlacklist[tokenAddress];
-    lastBlock = block.number;
-    return true;
-  }
-
-  function collectDust() external virtual notPaused returns(bool success) {
-    require(msg.sender == adminAddress || msg.sender == ownerAddress);
-    require(!safety);
-
-    uint dust = getEthDust();
-    if (dust > 0) {
-      address payable payableAddress = address(uint160(adminAddress));
-      payableAddress.transfer(dust);
-    }
-    lastBlock = block.number;
-    return true;
-  }
-
-  function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner notPaused returns(bool success) {
-    require(msg.sender == adminAddress || msg.sender == ownerAddress);
-    registerData[userAddress] = data;
-    lastBlock = block.number;
-    return true;
-  }
-
-  //-------SAFETY SWITCH---------
-  function flipSafetySwitch() external onlyOwner virtual notPaused returns(bool success) {
-    safety = !safety;
-    lastBlock = block.number;
-    return true;
-  }
-
-  function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
-    pause = !pause;
-    lastBlock = block.number;
-    return true;
-  }
-
-
-
-  function emergencyWithdrawAssets(address tokenAddress) external virtual notPaused returns(bool success) {
-    require(safety);
-    require(lastBlock < block.number);
-    require(msg.sender != adminAddress);
-
-    transfer1 = Transfer1(tokenAddress);
-
-    uint amount = depositedTokens[msg.sender][tokenAddress];
-    require(tokenBalance[tokenAddress] >= amount);
-    depositedTokens[msg.sender][tokenAddress] = 0;
-    tokenBalance[tokenAddress] = tokenBalance[tokenAddress].sub(amount);
-
-    transfer1.transfer(msg.sender, amount);
-
-    transfer1 = Transfer1(0);
-    lastBlock = block.number;
-
-    return true;
-  }
-  //-----------CONTROLLER ACCESS----------
-  //If we ever decide to change to a new contract, we can make this call and transfer data from
-  //this contract to a new contract and set the user flag when it is done.
-  //No need to make this contract modular and complicated.
-  function setRegistrationFlag(address userAddress, uint flag) external virtual notPaused returns(bool success) {
+    
+}
+contract NewContract is Assets{
+//If we ever decide to change to a new contract, we can make this call and transfer data from
+//this contract to a new contract and set the user flag when it is done.
+//No need to make this contract modular and complicated.
+  function setRegistrationFlag(address userAddress, uint flag) external virtual returns(bool success) {
     require(msg.sender==nextContractAddress);
     registration[userAddress] = flag;
     lastBlock = block.number;
     return true;
-  }
-
-
+  }  
 }
+
