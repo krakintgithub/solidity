@@ -15,7 +15,6 @@ The purpose of admin is to connect to an outside wallet to do the main contract 
 The purpose of the external contract is to act as an admin, and as a decentralized solution while standing in a middle.
 */
 
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^ 0.7 .4;
@@ -38,7 +37,6 @@ contract Ownable is Context {
   address internal adminAddress;
   address internal externalContract;
 
-
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
   constructor() {
@@ -55,15 +53,13 @@ contract Ownable is Context {
     require(_owner == _msgSender(), "Ownable: caller is not the owner");
     _;
   }
-  
-    modifier onlyAdmin() {
+
+  modifier onlyAdmin() {
     require(!pause, "OnlyAdmin: pause is ON");
-    require(lastBlock<block.number,"OnlyAdmin: wait for the next block");
-    require(msg.sender == adminAddress || msg.sender==externalContract, "OnlyAdmin: not administrator or external contract account");
+    require(lastBlock < block.number, "OnlyAdmin: wait for the next block");
+    require(msg.sender == adminAddress || msg.sender == externalContract, "OnlyAdmin: not administrator or external contract account");
     _;
   }
-
- 
 
   function renounceOwnership() public virtual onlyOwner {
     emit OwnershipTransferred(_owner, address(0));
@@ -79,6 +75,7 @@ contract Ownable is Context {
 
 abstract contract Transfer1 {
   function transfer(address toAddress, uint256 amount) external virtual;
+
   function transferFrom(address sender, address recipient, uint256 amount) external virtual;
 }
 
@@ -105,22 +102,21 @@ library SafeMath {
 }
 
 contract Assets is Ownable {
-  using SafeMath for uint;
+  using SafeMath
+  for uint;
 
+  mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
+  mapping(address => string) internal registerData; //for registering tokens, projects, etc
 
+  //---------------------------------
+  mapping(uint => address) internal pivotToAddress;
+  mapping(address => uint) internal addressToPivot;
+  uint internal pivot;
+  //---------------------------------
+  uint internal transactionPivot;
+  mapping(uint => uint) internal transactionHistory;
+  //------------------
 
-mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
-mapping(address => string) internal registerData; //for registering tokens, projects, etc
-
-//---------------------------------
-mapping(uint => address) internal pivotToAddress;
-mapping(address => uint) internal addressToPivot;
-uint internal pivot;
-//---------------------------------
-uint internal transactionPivot;
-mapping(uint=>uint) internal transactionHistory;
-//------------------
- 
   address internal ownerAddress;
 
   Transfer1 internal transfer1;
@@ -133,7 +129,7 @@ mapping(uint=>uint) internal transactionHistory;
   }
 
   //The admin must make this call!
-  function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success){
+  function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
     registerUser(userAddress);
     transactionHistory[transactionPivot] = blockNumber;
     transactionPivot = transactionPivot.add(1);
@@ -146,18 +142,16 @@ mapping(uint=>uint) internal transactionHistory;
   //==== TOKEN ====
 
   function registerNewTokenBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
-        registerUser(userAddress);
+    registerUser(userAddress);
 
-        transactionHistory[transactionPivot] = blockNumber;
-        transactionPivot = transactionPivot.add(1);
-        
-        transfer1 = Transfer1(0);
-        
-        lastBlock = block.number;
-        return true;
-      }
+    transactionHistory[transactionPivot] = blockNumber;
+    transactionPivot = transactionPivot.add(1);
 
- 
+    transfer1 = Transfer1(0);
+
+    lastBlock = block.number;
+    return true;
+  }
 
   //The admin must make this call!
   function withdrawTokens(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success) {
@@ -166,47 +160,42 @@ mapping(uint=>uint) internal transactionHistory;
 
     transactionHistory[transactionPivot] = block.number;
     transactionPivot = transactionPivot.add(1);
-        
+
     transfer1.transfer(userAddress, amount);
     transfer1 = Transfer1(0);
-    
+
     lastBlock = block.number;
 
     return true;
   }
 
-  
   //---------helpers-------
-  function registerUser(address userAddress) private  returns(bool success) {
-    if(addressToPivot[userAddress]==0){
-        pivot = pivot.add(1);
-        addressToPivot[userAddress] = pivot;
-        pivotToAddress[pivot] = userAddress;
+  function registerUser(address userAddress) private returns(bool success) {
+    if (addressToPivot[userAddress] == 0) {
+      pivot = pivot.add(1);
+      addressToPivot[userAddress] = pivot;
+      pivotToAddress[pivot] = userAddress;
     }
     return true;
   }
-  
-
-
 
 }
 
-contract OnlyOwner is Assets{
+contract OnlyOwner is Assets {
 
-   function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success) {
+  function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success) {
     adminAddress = newAdminAddress;
     lastBlock = block.number;
     return true;
   }
-  
-   function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
+
+  function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
     externalContract = newContract;
     lastBlock = block.number;
     return true;
   }
 
-
-  function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual  returns(bool success) {
+  function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual returns(bool success) {
     registration[userAddress] = flagType;
     lastBlock = block.number;
     return true;
@@ -218,21 +207,20 @@ contract OnlyOwner is Assets{
     return true;
   }
 }
-contract Switches is Assets{
+contract Switches is Assets {
 
   function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
     pause = !pause;
     lastBlock = block.number;
     return true;
-  }  
+  }
 }
 contract Views is Assets {
-    
-    
+
   function getExternalContractAddress() public view virtual returns(address externalContract) {
     return externalContract;
-  }    
-    
+  }
+
   function getAdminAddress() public view virtual returns(address admin) {
     return adminAddress;
   }
@@ -240,13 +228,13 @@ contract Views is Assets {
   function getOwnerAddress() public view virtual returns(address admin) {
     return ownerAddress;
   }
- 
+
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
     return lastBlock;
   }
-  
-  function getBlockNumber()public view virtual returns(uint blockNumber) {
-      return block.number;
+
+  function getBlockNumber() public view virtual returns(uint blockNumber) {
+    return block.number;
   }
 
   function getContractEth() public view virtual returns(uint contractEth) {
@@ -256,7 +244,7 @@ contract Views is Assets {
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
     return registration[userAddress];
   }
-  
+
   function getRegisterData(address userAddress) public view virtual returns(string memory data) {
     return registerData[userAddress];
   }
@@ -264,23 +252,25 @@ contract Views is Assets {
   function isPauseOn() public view virtual returns(bool safetySwitch) {
     return pause;
   }
-  
+
   function getPivot() public view virtual returns(uint pivot) {
-      return pivot;
+    return pivot;
   }
+
   function getTransactionPivot() public view virtual returns(uint pivot) {
-      return transactionPivot;
+    return transactionPivot;
   }
+
   function getAddressFromPivot(uint pivot) public view virtual returns(address userAddress) {
     return pivotToAddress[pivot];
   }
+
   function getPivotFromAddress(address userAddress) public view virtual returns(uint pivot) {
     return addressToPivot[userAddress];
   }
-    function getTransactionFromPivot(uint pivot) public view virtual returns(uint transaction) {
+
+  function getTransactionFromPivot(uint pivot) public view virtual returns(uint transaction) {
     return transactionHistory[pivot];
   }
- 
-    
+
 }
- 
