@@ -42,6 +42,8 @@ The frequent change of the Administrator account (with hidden private keys) is a
 #### Important details to note
 - We only process one transaction or function execution per block (approximately 12 seconds). Otherwise, the error is thrown. This can be managed via DAPP simply by showing the wait message, until the block number increases on the blockchain. This is also a security feature.
 
+- API calls are made in a 5 second interval.
+
 - Nobody can steal the assets from a contract, while no human will ever know the private key of the Admin account.
 
 - We have a pause that prevents any activity should we detect anything suspicious.
@@ -89,14 +91,30 @@ bool internal pause;
 - pause: pauses the executions of the main contract functions (safety)
 
 ```
-Transfer1 internal transfer1 = Transfer1(address(0));
+Transfer internal transfer = Transfer(address(0));
 ```
-- transfer1: Transfers the token from a contract address to user's wallet. NOTE: the token must have the common transfer function, otherwise it will remain locked!
+- transfer: Transfers the token from a contract address to user's wallet. NOTE: the token must have the common transfer function, otherwise it will remain locked!
  
-##### The list of owner-only function calls:
+#### The views:
+```
+function getExternalContractAddress() public view virtual returns(address externalContract)
+function getAdminAddress() public view virtual returns(address admin)
+function getLastBlock() public view virtual returns(uint lastBlockNumber)
+function getBlockNumber() public view virtual returns(uint blockNumber)
+function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag)
+function getRegisterData(address userAddress) public view virtual returns(string memory data)
+function isPauseOn() public view virtual returns(bool safetySwitch)
+function getPivot() public view virtual returns(uint pivot)
+function getTransactionPivot() public view virtual returns(uint pivot)
+function getAddressFromPivot(uint pivot) public view virtual returns(address userAddress)
+function getPivotFromAddress(address userAddress) public view virtual returns(uint pivot)
+function getTransactionFromPivot(uint pivot) public view virtual returns(uint transaction)
+```
+All of these functions are self-explanatory and do not need any further details and explanations.
  
-##### The list of emergency-only function calls:
- 
+#### The setters: 
+
+
 
 #### User deposits ETH to a contract
 
