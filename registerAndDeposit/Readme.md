@@ -35,24 +35,18 @@ Our primary goal is to:
   <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/registerAndDeposit/diagram1.png" title="Logo">
 </p>
 
-This diagram is a brief overview of the background processes for depositing or withdrawing a Token/ETH.
-All actions are done via backend, while Administrator account is responsible for taking some of the actions commuinicating strictly with the server-side backend.
-A decentralized DAPP is also necessary, while it is communicating with the backend that will be connected to API such as Etherscan via REST API.
+Currently, although a decentralized solution, the users do not have any control over their assets once deposited to exchange. In the future, we will not rely on using the internal and securely stored wallets. Instead, we can use an external block-chain or another contract that manages a decentralized database. Furthermore, there shouldn't be any need to make the Ethereum deposits.
 
-The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses, and nothing else. The Administrator account can also accumulate the ETH dust, since we will charge just a bit more ETH to cover the GAS price and to make sure that everything processed without interruptions. The dust can be collected and therefore used by the Admin account to assist creating the new Admin account or cover any other GAS fees that we need for the maintenance.
+The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses.
 
 #### Important details to note
 - We only process one transaction or function execution per block (approximately 12 seconds). Otherwise, the error is thrown. This can be managed via DAPP simply by showing the wait message, until the block number increases on the blockchain. This is also a security feature.
 
-- Nobody can steal the assets from a contract, and you are responsible for your own private keys.
+- Nobody can steal the assets from a contract, while no human will ever know the private key of the Admin account.
 
-- We have a switch implemented to cancel all exchange and simply let people withdraw whatever they put onto contract, as a fail-safe mechanism.
-
-- We will make sure that nobody, not even the project owners, can access the Administrator private key.
+- We have a pause that prevents any activity should we detect anything suspicious.
 
 - There is no physical and actual person as an administrator, while everything is automated using the Ethereum contract, web3j and a Java version of the web3.
-
-- We are not using the wrapped Ethereum (WETH).
 
 
 ##### The list of views:
