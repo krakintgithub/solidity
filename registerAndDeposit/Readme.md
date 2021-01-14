@@ -46,62 +46,18 @@ The frequent change of the Administrator account (with hidden private keys) is a
 
 - We have a pause that prevents any activity should we detect anything suspicious.
 
-- There is no physical and actual person as an administrator, while everything is automated using the Ethereum contract, web3j and a Java version of the web3.
+- There is no physical and actual person as an administrator, while everything is automated using the Ethereum contract.
+
+- Not everything is open-source. We will expose the DAPP and the block-chain contracts only. We will not expose or upload the administrator wallet source code, and it will be developed without an Internet connection. In future, no developer will have an access to it.
 
 
 ##### The list of views:
-```
-function getEthBalance(address userAddress) public view virtual returns(uint ethAmount)
-function getAdminAddress() public view virtual returns(address admin)
-function getOwnerAddress() public view virtual returns(address admin)
-function getNextContractAddress() public view virtual returns(address admin)
-function getLastBlock() public view virtual returns(uint lastBlockNumber)
-function getContractEth() public view virtual returns(uint contractEth)
-function getAssetBalace(address userAddress, address tokenAddress) public view virtual returns(uint assetAmount)
-function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag)
-function isTokenBlacklisted(address tokenAddress) public view virtual returns(bool onBlacklist)
-function getPivot() public view virtual returns(uint pivotNum)
-function getEthDust() public view virtual returns(uint dustEth)
-function isSafetyOn() public view virtual returns(bool safetySwitch)
-function isPauseOn() public view virtual returns(bool safetySwitch)
-```
-
-##### The list of users' decentralized function calls:
-```
-function depositEth() external payable notPaused
-function withdrawEth(uint amount) external virtual notPaused returns(bool success)
-function sendEthToAdmin(uint amount) external virtual notPaused returns(bool success)
-function transferFromUser(address tokenAddress, uint amount) external virtual notPaused returns(bool success)
-```
-
-##### The list of users' centralized function calls:
-```
-function withdrawAssets(address userAddress, address tokenAddress, uint amount) external virtual notPaused returns(bool success)
-```
-
-##### The list of administrator and/or owner-only function calls:
-```
-function setAdminEth(address userAddress, uint amount) external virtual notPaused returns(bool success)
-function setAccountFlag(address userAddress, uint flagType) external virtual notPaused returns(bool success)
-function tokenBlacklistSwitch(address tokenAddress) external virtual notPaused returns(bool success)
-function collectDust() external virtual notPaused returns(bool success)
-function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner notPaused returns(bool success)
-```
-
+ 
+ 
 ##### The list of owner-only function calls:
-```
-function setNextContractAddress(address newAddress) external onlyOwner notPaused virtual returns(bool success)
-function setAdminAddress(address newAdminAddress) external onlyOwner notPaused virtual returns(bool success)
-function flipSafetySwitch() external onlyOwner virtual notPaused returns(bool success)
-function flipPauseSwitch() external onlyOwner virtual returns(bool success)
-```
-
+ 
 ##### The list of emergency-only function calls:
-```
-function emergencyWithdrawEth() external virtual notPaused returns(bool success)
-function emergencyWithdrawAssets(address tokenAddress) external virtual notPaused returns(bool success)
-````
-
+ 
 
 #### User deposits ETH to a contract
 
