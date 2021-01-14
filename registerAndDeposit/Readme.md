@@ -112,8 +112,19 @@ function getTransactionFromPivot(uint pivot) public view virtual returns(uint tr
 ```
 All of these functions are self-explanatory and do not need any further details and explanations.
  
-#### The setters: 
-
+#### Only-owner functions: 
+```
+function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success)
+function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success)
+function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual returns(bool success)
+function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner returns(bool success)
+function flipPauseSwitch() external onlyOwner virtual returns(bool success)
+```
+- setAdminAddress: In case we need to change the Admin public key or set the Admin public key within the contract
+- setExternalContractAddress: In case we decide to avoid the usage of the Admin wallet address and use contracts instead
+- setAccountFlag: We can flag the accounts to see which account has which setting (special offers, partnerships, blacklist,...)
+- updateRegisterData: We can register the account or a contract/token adding string data such as web-page, address, owners, ...
+- flipPauseSwitch: We can pause/continue the contract deposit/withdrawal. This, however, does not pause the exchange.
 
 
 #### User deposits ETH to a contract
