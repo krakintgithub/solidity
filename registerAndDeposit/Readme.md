@@ -143,67 +143,9 @@ function registerUser(address userAddress) private returns(bool success) {
 ```
 - registerUser: registers a new user assigning it a pivot ID
 
----------------------------
 
-#### User deposits ETH to a contract
-
-Dapp takes care of the contract interaction, while it collects the Ethereum transaction ID to send it to a backend server and store it in a database. Once everything is processed, user can continue using the Dapp for depositing the assets, while everything is updated via the API call to Etherscan to read the blockchain data and the state of a transfer. In the meantime, while waiting for transaction to complete, users can trade with their previously deposited assets and earnings. They won't be able to deposit or withdraw from the contract. It is important not to select the cheapest transfer as an option, since DAPP may appear frozen until transaction is finally completed or rejected.
-
-```
-mapping(address => uint) private depositedEth;
-```
-This map is used to keep a track of how much ETH has been deposited to a contract. This ETH can be used for trading or for forwarding it to the Admin account. DO NOT send any ETH directly to the Admin account, since we must register all the ETH deposits.
-
-```
-function depositEth() external payable {
-```
-The payable function where user can input the amount of ETH they wish to transfer to a contract. This ETH can stay for exchange or be transferred to the Administrator to pay for the GAS fees.
-
-#### User sends ETH to administrator account
-
-DAPP is used to send ETH to a contract. Please do not send any ETH directly to a contract address, it will be complicated to process or retrieve it. 
-
-```
-mapping(address => uint) private adminEth;
-```
-This map is used to track how much Eth was sent to Administrator account to cover the GAS fees.
-
-```
-function sendEthToAdmin(uint amount) public virtual returns (bool success){
-```
-This function is executed using a DAPP, while it also updates the adminEth map.
+## General Work-Flow explanation
 
 
 
 
-### Ignore below:
-- Step 1: user deposits a token DONE!
-- Step 2: user registers a token using DAPP
-
--------------
-
-- Step 3: user asks for withdrawal
-- Step 4: user withdraws
-
-Owner account does: 3, needs deposited ETH
-
-
-TODO:
-
-Contract-Side
-
-1. Eth deposit for withdrawal processing
-2. Registration providing a block number, add encrypted message
-3. Withdrawal approval
-4. Withdrawal of tokens and/or deposited ETH
-5. Blacklist of tokens and wallets
-6. Admin list, add or remove
-7. GAS calculation before execution
-8. Prevent owner/admin from stealing tokens or ETH
-
-Backend-side
-1. API call to blockchain to get deposit data providing a block number
-2. Encryption/Decryption/Confirmation
-3. Allowing of withdrawals by admin or owner
-4. General DB management
-5. Safe storage of private keys (Encryption and admin wallet)
