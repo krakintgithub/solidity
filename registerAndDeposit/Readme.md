@@ -150,7 +150,8 @@ Please note:
 
 - DO NOT SEND TOKENS THAT DO NOT HAVE A COMMON TRANSFER FUNCTION!  These tokens will be locked in a contract and nobody will be able to get them for you. Examples of common transfer functions are:
 1. ```function transfer(address to, uint tokens) virtual override public returns (bool success)```
-2. ```function transfer(address to, uint tokens) virtual override public```
+2. ```function transfer(address to, uint tokens) virtual override public returns (bool)```
+3. ```function transfer(address to, uint tokens) virtual override public```
 
 - Users do not have to register their tokens on the block-chain. The backend system detects whether it is a new or an existing token. If token is new, users will be able to write wikipedia pages and give us more details. If you are a token owner, you will be asked to prove your identity by making a micro-transfer from a token account. Other registration forms will be provided. Everything will be optional, however, token will be graded depending on the information that is provided.
 
