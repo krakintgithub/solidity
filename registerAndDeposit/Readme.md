@@ -13,7 +13,11 @@
 ### This document is currently in progres
 
 # Introduction
-This is the contract mechanism that we will use to allow people to add and remove tokens to (and from an) exchange, and also to provide the necessary Ethereum gas to get the assets from the exchange. Everything else that happens within the exchange will be free. The "matrix" style doodle is not much about us hacking anything, but about the usability of the solution. Our primary goal is to:
+This is the contract mechanism that we will use to allow people to add and remove tokens to (and from an) exchange, and also to provide the necessary Ethereum gas to get the assets from the exchange. The main goal is to create an exchange where liquidity deposits are not a requirement. However, the main requirement is to provide the gas to a contract (or a wallet) that registers deposits and makes withdrawals.
+
+Since having an on-chain database is too expensive, we are falling back to centralized solutions that cost less and are scalable. As block-chain is already tracking deposits and withdrawals, we do not track what is already done for us. However, we register each block when some action happened. As we only allow one action per block, it becomes very easy to track how many tokens were deposited to and withdrawn from an exchange contract. This way, we can always replicate  data and replicate the exchange mechanism on any decentralized platform. Nevertheless, unless we run our own block-chain, we cannot replicate the inner state of an exchange and users' earnings/losses. This would require either a live block-chain update or a snapshot mechanism. At the moment of writing this document, we will start with the centralized database and the centralized live updates as well as the snapshot backups that will be kept offline.
+
+Our primary goal is to:
 
 1. Have the simplest contract as possible, and therefore, the lowest safety risk
 
@@ -23,11 +27,7 @@ This is the contract mechanism that we will use to allow people to add and remov
 
 4. Users must have as much power as possible without exposing their private keys
 
-5. To disable any potential risk that may involve the theft using the Krakin't private keys
-
-6. To have a fail-safe mechanism in case something bad happens, allowing users to get their money back
-
-7. To have a solution that is modular and that will become decentralized (similar to Krakin't token architecture)
+5. To have a solution that is modular and that will become decentralized (similar to Krakin't token architecture)
 
 
 ### Centralized and Decentralized Components Diagram
