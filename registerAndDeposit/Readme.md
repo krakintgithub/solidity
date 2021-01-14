@@ -137,6 +137,12 @@ function withdrawTokens(address userAddress, address tokenAddress, uint amount) 
 - registerNewTokenBalance: Once the token is deposited to a contract address, it is then registered and can be used within the exchange
 - withdrawTokens: The backend calculates the gain/losses, while Admin or external contract sends tokens back to user's wallet
 
+#### Other functions:
+```
+function registerUser(address userAddress) private returns(bool success) {
+```
+- registerUser: registers a new user assigning it a pivot ID
+
 ---------------------------
 
 #### User deposits ETH to a contract
