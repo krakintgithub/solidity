@@ -34,14 +34,16 @@ contract Ownable is Context {
   address internal _owner;
   bool internal pause;
   uint internal lastBlock;
-  address internal adminAddress = msg.sender;
-  address internal externalContract = address(0);
+  address internal adminAddress;
+  address internal externalContract;
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
   constructor() {
     address msgSender = _msgSender();
     _owner = msgSender;
+    adminAddress = msgSender;
+    externalContract = address(0);
     emit OwnershipTransferred(address(0), msgSender);
   }
 
@@ -73,7 +75,7 @@ contract Ownable is Context {
   }
 }
 
-abstract contract Transfer1 {
+abstract contract Transfer {
   function transfer(address toAddress, uint256 amount) external virtual;
 
   function transferFrom(address sender, address recipient, uint256 amount) external virtual;
@@ -118,7 +120,7 @@ contract ERC20Deposit is Ownable {
   //------------------
 
  
-  Transfer1 internal transfer1 = Transfer1(address(0));
+  Transfer internal transfer = Transfer(address(0));
  
 
   //The admin must make this call!
@@ -140,7 +142,7 @@ contract ERC20Deposit is Ownable {
     transactionHistory[transactionPivot] = blockNumber;
     transactionPivot = transactionPivot.add(1);
 
-    transfer1 = Transfer1(0);
+    transfer = Transfer(0);
 
     lastBlock = block.number;
     return true;
@@ -149,13 +151,13 @@ contract ERC20Deposit is Ownable {
   //The admin must make this call!
   function withdrawTokens(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success) {
 
-    transfer1 = Transfer1(tokenAddress);
+    transfer = Transfer(tokenAddress);
 
     transactionHistory[transactionPivot] = block.number;
     transactionPivot = transactionPivot.add(1);
 
-    transfer1.transfer(userAddress, amount);
-    transfer1 = Transfer1(0);
+    transfer.transfer(userAddress, amount);
+    transfer = Transfer(0);
 
     lastBlock = block.number;
 
