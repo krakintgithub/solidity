@@ -35,7 +35,7 @@ Our primary goal is to:
   <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/registerAndDeposit/diagram1.png" title="Logo">
 </p>
 
-Currently, although a decentralized solution, the users do not have any control over their assets once deposited to exchange. In the future, we will not rely on using the internal and securely stored wallets. Instead, we can use an external block-chain or another contract that manages a decentralized database. Furthermore, there shouldn't be any need to make the Ethereum deposits.
+Although a decentralized solution, the users do not have any control over their assets once deposited to exchange. In the future, we will not rely on using the internal and securely stored wallets. Instead, we can use an external block-chain or another contract that manages a decentralized database. Furthermore, there shouldn't be any need to make the Ethereum deposits.
 
 The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses.
 
@@ -51,8 +51,26 @@ The frequent change of the Administrator account (with hidden private keys) is a
 - Not everything is open-source. We will expose the DAPP and the block-chain contracts only. We will not expose or upload the administrator wallet source code, and it will be developed without an Internet connection. In future, no developer will have an access to it.
 
 
-##### The list of views:
- 
+#### The contract variables
+```
+address internal _owner;
+address internal adminAddress;
+address internal externalContract;
+```
+- _owner: the contract owner
+- adminAddress: the address of the Administrator wallet
+- externalContract: the contract that will be used instead of the Administrator wallet for an on-chain solution
+
+```
+uint internal lastBlock;
+uint internal pivot;
+uint internal transactionPivot;
+```
+- lastBlock: the last block that under which the last function was executed
+- pivot: used for keeping a track of addresses and their deposits/withdrawals
+- transactionPivot: used for memorizing the block numbers for all transactions that happened, speeds up the on-chain data mining
+
+
  
 ##### The list of owner-only function calls:
  
