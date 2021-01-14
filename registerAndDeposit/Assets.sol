@@ -119,9 +119,7 @@ contract ERC20Deposit is Ownable {
   mapping(uint => uint) internal transactionHistory;
   //------------------
 
- 
   Transfer internal transfer = Transfer(address(0));
- 
 
   //The admin must make this call!
   function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
@@ -201,8 +199,6 @@ contract OnlyOwner is ERC20Deposit {
     lastBlock = block.number;
     return true;
   }
-}
-contract Switches is ERC20Deposit {
 
   function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
     pause = !pause;
@@ -210,6 +206,7 @@ contract Switches is ERC20Deposit {
     return true;
   }
 }
+
 contract Views is ERC20Deposit {
 
   function getExternalContractAddress() public view virtual returns(address externalContract) {
@@ -226,10 +223,6 @@ contract Views is ERC20Deposit {
 
   function getBlockNumber() public view virtual returns(uint blockNumber) {
     return block.number;
-  }
-
-  function getContractEth() public view virtual returns(uint contractEth) {
-    return address(this).balance;
   }
 
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
