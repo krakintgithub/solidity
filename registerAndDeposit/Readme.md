@@ -144,7 +144,18 @@ function registerUser(address userAddress) private returns(bool success) {
 - registerUser: registers a new user assigning it a pivot ID
 
 
-## General Work-Flow explanation
+# Work-Flow and general description
+
+Please note:
+
+- Users do not have to register their tokens on the block-chain. The backend system detects whether it is a new or an existing token. If token is new, users will be able to write wikipedia pages and give us more details. If you are a token owner, you will be asked to prove your identity by making a micro-transfer from a token account. Other registration forms will be provided. Everything will be optional, however, token will be graded depending on the information that is provided.
+
+- Token name collisions are possible, and a backend solution is implemented. Similar tokens will be included on the Wiki pages. This prevents any potential scams.
+
+- Users must deposit ETH to Administrator address to cover the GAS costs. The GAS costs include: Registering deposits, Registering withdrawals, ETH withdrawal from the Administrator account. The best approach is never to deposit the ETH that you will not use, to lower the risk.
+
+- You will be in control of your own keys as soon as we abandon the use of the Administrator wallet and use a block-chain contract instead.
+
 
 
 
