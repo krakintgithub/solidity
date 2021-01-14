@@ -101,7 +101,7 @@ library SafeMath {
 
 }
 
-contract Assets is Ownable {
+contract ERC20Deposit is Ownable {
   using SafeMath
   for uint;
 
@@ -174,7 +174,7 @@ contract Assets is Ownable {
 
 }
 
-contract OnlyOwner is Assets {
+contract OnlyOwner is ERC20Deposit {
 
   function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success) {
     adminAddress = newAdminAddress;
@@ -200,7 +200,7 @@ contract OnlyOwner is Assets {
     return true;
   }
 }
-contract Switches is Assets {
+contract Switches is ERC20Deposit {
 
   function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
     pause = !pause;
@@ -208,7 +208,7 @@ contract Switches is Assets {
     return true;
   }
 }
-contract Views is Assets {
+contract Views is ERC20Deposit {
 
   function getExternalContractAddress() public view virtual returns(address externalContract) {
     return externalContract;
