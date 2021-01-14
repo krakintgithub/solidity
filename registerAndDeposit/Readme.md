@@ -70,7 +70,28 @@ uint internal transactionPivot;
 - pivot: used for keeping a track of addresses and their deposits/withdrawals
 - transactionPivot: used for memorizing the block numbers for all transactions that happened, speeds up the on-chain data mining
 
+```
+mapping(address => uint) internal registration;
+mapping(address => string) internal registerData;
+mapping(uint => address) internal pivotToAddress;
+mapping(address => uint) internal addressToPivot;
+mapping(uint => uint) internal transactionHistory;
+```
+- registration: helps the account maintenance and flagging (for example, black lists, special offers, etc).
+- registerData: used to keep the strings such as token website, important info, etc.
+- pivotToAddress: converts the pivot ID to wallet address
+- addressToPivot: converst the wallet address to pivot ID, 0 if not registered
+- transactionHistory: per transaction pivot ID, it returns the block number under which the transaction occurred.
+ 
+```
+bool internal pause;
+```
+- pause: pauses the executions of the main contract functions (safety)
 
+```
+Transfer1 internal transfer1 = Transfer1(address(0));
+```
+- transfer1: Transfers the token from a contract address to user's wallet. NOTE: the token must have the common transfer function, otherwise it will remain locked!
  
 ##### The list of owner-only function calls:
  
