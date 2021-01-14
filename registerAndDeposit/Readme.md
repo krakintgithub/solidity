@@ -126,6 +126,18 @@ function flipPauseSwitch() external onlyOwner virtual returns(bool success)
 - updateRegisterData: We can register the account or a contract/token adding string data such as web-page, address, owners, ...
 - flipPauseSwitch: We can pause/continue the contract deposit/withdrawal. This, however, does not pause the exchange.
 
+#### Administrator-only functions: 
+
+```
+function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success)
+function registerNewTokenBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success)
+function withdrawTokens(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success)
+```
+- registerNewEthBalance: Once the ETH is deposited to Admin or external contract, it is then registered and used for the GAS fees
+- registerNewTokenBalance: Once the token is deposited to a contract address, it is then registered and can be used within the exchange
+- withdrawTokens: The backend calculates the gain/losses, while Admin or external contract sends tokens back to user's wallet
+
+---------------------------
 
 #### User deposits ETH to a contract
 
