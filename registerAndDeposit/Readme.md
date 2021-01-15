@@ -187,5 +187,7 @@ So how does it all work?
 6. User asks for a withdrawal
 7. System calculates their earnings/losses and sends them tokens using the previously deposited ETH for GAS expenses.
 
+- With oracles, the steps 3, 4, 5 and 6 are not relevant. However, more money is wasted to make a simple GET call.
+
 - The reason why we need to register each transaction is to ease the data-mining of the block-chain and have the possibility of transfering all the data onto decentralized solutions. Our goal is to develop the centralized product and to make it as decentralized as possible as a step-by-step procedure. Briefly, you are spending the GAS money on safety and ease of access.
 
