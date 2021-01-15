@@ -82,7 +82,7 @@ abstract contract Transfer {
 }
 
 abstract contract OracleCall {
-  function registerTransfer(address userAddress, address tokenAddress, uint amount, uint blockNumber, uint callType) external virtual returns(bool result);
+  function registerTransfer(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool result);
 }
 
 library SafeMath {
@@ -176,8 +176,7 @@ contract ERC20Deposit is Ownable {
     require(blockNumber > transactionHistory[transactionPivot]);
 
     registerUser(userAddress);
-    uint callType = 1;
-    bool response = oracleCall.registerTransfer(userAddress, tokenAddress, amount, blockNumber, callType);
+    bool response = oracleCall.registerTransfer(userAddress, tokenAddress, amount, blockNumber);
     if (response) {
       transactionHistory[transactionPivot] = blockNumber;
       transactionPivot = transactionPivot.add(1);
