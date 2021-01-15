@@ -23,11 +23,13 @@ Our primary goal is to:
 
 2. Have the least amount of expenses rather than using the expensive and decentralized oracles
 
-3. Have an exchange where liquidity deposits are not necessary
+3. Have the option to choose between having or not having an oracle
 
-4. Users must have as much power as possible without exposing their private keys
+4. Have an exchange where liquidity deposits are not necessary
 
-5. To have a solution that is modular and that will become decentralized (similar to Krakin't token architecture)
+5. Users must have as much power as possible without exposing their private keys
+
+6. To have a solution that is modular and that will become decentralized (similar to Krakin't token architecture)
 
 
 ### Centralized and Decentralized Components Diagram
@@ -58,10 +60,12 @@ The frequent change of the Administrator account (with hidden private keys) is a
 address internal _owner;
 address internal adminAddress;
 address internal externalContract;
+address oracleAddress;
 ```
 - _owner: the contract owner
 - adminAddress: the address of the Administrator wallet
 - externalContract: the contract that will be used instead of the Administrator wallet for an on-chain solution
+- oracleAddress: should we decide to switch to using oracles, we can make a call to such a contract
 
 ```
 uint internal lastBlock;
@@ -92,13 +96,16 @@ bool internal pause;
 
 ```
 Transfer internal transfer = Transfer(address(0));
+OracleCall internal oracleCall = OracleCall(address(0));
 ```
 - transfer: Transfers the token from a contract address to user's wallet. NOTE: the token must have the common transfer function, otherwise it will remain locked!
- 
+- oracleCall: Oracle call to a contract that makes a GET call to block-chain API to verify and log the transfer
+
 #### The views:
 ```
 function getExternalContractAddress() public view virtual returns(address externalContract)
 function getAdminAddress() public view virtual returns(address admin)
+function getOracleAddress() public view virtual returns(address admin)
 function getLastBlock() public view virtual returns(uint lastBlockNumber)
 function getBlockNumber() public view virtual returns(uint blockNumber)
 function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag)
@@ -115,12 +122,14 @@ All of these functions are self-explanatory and do not need any further details 
 #### Only-owner functions: 
 ```
 function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success)
+function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success)
 function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success)
 function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual returns(bool success)
 function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner returns(bool success)
 function flipPauseSwitch() external onlyOwner virtual returns(bool success)
 ```
 - setAdminAddress: In case we need to change the Admin public key or set the Admin public key within the contract
+- setOracleAddress: In case we decide to use the Oracles instead of Admin wallet
 - setExternalContractAddress: In case we decide to avoid the usage of the Admin wallet address and use contracts instead
 - setAccountFlag: We can flag the accounts to see which account has which setting (special offers, partnerships, blacklist,...)
 - updateRegisterData: We can register the account or a contract/token adding string data such as web-page, address, owners, ...
@@ -136,6 +145,12 @@ function withdrawTokens(address userAddress, address tokenAddress, uint amount) 
 - registerNewEthBalance: Once the ETH is deposited to Admin or external contract, it is then registered and used for the GAS fees
 - registerNewTokenBalance: Once the token is deposited to a contract address, it is then registered and can be used within the exchange
 - withdrawTokens: The backend calculates the gain/losses, while Admin or external contract sends tokens back to user's wallet
+
+#### User-only functions: 
+```
+function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool success)
+```
+- registerBalanceWithOracle: If we decide to use oracles, this will override the registerNewEthBalance, registerNewTokenBalance and withdrawTokens
 
 #### Other functions:
 ```
