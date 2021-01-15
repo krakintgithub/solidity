@@ -82,9 +82,7 @@ abstract contract Transfer {
 }
 
 abstract contract OracleCall {
-  function registerTransfer(address userAddress, address tokenAddress, uint blockNumber, uint callType) external virtual returns(uint result);
-
-  function registerTransfer(address userAddress, uint blockNumber, uint callType) external virtual returns(uint result);
+  function registerTransfer(address userAddress, address tokenAddress, uint amount, uint blockNumber, uint callType) external virtual returns(bool result);
 }
 
 library SafeMath {
@@ -130,9 +128,10 @@ contract ERC20Deposit is Ownable {
 
   //The admin must make this call!
   function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
+    require(blockNumber > transactionHistory[transactionPivot]);
     registerUser(userAddress);
-    transactionHistory[transactionPivot] = blockNumber;
     transactionPivot = transactionPivot.add(1);
+    transactionHistory[transactionPivot] = blockNumber;
     lastBlock = block.number;
     return true;
   }
@@ -142,10 +141,11 @@ contract ERC20Deposit is Ownable {
   //==== TOKEN ====
 
   function registerNewTokenBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
+    require(blockNumber > transactionHistory[transactionPivot]);
     registerUser(userAddress);
 
-    transactionHistory[transactionPivot] = blockNumber;
     transactionPivot = transactionPivot.add(1);
+    transactionHistory[transactionPivot] = blockNumber;
 
     transfer = Transfer(0);
 
@@ -158,14 +158,32 @@ contract ERC20Deposit is Ownable {
 
     transfer = Transfer(tokenAddress);
 
-    transactionHistory[transactionPivot] = block.number;
     transactionPivot = transactionPivot.add(1);
+    transactionHistory[transactionPivot] = block.number;
 
     transfer.transfer(userAddress, amount);
     transfer = Transfer(0);
 
     lastBlock = block.number;
 
+    return true;
+  }
+
+  function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool success) {
+    require(lastBlock < block.number);
+    require(oracleAddress != address(0));
+    require(registration[msg.sender] != 100);
+    require(blockNumber > transactionHistory[transactionPivot.sub(1)]);
+
+    registerUser(userAddress);
+    uint callType = 1;
+    bool response = oracleCall.registerTransfer(userAddress, tokenAddress, amount, blockNumber, callType);
+    if (response) {
+      transactionHistory[transactionPivot] = blockNumber;
+      transactionPivot = transactionPivot.add(1);
+    }
+
+    lastBlock = block.number;
     return true;
   }
 
