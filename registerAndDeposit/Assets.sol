@@ -36,6 +36,7 @@ contract Ownable is Context {
   uint internal lastBlock;
   address internal adminAddress;
   address internal externalContract;
+  address oracleAddress;
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -44,6 +45,7 @@ contract Ownable is Context {
     _owner = msgSender;
     adminAddress = msgSender;
     externalContract = address(0);
+    oracleAddress = address(0);
     emit OwnershipTransferred(address(0), msgSender);
   }
 
@@ -77,8 +79,12 @@ contract Ownable is Context {
 
 abstract contract Transfer {
   function transfer(address toAddress, uint256 amount) external virtual;
+}
 
-  function transferFrom(address sender, address recipient, uint256 amount) external virtual;
+abstract contract OracleCall {
+  function registerTransfer(address userAddress, address tokenAddress, uint blockNumber, uint callType) external virtual returns(uint result);
+
+  function registerTransfer(address userAddress, uint blockNumber, uint callType) external virtual returns(uint result);
 }
 
 library SafeMath {
@@ -120,6 +126,7 @@ contract ERC20Deposit is Ownable {
   //------------------
 
   Transfer internal transfer = Transfer(address(0));
+  OracleCall internal oracleCall = OracleCall(address(0));
 
   //The admin must make this call!
   function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
@@ -183,6 +190,12 @@ contract OnlyOwner is ERC20Deposit {
   }
 
   function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
+    oracleCall = OracleCall(newContract);
+    oracleAddress = newContract;
+    return true;
+  }
+
+  function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success) {
     externalContract = newContract;
     lastBlock = block.number;
     return true;
@@ -211,6 +224,10 @@ contract Views is ERC20Deposit {
 
   function getExternalContractAddress() public view virtual returns(address externalContract) {
     return externalContract;
+  }
+
+  function getOracleAddress() public view virtual returns(address admin) {
+    return oracleAddress;
   }
 
   function getAdminAddress() public view virtual returns(address admin) {
