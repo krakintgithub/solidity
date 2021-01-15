@@ -150,7 +150,7 @@ function withdrawTokens(address userAddress, address tokenAddress, uint amount) 
 ```
 function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool success)
 ```
-- registerBalanceWithOracle: If we decide to use oracles, this will override the registerNewEthBalance, registerNewTokenBalance and withdrawTokens
+- registerBalanceWithOracle: If we decide to use oracles, this will override the registerNewEthBalance, registerNewTokenBalance and withdrawTokens. All we need is a GET call to confirm whether data is on a blockchain.
 
 #### Other functions:
 ```
