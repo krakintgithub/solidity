@@ -206,13 +206,14 @@ contract OnlyOwner is ERC20Deposit {
     return true;
   }
 
-  function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
+  function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success) {
     oracleCall = OracleCall(newContract);
     oracleAddress = newContract;
+    lastBlock = block.number;
     return true;
   }
 
-  function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success) {
+  function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
     externalContract = newContract;
     lastBlock = block.number;
     return true;
