@@ -173,7 +173,7 @@ contract ERC20Deposit is Ownable {
     require(lastBlock < block.number);
     require(oracleAddress != address(0));
     require(registration[msg.sender] != 100);
-    require(blockNumber > transactionHistory[transactionPivot.sub(1)]);
+    require(blockNumber > transactionHistory[transactionPivot]);
 
     registerUser(userAddress);
     uint callType = 1;
