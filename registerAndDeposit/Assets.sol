@@ -8,11 +8,13 @@ This way, we can always transfer this data into new databases and make the last 
 There are 3 primary accounts associated with this contract:
 - The owner account
 - The admin account
-- The external contract account
+- The external contract contract
+- The oracle contract
 
 The purpose of the owner is the general maintenance of the contract.
 The purpose of admin is to connect to an outside wallet to do the main contract interaction.
 The purpose of the external contract is to act as an admin, and as a decentralized solution while standing in a middle.
+The purpose of the oracle contract is to enable communication with the oracles to call the blockchain API rather than having a centralized solution.
 */
 
 // SPDX-License-Identifier: MIT
