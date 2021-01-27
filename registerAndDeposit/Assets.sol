@@ -7,7 +7,6 @@ We are also collecting the information from the block-chain and writing it insid
 This way, we can always transfer this data into new databases and make the last solution as decentralized as possible.
 There are 3 primary accounts associated with this contract:
 - The owner account
-- The admin account
 - The external contract contract
 - The oracle contract
 
@@ -36,7 +35,6 @@ contract Ownable is Context {
   address internal _owner;
   bool internal pause;
   uint internal lastBlock;
-  address internal adminAddress;
   address internal externalContract;
   address oracleAddress;
 
@@ -45,7 +43,7 @@ contract Ownable is Context {
   constructor() {
     address msgSender = _msgSender();
     _owner = msgSender;
-    adminAddress = msgSender;
+    // adminAddress = msgSender;
     externalContract = address(0);
     oracleAddress = address(0);
     emit OwnershipTransferred(address(0), msgSender);
@@ -60,12 +58,7 @@ contract Ownable is Context {
     _;
   }
 
-  modifier onlyAdmin() {
-    require(!pause, "OnlyAdmin: pause is ON");
-    require(lastBlock < block.number, "OnlyAdmin: wait for the next block");
-    require(msg.sender == adminAddress || msg.sender == externalContract, "OnlyAdmin: not administrator or external contract account");
-    _;
-  }
+
 
   function renounceOwnership() public virtual onlyOwner {
     emit OwnershipTransferred(_owner, address(0));
@@ -115,6 +108,7 @@ contract ERC20Deposit is Ownable {
 
   mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
   mapping(address => string) internal registerData; //for registering tokens, projects, etc
+  mapping(address => address) internal associatedAccounts; //krakin't account => user account
 
   //---------------------------------
   mapping(uint => address) internal pivotToAddress;
@@ -129,8 +123,9 @@ contract ERC20Deposit is Ownable {
   OracleCall internal oracleCall = OracleCall(address(0));
 
   //The admin must make this call!
-  function registerNewEthBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
+  function registerNewEthBalance( uint blockNumber) external virtual returns(bool success) {
     require(blockNumber > transactionHistory[transactionPivot]);
+    address userAddress = associatedAccounts[msg.sender];
     registerUser(userAddress);
     transactionPivot = transactionPivot.add(1);
     transactionHistory[transactionPivot] = blockNumber;
@@ -142,8 +137,10 @@ contract ERC20Deposit is Ownable {
 
   //==== TOKEN ====
 
-  function registerNewTokenBalance(address userAddress, uint blockNumber) external virtual onlyAdmin returns(bool success) {
+  function registerNewTokenBalance(uint blockNumber) external virtual returns(bool success) {
     require(blockNumber > transactionHistory[transactionPivot]);
+    address userAddress = associatedAccounts[msg.sender];
+
     registerUser(userAddress);
 
     transactionPivot = transactionPivot.add(1);
@@ -156,7 +153,9 @@ contract ERC20Deposit is Ownable {
   }
 
   //The admin must make this call!
-  function withdrawTokens(address userAddress, address tokenAddress, uint amount) external virtual onlyAdmin returns(bool success) {
+  function withdrawTokens(address tokenAddress, uint amount) external virtual returns(bool success) {
+
+    address userAddress = associatedAccounts[msg.sender];
 
     transfer = Transfer(tokenAddress);
 
@@ -169,6 +168,11 @@ contract ERC20Deposit is Ownable {
     lastBlock = block.number;
 
     return true;
+  }
+  
+  function associateNewAccount(address userAddress) external virtual returns(bool success) {
+      associatedAccounts[msg.sender] = userAddress;
+      return true;
   }
 
   function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool success) {
@@ -202,11 +206,6 @@ contract ERC20Deposit is Ownable {
 
 contract OnlyOwner is ERC20Deposit {
 
-  function setAdminAddress(address newAdminAddress) external onlyOwner virtual returns(bool success) {
-    adminAddress = newAdminAddress;
-    lastBlock = block.number;
-    return true;
-  }
 
   function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success) {
     oracleCall = OracleCall(newContract);
@@ -248,10 +247,6 @@ contract Views is ERC20Deposit {
 
   function getOracleAddress() public view virtual returns(address admin) {
     return oracleAddress;
-  }
-
-  function getAdminAddress() public view virtual returns(address admin) {
-    return adminAddress;
   }
 
   function getLastBlock() public view virtual returns(uint lastBlockNumber) {
