@@ -34,7 +34,6 @@ abstract contract Context {
 contract Ownable is Context {
   address internal _owner;
   bool internal pause;
-  uint internal lastBlock;
   address internal externalContract;
   address oracleAddress;
 
@@ -129,7 +128,6 @@ contract ERC20Deposit is Ownable {
     registerUser(userAddress);
     transactionPivot = transactionPivot.add(1);
     transactionHistory[transactionPivot] = blockNumber;
-    lastBlock = block.number;
     return true;
   }
 
@@ -148,7 +146,6 @@ contract ERC20Deposit is Ownable {
 
     transfer = Transfer(0);
 
-    lastBlock = block.number;
     return true;
   }
 
@@ -165,7 +162,6 @@ contract ERC20Deposit is Ownable {
     transfer.transfer(userAddress, amount);
     transfer = Transfer(0);
 
-    lastBlock = block.number;
 
     return true;
   }
@@ -176,7 +172,6 @@ contract ERC20Deposit is Ownable {
   }
 
   function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool success) {
-    require(lastBlock < block.number);
     require(oracleAddress != address(0));
     require(registration[msg.sender] != 100);
     require(blockNumber > transactionHistory[transactionPivot]);
@@ -188,7 +183,6 @@ contract ERC20Deposit is Ownable {
       transactionPivot = transactionPivot.add(1);
     }
 
-    lastBlock = block.number;
     return true;
   }
 
@@ -210,31 +204,26 @@ contract OnlyOwner is ERC20Deposit {
   function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success) {
     oracleCall = OracleCall(newContract);
     oracleAddress = newContract;
-    lastBlock = block.number;
     return true;
   }
 
   function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
     externalContract = newContract;
-    lastBlock = block.number;
     return true;
   }
 
   function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual returns(bool success) {
     registration[userAddress] = flagType;
-    lastBlock = block.number;
     return true;
   }
 
   function updateRegisterData(address userAddress, string memory data) external virtual onlyOwner returns(bool success) {
     registerData[userAddress] = data;
-    lastBlock = block.number;
     return true;
   }
 
   function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
     pause = !pause;
-    lastBlock = block.number;
     return true;
   }
 }
@@ -247,10 +236,6 @@ contract Views is ERC20Deposit {
 
   function getOracleAddress() public view virtual returns(address admin) {
     return oracleAddress;
-  }
-
-  function getLastBlock() public view virtual returns(uint lastBlockNumber) {
-    return lastBlock;
   }
 
   function getBlockNumber() public view virtual returns(uint blockNumber) {
