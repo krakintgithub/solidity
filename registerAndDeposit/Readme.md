@@ -42,7 +42,6 @@ Although a decentralized solution, the users do not have any control over their 
 The frequent change of the Administrator account (with hidden private keys) is also possible, while the owner of the contract would have to transfer all the assets to the new Administrator account. This can prevent the possible hacking of the files and encrypted data where the keys are stored. Therefore, it is important to allocate ETH to Administrator account only to cover the GAS expenses.
 
 #### Important details to note
-- We only process one transaction or function execution per block (approximately 12 seconds). Otherwise, the error is thrown. This can be managed via DAPP simply by showing the wait message, until the block number increases on the blockchain. This is also a security feature.
 
 - API calls are made in a 5 second interval.
 
@@ -68,11 +67,9 @@ address oracleAddress;
 - oracleAddress: should we decide to switch to using oracles, we can make a call to such a contract
 
 ```
-uint internal lastBlock;
 uint internal pivot;
 uint internal transactionPivot;
 ```
-- lastBlock: the last block that under which the last function was executed
 - pivot: used for keeping a track of addresses and their deposits/withdrawals
 - transactionPivot: used for memorizing the block numbers for all transactions that happened, speeds up the on-chain data mining
 
@@ -106,7 +103,6 @@ OracleCall internal oracleCall = OracleCall(address(0));
 function getExternalContractAddress() public view virtual returns(address externalContract)
 function getAdminAddress() public view virtual returns(address admin)
 function getOracleAddress() public view virtual returns(address admin)
-function getLastBlock() public view virtual returns(uint lastBlockNumber)
 function getBlockNumber() public view virtual returns(uint blockNumber)
 function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag)
 function getRegisterData(address userAddress) public view virtual returns(string memory data)
