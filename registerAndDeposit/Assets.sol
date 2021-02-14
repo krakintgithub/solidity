@@ -76,7 +76,7 @@ abstract contract Transfer {
 }
 
 abstract contract OracleCall {
-  function registerTransfer(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool result);
+  function registerTransfer(address userAddress, address tokenAddress, uint amount, string memory txHash) external virtual returns(bool result);
 }
 
 library SafeMath {
@@ -115,19 +115,18 @@ contract ERC20Deposit is Ownable {
   uint internal pivot;
   //---------------------------------
   uint internal transactionPivot;
-  mapping(uint => uint) internal transactionHistory;
+  mapping(uint => string) internal registeredTransactions;
   //------------------
 
   Transfer internal transfer = Transfer(address(0));
   OracleCall internal oracleCall = OracleCall(address(0));
 
   //The admin must make this call!
-  function registerNewEthBalance( uint blockNumber) external virtual returns(bool success) {
-    require(blockNumber > transactionHistory[transactionPivot]);
+  function registerNewEthBalance(string memory txHash) external virtual returns(bool success) {
     address userAddress = associatedAccounts[msg.sender];
     registerUser(userAddress);
     transactionPivot = transactionPivot.add(1);
-    transactionHistory[transactionPivot] = blockNumber;
+    registeredTransactions[transactionPivot] = txHash;
     return true;
   }
 
@@ -135,29 +134,23 @@ contract ERC20Deposit is Ownable {
 
   //==== TOKEN ====
 
-  function registerNewTokenBalance(uint blockNumber) external virtual returns(bool success) {
-    require(blockNumber > transactionHistory[transactionPivot]);
+  function registerNewTokenBalance(string memory txHash) external virtual returns(bool success) {
     address userAddress = associatedAccounts[msg.sender];
 
     registerUser(userAddress);
 
     transactionPivot = transactionPivot.add(1);
-    transactionHistory[transactionPivot] = blockNumber;
+    registeredTransactions[transactionPivot] = txHash;
 
     transfer = Transfer(0);
 
     return true;
   }
 
-  //The admin must make this call!
   function withdrawTokens(address tokenAddress, uint amount) external virtual returns(bool success) {
-
     address userAddress = associatedAccounts[msg.sender];
 
     transfer = Transfer(tokenAddress);
-
-    transactionPivot = transactionPivot.add(1);
-    transactionHistory[transactionPivot] = block.number;
 
     transfer.transfer(userAddress, amount);
     transfer = Transfer(0);
@@ -171,16 +164,15 @@ contract ERC20Deposit is Ownable {
       return true;
   }
 
-  function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, uint blockNumber) external virtual returns(bool success) {
+  function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, string memory txHash) external virtual returns(bool success) {
     require(oracleAddress != address(0));
     require(registration[msg.sender] != 100);
-    require(blockNumber > transactionHistory[transactionPivot]);
 
     registerUser(userAddress);
-    bool response = oracleCall.registerTransfer(userAddress, tokenAddress, amount, blockNumber);
+    bool response = oracleCall.registerTransfer(userAddress, tokenAddress, amount, txHash);
     if (response) {
-      transactionHistory[transactionPivot] = blockNumber;
       transactionPivot = transactionPivot.add(1);
+      registeredTransactions[transactionPivot] = txHash;
     }
 
     return true;
@@ -238,10 +230,6 @@ contract Views is ERC20Deposit {
     return oracleAddress;
   }
 
-  function getBlockNumber() public view virtual returns(uint blockNumber) {
-    return block.number;
-  }
-
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
     return registration[userAddress];
   }
@@ -270,8 +258,8 @@ contract Views is ERC20Deposit {
     return addressToPivot[userAddress];
   }
 
-  function getTransactionFromPivot(uint pivot) public view virtual returns(uint transaction) {
-    return transactionHistory[pivot];
+  function getTransactionFromPivot(uint pivot) public view virtual returns(string memory txHash) {
+    return registeredTransactions[pivot];
   }
 
 }
