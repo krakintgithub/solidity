@@ -6,7 +6,7 @@ This way, we can always transfer this data into new databases and make the last 
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^ 0.7 .4;
+pragma solidity ^ 0.7.6;
 
 abstract contract Context {
   function _msgSender() internal view virtual returns(address payable) {
@@ -142,12 +142,7 @@ contract ERC20Deposit is Ownable {
       return true;
   }
   
-
-
-}
-
-contract OnlyOwner is ERC20Deposit {
-
+//---------ONLY OWNER-----
   function setInitAddress(address newAddress) external onlyOwner virtual returns(bool success) {
     initAddress = newAddress;
     return true;
@@ -163,12 +158,7 @@ contract OnlyOwner is ERC20Deposit {
     registerData[userAddress] = data;
     return true;
   }
-
-
-}
-
-contract Views is ERC20Deposit {
-
+//-----------------VIEWS-----
   function getExternalContractAddress() public view virtual returns(address externalContract) {
     return externalContract;
   }
@@ -194,3 +184,4 @@ contract Views is ERC20Deposit {
   }
 
 }
+
