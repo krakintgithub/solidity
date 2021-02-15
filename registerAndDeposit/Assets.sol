@@ -1,19 +1,7 @@
 /*
 This contract aids the token deposit and registering with the Krakin't exchange.
-Data already exists on a block-chain and therefore, it has to be accessed via API calls.
-The Administrator account is used to send tokens to and out of the exchange.
-Since the Administrator account needs GAS, the users need to deposit the Ethereum necessary to run this contract.
 We are also collecting the information from the block-chain and writing it inside the contract.
 This way, we can always transfer this data into new databases and make the last solution as decentralized as possible.
-There are 3 primary accounts associated with this contract:
-- The owner account
-- The external contract contract
-- The oracle contract
-
-The purpose of the owner is the general maintenance of the contract.
-The purpose of admin is to connect to an outside wallet to do the main contract interaction.
-The purpose of the external contract is to act as an admin, and as a decentralized solution while standing in a middle.
-The purpose of the oracle contract is to enable communication with the oracles to call the blockchain API rather than having a centralized solution.
 */
 
 // SPDX-License-Identifier: MIT
