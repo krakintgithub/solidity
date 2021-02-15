@@ -31,53 +31,42 @@ abstract contract Context {
   }
 }
 
-contract Ownable is Context {
-  address internal _owner;
-  bool internal pause;
-  address internal externalContract;
-  address oracleAddress;
+abstract contract Ownable is Context {
+    address private _owner;
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-  constructor() {
-    address msgSender = _msgSender();
-    _owner = msgSender;
-    // adminAddress = msgSender;
-    externalContract = address(0);
-    oracleAddress = address(0);
-    emit OwnershipTransferred(address(0), msgSender);
-  }
+    constructor () {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
 
-  function owner() public view returns(address) {
-    return _owner;
-  }
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
 
-  modifier onlyOwner() {
-    require(_owner == _msgSender(), "Ownable: caller is not the owner");
-    _;
-  }
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
 
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
 
-
-  function renounceOwnership() public virtual onlyOwner {
-    emit OwnershipTransferred(_owner, address(0));
-    _owner = address(0);
-  }
-
-  function transferOwnership(address newOwner) public virtual onlyOwner {
-    require(newOwner != address(0), "Ownable: new owner is the zero address");
-    emit OwnershipTransferred(_owner, newOwner);
-    _owner = newOwner;
-  }
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
 }
 
 abstract contract Transfer {
   function transfer(address toAddress, uint256 amount) external virtual;
 }
 
-abstract contract OracleCall {
-  function registerTransfer(address userAddress, address tokenAddress, uint amount, string memory txHash) external virtual returns(bool result);
-}
 
 library SafeMath {
 
@@ -104,108 +93,94 @@ library SafeMath {
 contract ERC20Deposit is Ownable {
   using SafeMath
   for uint;
+  
+  address initAddress = address(0);
 
   mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
   mapping(address => string) internal registerData; //for registering tokens, projects, etc
   mapping(address => address) internal associatedAccounts; //krakin't account => user account
 
   //---------------------------------
-  mapping(uint => address) internal pivotToAddress;
-  mapping(address => uint) internal addressToPivot;
-  uint internal pivot;
-  //---------------------------------
   uint internal transactionPivot;
   mapping(uint => string) internal registeredTransactions;
   //------------------
 
   Transfer internal transfer = Transfer(address(0));
-  OracleCall internal oracleCall = OracleCall(address(0));
 
-  //The admin must make this call!
-  function registerNewEthBalance(string memory txHash) external virtual returns(bool success) {
-    address userAddress = associatedAccounts[msg.sender];
-    registerUser(userAddress);
-    transactionPivot = transactionPivot.add(1);
-    registeredTransactions[transactionPivot] = txHash;
-    return true;
-  }
-
+  //we don't need to register ETH deposits, it is done by the frontend
   //recover ETH from Admin is a web3 function, not a contract, then another call to registerNewEthBalance is made
 
   //==== TOKEN ====
-
+  //this is done by the frontend,  we can always read txHash
   function registerNewTokenBalance(string memory txHash) external virtual returns(bool success) {
-    address userAddress = associatedAccounts[msg.sender];
-
-    registerUser(userAddress);
-
     transactionPivot = transactionPivot.add(1);
     registeredTransactions[transactionPivot] = txHash;
-
-    transfer = Transfer(0);
-
     return true;
   }
 
-  function withdrawTokens(address tokenAddress, uint amount) external virtual returns(bool success) {
-    address userAddress = associatedAccounts[msg.sender];
+    //This is done by the locked account, amount is determined by the backend system
+  function withdrawTokens(address tokenAddress, address frontendAddress, uint amount, string memory message) external virtual returns(bool success) {
+    
+    address userAddress = associatedAccounts[frontendAddress];
+    require(msg.sender == userAddress);
+    require(registration[tokenAddress]!=100);
 
     transfer = Transfer(tokenAddress);
 
-    transfer.transfer(userAddress, amount);
+    transfer.transfer(frontendAddress, amount);
     transfer = Transfer(0);
-
+    
+    transactionPivot = transactionPivot.add(1);
+    registeredTransactions[transactionPivot] = message;
 
     return true;
   }
   
-  function associateNewAccount(address userAddress) external virtual returns(bool success) {
-      associatedAccounts[msg.sender] = userAddress;
+  //This is done by the locked account
+  function associateNewAccount(address newUserAddress, address frontendAddress) external virtual returns(bool success) {
+      address userAddress = associatedAccounts[frontendAddress];
+      require(msg.sender == userAddress);
+      associatedAccounts[frontendAddress] = newUserAddress;
       return true;
   }
-
-  function registerBalanceWithOracle(address userAddress, address tokenAddress, uint amount, string memory txHash) external virtual returns(bool success) {
-    require(oracleAddress != address(0));
-    require(registration[msg.sender] != 100);
-
-    registerUser(userAddress);
-    bool response = oracleCall.registerTransfer(userAddress, tokenAddress, amount, txHash);
-    if (response) {
-      transactionPivot = transactionPivot.add(1);
-      registeredTransactions[transactionPivot] = txHash;
-    }
-
-    return true;
+  
+  //this is done by the init address
+  function registerUser(address newUserAddress, address frontendAddress) external virtual returns(bool success){
+      require(msg.sender == initAddress);
+      associatedAccounts[frontendAddress] = newUserAddress;
+      return true;
   }
+  
 
   //---------helpers-------
-  function registerUser(address userAddress) private returns(bool success) {
-    if (addressToPivot[userAddress] == 0) {
-      pivot = pivot.add(1);
-      addressToPivot[userAddress] = pivot;
-      pivotToAddress[pivot] = userAddress;
-    }
-    return true;
-  }
+
+  
+  
+function uint2str( uint256 _i) internal pure returns(string memory str) {
+    if (_i == 0) { return "0"; }
+    uint256 j = _i;
+    uint256 length;
+    while (j != 0) { length++; j /= 10; }
+    bytes memory bstr = new bytes(length);
+    uint256 k = length;
+    j = _i;
+    while (j != 0) { bstr[--k] = bytes1(uint8(48 + j % 10)); j /= 10; }
+    str = string(bstr);
+}
+  
 
 }
 
 contract OnlyOwner is ERC20Deposit {
 
-
-  function setOracleAddress(address newContract) external onlyOwner virtual returns(bool success) {
-    oracleCall = OracleCall(newContract);
-    oracleAddress = newContract;
+  function setInitAddress(address newAddress) external onlyOwner virtual returns(bool success) {
+    initAddress = newAddress;
     return true;
   }
+  
 
-  function setExternalContractAddress(address newContract) external onlyOwner virtual returns(bool success) {
-    externalContract = newContract;
-    return true;
-  }
-
-  function setAccountFlag(address userAddress, uint flagType) external onlyOwner virtual returns(bool success) {
-    registration[userAddress] = flagType;
+  function setAccountFlag(address regAddress, uint flagType) external onlyOwner virtual returns(bool success) {
+    registration[regAddress] = flagType;
     return true;
   }
 
@@ -214,20 +189,13 @@ contract OnlyOwner is ERC20Deposit {
     return true;
   }
 
-  function flipPauseSwitch() external onlyOwner virtual returns(bool success) {
-    pause = !pause;
-    return true;
-  }
+
 }
 
 contract Views is ERC20Deposit {
 
   function getExternalContractAddress() public view virtual returns(address externalContract) {
     return externalContract;
-  }
-
-  function getOracleAddress() public view virtual returns(address admin) {
-    return oracleAddress;
   }
 
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
@@ -238,24 +206,12 @@ contract Views is ERC20Deposit {
     return registerData[userAddress];
   }
 
-  function isPauseOn() public view virtual returns(bool safetySwitch) {
-    return pause;
-  }
-
   function getPivot() public view virtual returns(uint pivot) {
     return pivot;
   }
 
   function getTransactionPivot() public view virtual returns(uint pivot) {
     return transactionPivot;
-  }
-
-  function getAddressFromPivot(uint pivot) public view virtual returns(address userAddress) {
-    return pivotToAddress[pivot];
-  }
-
-  function getPivotFromAddress(address userAddress) public view virtual returns(uint pivot) {
-    return addressToPivot[userAddress];
   }
 
   function getTransactionFromPivot(uint pivot) public view virtual returns(string memory txHash) {
