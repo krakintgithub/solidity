@@ -108,7 +108,6 @@ contract ERC20Deposit is Ownable {
 
     //This is done by the locked account, amount is determined by the backend system
   function withdrawTokens(address tokenAddress, address frontendAddress, uint amount, string memory message) external virtual returns(bool success) {
-    
     address userAddress = associatedAccounts[frontendAddress];
     require(msg.sender == userAddress);
     require(registration[tokenAddress]!=100);
@@ -127,35 +126,23 @@ contract ERC20Deposit is Ownable {
   //This is done by the locked account
   function associateNewAccount(address newUserAddress, address frontendAddress) external virtual returns(bool success) {
       address userAddress = associatedAccounts[frontendAddress];
+      require(registration[newUserAddress]!=100);
+      require(registration[frontendAddress]!=100);
       require(msg.sender == userAddress);
       associatedAccounts[frontendAddress] = newUserAddress;
       return true;
   }
   
-  //this is done by the init address
+  //this is done by the init address, backend call
   function registerUser(address newUserAddress, address frontendAddress) external virtual returns(bool success){
       require(msg.sender == initAddress);
+      require(registration[newUserAddress]!=100);
+      require(registration[frontendAddress]!=100);
       associatedAccounts[frontendAddress] = newUserAddress;
       return true;
   }
   
 
-  //---------helpers-------
-
-  
-  
-function uint2str( uint256 _i) internal pure returns(string memory str) {
-    if (_i == 0) { return "0"; }
-    uint256 j = _i;
-    uint256 length;
-    while (j != 0) { length++; j /= 10; }
-    bytes memory bstr = new bytes(length);
-    uint256 k = length;
-    j = _i;
-    while (j != 0) { bstr[--k] = bytes1(uint8(48 + j % 10)); j /= 10; }
-    str = string(bstr);
-}
-  
 
 }
 
