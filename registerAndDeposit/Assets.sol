@@ -109,8 +109,9 @@ contract ERC20Deposit is Ownable {
     //This is done by the locked account, amount is determined by the backend system
   function withdrawTokens(address tokenAddress, address frontendAddress, uint amount, string memory message) external virtual returns(bool success) {
     address userAddress = associatedAccounts[frontendAddress];
-    require(msg.sender == userAddress);
-    require(registration[tokenAddress]!=100);
+    require(msg.sender == userAddress,"Error in registerUser, not userAddress.");
+    require(registration[tokenAddress]!=100,"Error in registerUser, tokenAddress blocked.");
+    require(registration[frontendAddress]!=100,"Error in registerUser, frontendAddress blocked.");
 
     transfer = Transfer(tokenAddress);
 
@@ -126,18 +127,18 @@ contract ERC20Deposit is Ownable {
   //This is done by the locked account
   function associateNewAccount(address newUserAddress, address frontendAddress) external virtual returns(bool success) {
       address userAddress = associatedAccounts[frontendAddress];
-      require(registration[newUserAddress]!=100);
-      require(registration[frontendAddress]!=100);
-      require(msg.sender == userAddress);
+      require(msg.sender == userAddress,"Error in registerUser, not userAddress.");
+      require(registration[newUserAddress]!=100,"Error in registerUser, newUserAddress blocked.");
+      require(registration[frontendAddress]!=100,"Error in registerUser, frontendAddress blocked.");
       associatedAccounts[frontendAddress] = newUserAddress;
       return true;
   }
   
   //this is done by the init address, backend call
   function registerUser(address newUserAddress, address frontendAddress) external virtual returns(bool success){
-      require(msg.sender == initAddress);
-      require(registration[newUserAddress]!=100);
-      require(registration[frontendAddress]!=100);
+      require(msg.sender == initAddress,"Error in registerUser, not initAddress.");
+      require(registration[newUserAddress]!=100,"Error in registerUser, newUserAddress blocked.");
+      require(registration[frontendAddress]!=100,"Error in registerUser, frontendAddress blocked.");
       associatedAccounts[frontendAddress] = newUserAddress;
       return true;
   }
@@ -159,8 +160,8 @@ contract ERC20Deposit is Ownable {
     return true;
   }
 //-----------------VIEWS-----
-  function getExternalContractAddress() public view virtual returns(address externalContract) {
-    return externalContract;
+   function getAssociatedAccount(address userAddress) public view virtual returns(address associatedAccount) {
+    return associatedAccounts[userAddress];
   }
 
   function getAccountFlag(address userAddress) public view virtual returns(uint accountFlag) {
@@ -184,4 +185,3 @@ contract ERC20Deposit is Ownable {
   }
 
 }
-
