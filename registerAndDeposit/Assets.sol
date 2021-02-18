@@ -6,7 +6,7 @@ This way, we can always transfer this data into new databases and make the last 
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^ 0.7.6;
+pragma solidity ^ 0.7 .6;
 
 abstract contract Context {
   function _msgSender() internal view virtual returns(address payable) {
@@ -20,41 +20,40 @@ abstract contract Context {
 }
 
 abstract contract Ownable is Context {
-    address private _owner;
+  address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor () {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
+  constructor() {
+    address msgSender = _msgSender();
+    _owner = msgSender;
+    emit OwnershipTransferred(address(0), msgSender);
+  }
 
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
+  function owner() public view virtual returns(address) {
+    return _owner;
+  }
 
-    modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
+  modifier onlyOwner() {
+    require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
 
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
+  function renounceOwnership() public virtual onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
 
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
+  function transferOwnership(address newOwner) public virtual onlyOwner {
+    require(newOwner != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
 }
 
 abstract contract Transfer {
   function transfer(address toAddress, uint256 amount) external virtual;
 }
-
 
 library SafeMath {
 
@@ -81,7 +80,7 @@ library SafeMath {
 contract ERC20Deposit is Ownable {
   using SafeMath
   for uint;
-  
+
   address initAddress = address(0);
 
   mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
@@ -106,49 +105,75 @@ contract ERC20Deposit is Ownable {
     return true;
   }
 
-    //This is done by the locked account, amount is determined by the backend system
+  //This is done by the locked account, amount is determined by the backend system
   function withdrawTokens(address tokenAddress, address frontendAddress, uint amount, string memory message) external virtual returns(bool success) {
     address userAddress = associatedAccounts[frontendAddress];
-    require(msg.sender == userAddress,"Error in withdrawTokens, not userAddress.");
-    require(registration[tokenAddress]!=100,"Error in withdrawTokens, tokenAddress blocked.");
-    require(registration[frontendAddress]!=100,"Error in withdrawTokens, frontendAddress blocked.");
+    require(msg.sender == userAddress, "Error in withdrawTokens, not userAddress.");
+    require(registration[tokenAddress] != 100, "Error in withdrawTokens, tokenAddress blocked.");
+    require(registration[frontendAddress] != 100, "Error in withdrawTokens, frontendAddress blocked.");
 
     transfer = Transfer(tokenAddress);
 
     transfer.transfer(frontendAddress, amount);
     transfer = Transfer(0);
-    
+
     transactionPivot = transactionPivot.add(1);
-    registeredTransactions[transactionPivot] = message;
+    registeredTransactions[transactionPivot] = append(message);
 
     return true;
   }
-  
+
   //This is done by the locked account
   function associateNewAccount(address newUserAddress, address frontendAddress) external virtual returns(bool success) {
-      address userAddress = associatedAccounts[frontendAddress];
-      require(msg.sender == userAddress,"Error in associateNewAccount, not userAddress.");
-      require(registration[newUserAddress]!=100,"Error in associateNewAccount, newUserAddress blocked.");
-      require(registration[frontendAddress]!=100,"Error in associateNewAccount, frontendAddress blocked.");
-      associatedAccounts[frontendAddress] = newUserAddress;
-      return true;
+    address userAddress = associatedAccounts[frontendAddress];
+    require(msg.sender == userAddress, "Error in associateNewAccount, not userAddress.");
+    require(registration[newUserAddress] != 100, "Error in associateNewAccount, newUserAddress blocked.");
+    require(registration[frontendAddress] != 100, "Error in associateNewAccount, frontendAddress blocked.");
+    associatedAccounts[frontendAddress] = newUserAddress;
+    return true;
   }
-  
+
   //this is done by the init address, backend call
-  function registerUser(address newUserAddress, address frontendAddress) external virtual returns(bool success){
-      require(msg.sender == initAddress,"Error in registerUser, not initAddress.");
-      require(registration[newUserAddress]!=100,"Error in registerUser, newUserAddress blocked.");
-      require(registration[frontendAddress]!=100,"Error in registerUser, frontendAddress blocked.");
-      associatedAccounts[frontendAddress] = newUserAddress;
-      return true;
+  function registerUser(address newUserAddress, address frontendAddress) external virtual returns(bool success) {
+    require(msg.sender == initAddress, "Error in registerUser, not initAddress.");
+    require(registration[newUserAddress] != 100, "Error in registerUser, newUserAddress blocked.");
+    require(registration[frontendAddress] != 100, "Error in registerUser, frontendAddress blocked.");
+    associatedAccounts[frontendAddress] = newUserAddress;
+    return true;
   }
-  
-//---------ONLY OWNER-----
+
+
+  //---------HELPERS-----
+  function append(string memory a) internal view virtual returns(string memory concat) {
+    string memory b = uint2str(block.number);
+    return string(abi.encodePacked(a, b));
+  }
+
+  function uint2str(uint256 _i) internal view virtual returns(string memory str) {
+    if (_i == 0) {
+      return "0";
+    }
+    uint j = _i;
+    uint256 length;
+    while (j != 0) {
+      length++;
+      j /= 10;
+    }
+    bytes memory bstr = new bytes(length);
+    uint256 k = length;
+    j = _i;
+    while (j != 0) {
+      bstr[--k] = bytes1(uint8(48 + j % 10));
+      j /= 10;
+    }
+    str = string(bstr);
+  }
+
+  //---------ONLY OWNER-----
   function setInitAddress(address newAddress) external onlyOwner virtual returns(bool success) {
     initAddress = newAddress;
     return true;
   }
-  
 
   function setAccountFlag(address regAddress, uint flagType) external onlyOwner virtual returns(bool success) {
     registration[regAddress] = flagType;
@@ -159,8 +184,8 @@ contract ERC20Deposit is Ownable {
     registerData[userAddress] = data;
     return true;
   }
-//-----------------VIEWS-----
-   function getAssociatedAccount(address userAddress) public view virtual returns(address associatedAccount) {
+  //-----------------VIEWS-----
+  function getAssociatedAccount(address userAddress) public view virtual returns(address associatedAccount) {
     return associatedAccounts[userAddress];
   }
 
