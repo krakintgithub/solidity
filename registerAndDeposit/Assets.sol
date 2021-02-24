@@ -6,13 +6,9 @@ This way, we can always transfer this data into new databases and make the last 
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^ 0.7 .6;
+pragma solidity ^ 0.8 .1;
 
 abstract contract Context {
-  function _msgSender() internal view virtual returns(address payable) {
-    return msg.sender;
-  }
-
   function _msgData() internal view virtual returns(bytes memory) {
     this;
     return msg.data;
@@ -25,7 +21,7 @@ abstract contract Ownable is Context {
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
   constructor() {
-    address msgSender = _msgSender();
+    address msgSender = msg.sender;
     _owner = msgSender;
     emit OwnershipTransferred(address(0), msgSender);
   }
@@ -35,7 +31,7 @@ abstract contract Ownable is Context {
   }
 
   modifier onlyOwner() {
-    require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    require(owner() == msg.sender, "Ownable: caller is not the owner");
     _;
   }
 
@@ -115,7 +111,7 @@ contract ERC20Deposit is Ownable {
     transfer = Transfer(tokenAddress);
 
     transfer.transfer(frontendAddress, amount);
-    transfer = Transfer(0);
+    transfer = Transfer(address(0));
 
     transactionPivot = transactionPivot.add(1);
     registeredTransactions[transactionPivot] = append(message);
