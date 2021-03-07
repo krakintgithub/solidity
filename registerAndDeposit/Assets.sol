@@ -168,11 +168,6 @@ contract ERC20Deposit is Ownable {
   }
 
   //---------ONLY OWNER-----
-  //   function setInitAddress(address newAddress) external onlyOwner virtual returns(bool success) {
-  //     initAddress = newAddress;
-  //     return true;
-  //   }
-
   function addInitAddress(address addAddress) external onlyOwner virtual returns(bool success) {
     initAddressByPivot[initAddressPivot] = addAddress;
     pivotByInitAddress[addAddress] = initAddressPivot;
