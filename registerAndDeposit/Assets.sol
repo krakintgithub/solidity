@@ -193,6 +193,15 @@ contract ERC20Deposit is Ownable {
     return true;
   }
   //-----------------VIEWS-----
+  function getCurrentInitAddressPivot() public view virtual returns(uint pivot) {
+    return initAddressPivot;
+  }
+  function getPivotByInitAddress(address initAddress) public view virtual returns(uint pivot) {
+    return pivotByInitAddress[initAddress];
+  }
+  function getInitAddressByPivot(uint pivot) public view virtual returns(address associatedAccount) {
+      return initAddressByPivot[pivot];
+  }
   function getAssociatedAccount(address userAddress) public view virtual returns(address associatedAccount) {
     return associatedAccounts[userAddress];
   }
