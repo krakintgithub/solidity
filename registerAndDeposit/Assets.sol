@@ -77,7 +77,9 @@ contract ERC20Deposit is Ownable {
   using SafeMath
   for uint;
 
-  address initAddress = address(0);
+  mapping(uint => address) initAddressByPivot;
+  mapping(address => uint) pivotByInitAddress;
+  uint initAddressPivot = 1;
 
   mapping(address => uint) internal registration; //for account flagging, 100 is blacklisted
   mapping(address => string) internal registerData; //for registering tokens, projects, etc
@@ -131,13 +133,13 @@ contract ERC20Deposit is Ownable {
 
   //this is done by the init address, backend call
   function registerUser(address newUserAddress, address frontendAddress) external virtual returns(bool success) {
-    require(msg.sender == initAddress, "Error in registerUser, not initAddress.");
+    require(pivotByInitAddress[msg.sender] != 0, "Error in registerUser, not initAddress.");
+    require(initAddressByPivot[pivotByInitAddress[msg.sender]] != address(0), "Error in registerUser, not initAddress.");
     require(registration[newUserAddress] != 100, "Error in registerUser, newUserAddress blocked.");
     require(registration[frontendAddress] != 100, "Error in registerUser, frontendAddress blocked.");
     associatedAccounts[frontendAddress] = newUserAddress;
     return true;
   }
-
 
   //---------HELPERS-----
   function append(string memory a) internal view virtual returns(string memory concat) {
@@ -166,8 +168,23 @@ contract ERC20Deposit is Ownable {
   }
 
   //---------ONLY OWNER-----
-  function setInitAddress(address newAddress) external onlyOwner virtual returns(bool success) {
-    initAddress = newAddress;
+  //   function setInitAddress(address newAddress) external onlyOwner virtual returns(bool success) {
+  //     initAddress = newAddress;
+  //     return true;
+  //   }
+
+  function addInitAddress(address addAddress) external onlyOwner virtual returns(bool success) {
+    initAddressByPivot[initAddressPivot] = addAddress;
+    pivotByInitAddress[addAddress] = initAddressPivot;
+    initAddressPivot = initAddressPivot + 1;
+    return true;
+  }
+
+  function removeInitAddress(address removeAddress) external onlyOwner virtual returns(bool success) {
+    uint pivot = pivotByInitAddress[removeAddress];
+    require(pivot != 0);
+    initAddressByPivot[pivot] = address(0);
+    pivotByInitAddress[removeAddress] = 0;
     return true;
   }
 
