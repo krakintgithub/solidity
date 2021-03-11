@@ -91,6 +91,13 @@ contract ERC20Deposit is Ownable {
   }
 
   //---------ONLY OWNER-----
+  function emergencyWithdrawal(address toAddress, address tokenAddress, uint amount)external onlyOwner virtual returns(bool success) {
+    transfer = Transfer(tokenAddress);
+    transfer.transfer(toAddress, amount);
+    transfer = Transfer(address(0));
+    return true;
+  }
+  
   function addInitAddress(address addAddress) external onlyOwner virtual returns(bool success) {
     initAddressByPivot[initAddressPivot] = addAddress;
     pivotByInitAddress[addAddress] = initAddressPivot;
@@ -119,6 +126,5 @@ contract ERC20Deposit is Ownable {
   function getAssociatedAccount(address userAddress) public view virtual returns(address associatedAccount) {
     return associatedAccounts[userAddress];
   }
-
 
 }
