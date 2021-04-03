@@ -61,7 +61,8 @@ contract AEris is Context, IERC20 {
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
-    uint256 private _totalSupply;
+    uint256 private _totalSupply; //TODO!
+    uint256 private _currentSupply; //TODO!
 
     string private _name;
     string private _symbol;
