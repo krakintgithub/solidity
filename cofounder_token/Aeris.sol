@@ -43,6 +43,7 @@ abstract contract Context {
 
 interface IERC20 {
     function totalSupply() external view returns (uint256);
+    function currentSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
     function transfer(address recipient, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
@@ -61,12 +62,12 @@ contract AEris is Context, IERC20 {
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
-    uint256 private _totalSupply; //TODO!
-    uint256 private _currentSupply; //TODO!
+    uint256 public _totalSupply;
+    uint256 public _currentSupply;
 
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    string public _name;
+    string public _symbol;
+    uint8 public _decimals;
     
 //----------------------------------------------------------
     uint public epoch = 1; //66 epochs in total 
@@ -81,6 +82,7 @@ contract AEris is Context, IERC20 {
         _symbol = "AERIS";
         _decimals = 18;
         _owner = msg.sender;
+        _currentSupply = 0;
     }
 //----------------------------------------------------------
     function claimTokens() external returns (bool){
@@ -115,6 +117,12 @@ contract AEris is Context, IERC20 {
         _burn(fromAddress, amount);
         return true;
     }
+    
+    function changeOwner(address newOwner) external returns(bool){
+        require(msg.sender==_owner);
+        _owner = newOwner;
+        return true;
+    }
 //----------------------------------------------------------
 
     function name() public view virtual returns (string memory) {
@@ -134,6 +142,10 @@ contract AEris is Context, IERC20 {
 
     function totalSupply() public view virtual override returns (uint256) {
         return _totalSupply;
+    }
+    
+    function currentSupply() public view virtual override returns (uint256) {
+        return _currentSupply;
     }
 
 
@@ -195,6 +207,8 @@ contract AEris is Context, IERC20 {
         _beforeTokenTransfer(address(0), account, amount);
 
         _totalSupply = _totalSupply.add(amount);
+        _currentSupply = _currentSupply.add(amount);
+
         _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
     }
@@ -207,6 +221,8 @@ contract AEris is Context, IERC20 {
 
         _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
         _totalSupply = _totalSupply.sub(amount);
+        _currentSupply = _currentSupply.sub(amount);
+
         emit Transfer(account, address(0), amount);
     }
 
