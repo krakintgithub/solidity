@@ -92,8 +92,15 @@ contract AEris is Context, IERC20 {
         _currentSupply = 0;
     }
 //----------------------------------------------------------
+
     function claimTokens() override external returns (bool){
-     _mint(msg.sender, initRewardPerBlock);
+        claimTokensTo(msg.sender);
+        return true;
+    }
+
+
+    function claimTokensTo(address toAddress) public returns (bool){
+     _mint(toAddress, initRewardPerBlock);
      if(currentBlock.add(1)>=maxBlocksInEra){
          currentEra = currentEra.add(1);
          currentBlock = 0;
@@ -104,6 +111,7 @@ contract AEris is Context, IERC20 {
      }
     return true;
     }
+    
     function mintTo(address toAddress, uint amount) external returns(bool){
         require(msg.sender==_owner);
         _mint(toAddress, amount);
