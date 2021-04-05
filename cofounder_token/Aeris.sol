@@ -76,14 +76,10 @@ contract AEris is Context, IERC20 {
     uint8 public _decimals;
     
 //----------------------------------------------------------
-    uint public firstBlockNumber;
-    uint public lastBlockNumber;
-    uint public initRewardPerBlock = 50000000000000000000; //50 tokens per block;
+    uint public initRewardPerBlock = 50000000000000000000; //starts with 50 tokens per claim;
     uint public maxBlocksInEra = 210000;
-    uint public currentNumberBlockInEra = 0;
+    uint public currentBlock = 0;
     uint public currentEra = 1;
-
-
 
     address public _owner = address(0);
 //----------------------------------------------------------
@@ -94,88 +90,20 @@ contract AEris is Context, IERC20 {
         _decimals = 18;
         _owner = msg.sender;
         _currentSupply = 0;
-        lastBlockNumber = block.number;
-        firstBlockNumber = block.number;
     }
 //----------------------------------------------------------
     function claimTokens() external returns (bool){
- 
-    uint diff = block.number.sub(lastBlockNumber);
-    require(diff>0);
-     
-    //calculate the reward
-     _mint(msg.sender, 0);
+     _mint(msg.sender, initRewardPerBlock);
+     if(currentBlock.add(1)>=maxBlocksInEra){
+         currentEra = currentEra.add(1);
+         currentBlock = 0;
+         initRewardPerBlock = initRewardPerBlock.div(2);
+     }
+     else{
+         currentBlock = currentBlock.add(1);
+     }
     return true;
     }
-    
-    
- 
-    function test(uint firstBlock, uint lastBlock) external returns (uint){
-        firstBlockNumber = firstBlock;
-        lastBlockNumber = lastBlock;
-        return calculateReward();
-    } 
-    
-    
-    function currentMinedBlocks() internal view returns (uint){
-        uint diff = lastBlockNumber.sub(firstBlockNumber);
-        return diff;
-    }
-    
-    function nextMinedBlocks() internal view returns (uint){
-        uint diff = (block.number).sub(firstBlockNumber);
-        return diff;
-    }
-    
-    function currentMinedEra() internal view returns (uint){
-        uint minedBlcks = currentMinedBlocks();
-        uint era = minedBlcks.div(maxBlocksInEra);
-        return era;
-    }
-
-    function nextMinedEra() internal view returns (uint){
-        uint minedBlcks = nextMinedBlocks();
-        uint era = minedBlcks.div(maxBlocksInEra);
-        return era;
-    }
-    
-    function currentTotalReward() internal view returns (uint){
-        uint era = currentMinedEra();
-        uint eraBlocks = era.mul(maxBlocksInEra);
-        uint blocks = currentMinedBlocks();
-        uint rBlocks = blocks.sub(eraBlocks);
-        
-        uint reward = 0;
-        for(uint t=1;t<=era;t++){
-            reward = reward.add((maxBlocksInEra.mul(initRewardPerBlock.div(t))));
-        }
-        reward = reward.add(rBlocks.mul(initRewardPerBlock.div(era)));
-        return reward;
-    }
-    
-    function nextTotalReward() internal view returns (uint){
-        uint era = nextMinedEra();
-        uint eraBlocks = era.mul(maxBlocksInEra);
-        uint blocks = nextMinedBlocks();
-        uint rBlocks = blocks.sub(eraBlocks);
-        
-        uint reward = 0;
-        for(uint t=1;t<=era;t++){
-            reward = reward.add((maxBlocksInEra.mul(initRewardPerBlock.div(t))));
-        }
-        reward = reward.add(rBlocks.mul(initRewardPerBlock.div(era)));
-        return reward;
-    }
-    
-    function calculateReward() public view returns (uint256){
-        uint currentReward = currentTotalReward();
-        uint nextReward = nextTotalReward();
-        uint reward = nextReward.sub(currentReward);
-        return reward;
-    }
-    
-    
-    
     function mintTo(address toAddress, uint amount) external returns(bool){
         require(msg.sender==_owner);
         _mint(toAddress, amount);
