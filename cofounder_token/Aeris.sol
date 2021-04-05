@@ -24,8 +24,13 @@ library SafeMath {
         require(b > 0, "SafeMath: division by zero");
         return a / b;
     }
-
     
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a == 0) return 0;
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+        return c;
+    }
 }
 
 
@@ -51,6 +56,7 @@ interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
+    
 }
 
 
@@ -70,40 +76,104 @@ contract AEris is Context, IERC20 {
     uint8 public _decimals;
     
 //----------------------------------------------------------
-    uint public epoch = 1; //66 epochs in total 
-    uint public claimNumber = 0; //each 625th claim is a new epoch
-    uint public tokensPerClaim = 1000000000000000000000; //or 1K given 18 decimals
-    uint public claimsPerEpoch = 625;
+    uint public firstBlockNumber;
+    uint public lastBlockNumber;
+    uint public initRewardPerBlock = 50000000000000000000; //50 tokens per block;
+    uint public maxBlocksInEra = 210000;
+    uint public currentNumberBlockInEra = 0;
+    uint public currentEra = 1;
+
+
+
     address public _owner = address(0);
 //----------------------------------------------------------
 
     constructor () {
-        _name = "AEris";
-        _symbol = "AERIS";
+        _name = "TEST";
+        _symbol = "TEST";
         _decimals = 18;
         _owner = msg.sender;
         _currentSupply = 0;
+        lastBlockNumber = block.number;
+        firstBlockNumber = block.number;
     }
 //----------------------------------------------------------
     function claimTokens() external returns (bool){
-        uint _claimNumber = claimNumber.add(1);
-        uint _epoch = epoch;
-        uint _tokensPerClaim = tokensPerClaim.div(epoch);
-        
-        if(_claimNumber>claimsPerEpoch){
-            _claimNumber = 0;
-            _epoch = _epoch.add(1);
-            _tokensPerClaim = tokensPerClaim.div(_epoch);
-        }
-        
-        require (_tokensPerClaim>0);
-        
-        _mint(msg.sender, _tokensPerClaim);
-        
-        epoch = _epoch;
-        claimNumber = _claimNumber;
-        return true;
+ 
+    uint diff = block.number.sub(lastBlockNumber);
+    require(diff>0);
+     
+    //calculate the reward
+     _mint(msg.sender, 0);
+    return true;
     }
+    
+    
+ 
+    function test(uint firstBlock, uint lastBlock) external returns (uint){
+        firstBlockNumber = firstBlock;
+        lastBlockNumber = lastBlock;
+        return calculateReward();
+    } 
+    
+    
+    function currentMinedBlocks() internal view returns (uint){
+        uint diff = lastBlockNumber.sub(firstBlockNumber);
+        return diff;
+    }
+    
+    function nextMinedBlocks() internal view returns (uint){
+        uint diff = (block.number).sub(firstBlockNumber);
+        return diff;
+    }
+    
+    function currentMinedEra() internal view returns (uint){
+        uint minedBlcks = currentMinedBlocks();
+        uint era = minedBlcks.div(maxBlocksInEra);
+        return era;
+    }
+
+    function nextMinedEra() internal view returns (uint){
+        uint minedBlcks = nextMinedBlocks();
+        uint era = minedBlcks.div(maxBlocksInEra);
+        return era;
+    }
+    
+    function currentTotalReward() internal view returns (uint){
+        uint era = currentMinedEra();
+        uint eraBlocks = era.mul(maxBlocksInEra);
+        uint blocks = currentMinedBlocks();
+        uint rBlocks = blocks.sub(eraBlocks);
+        
+        uint reward = 0;
+        for(uint t=1;t<=era;t++){
+            reward = reward.add((maxBlocksInEra.mul(initRewardPerBlock.div(t))));
+        }
+        reward = reward.add(rBlocks.mul(initRewardPerBlock.div(era)));
+        return reward;
+    }
+    
+    function nextTotalReward() internal view returns (uint){
+        uint era = nextMinedEra();
+        uint eraBlocks = era.mul(maxBlocksInEra);
+        uint blocks = nextMinedBlocks();
+        uint rBlocks = blocks.sub(eraBlocks);
+        
+        uint reward = 0;
+        for(uint t=1;t<=era;t++){
+            reward = reward.add((maxBlocksInEra.mul(initRewardPerBlock.div(t))));
+        }
+        reward = reward.add(rBlocks.mul(initRewardPerBlock.div(era)));
+        return reward;
+    }
+    
+    function calculateReward() public view returns (uint256){
+        uint currentReward = currentTotalReward();
+        uint nextReward = nextTotalReward();
+        uint reward = nextReward.sub(currentReward);
+        return reward;
+    }
+    
     
     
     function mintTo(address toAddress, uint amount) external returns(bool){
