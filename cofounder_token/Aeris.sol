@@ -56,7 +56,7 @@ interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
-    
+    function claimTokens() external returns (bool);
 }
 
 
@@ -92,7 +92,7 @@ contract AEris is Context, IERC20 {
         _currentSupply = 0;
     }
 //----------------------------------------------------------
-    function claimTokens() external returns (bool){
+    function claimTokens() override external returns (bool){
      _mint(msg.sender, initRewardPerBlock);
      if(currentBlock.add(1)>=maxBlocksInEra){
          currentEra = currentEra.add(1);
