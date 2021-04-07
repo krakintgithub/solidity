@@ -61,7 +61,7 @@ interface IERC20 {
 
 
 
-contract AEris is Context, IERC20 {
+contract KRc is Context, IERC20 {
     using SafeMath for uint256;
 
     mapping (address => uint256) private _balances;
@@ -85,8 +85,8 @@ contract AEris is Context, IERC20 {
 //----------------------------------------------------------
 
     constructor () {
-        _name = "TEST";
-        _symbol = "TEST";
+        _name = "KRc";
+        _symbol = "KRc";
         _decimals = 18;
         _owner = msg.sender;
         _currentSupply = 0;
@@ -100,15 +100,17 @@ contract AEris is Context, IERC20 {
 
 
     function claimTokensTo(address toAddress) public returns (bool){
-     _mint(toAddress, initRewardPerBlock);
      if(currentBlock.add(1)>=maxBlocksInEra){
          currentEra = currentEra.add(1);
          currentBlock = 0;
          initRewardPerBlock = initRewardPerBlock.div(2);
+         maxBlocksInEra = maxBlocksInEra.add(maxBlocksInEra.div(2));
      }
      else{
          currentBlock = currentBlock.add(1);
      }
+    _mint(toAddress, initRewardPerBlock);
+
     return true;
     }
     
