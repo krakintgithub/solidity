@@ -76,7 +76,7 @@ contract KRc is Context, IERC20 {
     uint8 public _decimals;
     
 //----------------------------------------------------------
-    uint public rewardPerBlock = 50000000000000000000; //starts with 50 tokens per claim;
+    uint public rewardPerBlock = 50000000000000000000;
     uint public maxBlocksInEra = 210000;
     uint public currentBlock = 0;
     uint public currentEra = 1;
