@@ -100,7 +100,7 @@ contract KRc is Context, IERC20 {
 
 
     function claimTokensTo(address toAddress) public returns (bool){
-     if(currentBlock.add(1)>=maxBlocksInEra){
+     if(currentBlock>=maxBlocksInEra){
          currentEra = currentEra.add(1);
          currentBlock = 0;
          initRewardPerBlock = initRewardPerBlock.div(2);
