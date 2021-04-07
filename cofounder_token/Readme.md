@@ -2,15 +2,15 @@
   <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/cofounder_token/Logo_sm.png" width="64px" title="Logo">
 </p>
 
-# Krakin't Co-Founder token - BEP-20 standard - Technical Documentation
-# Address: 0x4180CE5a616E75512fd9DF0bd896AC955C64a246
+## Krakin't Co-Founder token - BEP-20 standard - Technical Documentation
+## Address: 0x4180CE5a616E75512fd9DF0bd896AC955C64a246
 
-## About BEP-20 
+### About BEP-20 
 Since this is not the main KRK token, we have issued the KRc (The Krakin't Co-founder token) on the Binance Smart-Chain, in order to save the GAS money.
 Instead of Ethereum, BEP-20 works on the Binance token (BNB). You can use the Ethereum tools such as Metamask, however, you will have to add the Binance network.
 <a href="https://docs.binance.org/smart-chain/wallet/metamask.html">Click here to learn how to adjust Metamask</a>
 
-## Introduction 
+### Introduction 
 
 The main purpose of this token is to develop a decentralized system that would aid the development of the Krakin't project. The amount of token someone holds will determine the strength of their vote.
 The voting system will be done by applying the weighted inverse voting, where the amount of tokens will act only as a weight in the voting process.
@@ -41,7 +41,7 @@ Please note:
 
 
 
-## Source code analysis
+### Source code analysis
 This token has the basic token code taken from Open Zepellin. However, we have only added a few classes:
 
 - claimTokens : for claiming the tokens to user's account
