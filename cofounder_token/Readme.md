@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/cofounder_token/Logo_sm.png" width="64px" title="Logo">
+  <img src="https://raw.githubusercontent.com/krakintgithub/solidity/master/cofounder_token/Logo_sm.png" width="150px" title="Logo">
 </p>
 
 ## Krakin't Co-Founder token - BEP-20 standard - Technical Documentation
