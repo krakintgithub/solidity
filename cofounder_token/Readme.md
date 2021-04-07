@@ -12,7 +12,7 @@ Instead of Ethereum, BEP-20 works on the Binance token (BNB). You can use the Et
 
 ### Introduction 
 
-The main purpose of this token is to develop a decentralized system that would aid the development of the Krakin't project. The amount of token someone holds will determine the strength of their vote.
+The main purpose of this token is to develop a decentralized system that would aid the development of the Krakin't project. The amount of tokens someone holds will determine the strength of their vote.
 The voting system will be done by applying the weighted inverse voting, where the amount of tokens will act only as a weight in the voting process.
 Anyone who holds any amount of this token will be able to vote for the steps they believe Krakin't should take or avoid.
 
