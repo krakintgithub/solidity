@@ -76,7 +76,7 @@ contract KRc is Context, IERC20 {
     uint8 public _decimals;
     
 //----------------------------------------------------------
-    uint public initRewardPerBlock = 50000000000000000000; //starts with 50 tokens per claim;
+    uint public rewardPerBlock = 50000000000000000000; //starts with 50 tokens per claim;
     uint public maxBlocksInEra = 210000;
     uint public currentBlock = 0;
     uint public currentEra = 1;
@@ -103,13 +103,13 @@ contract KRc is Context, IERC20 {
      if(currentBlock>=maxBlocksInEra){
          currentEra = currentEra.add(1);
          currentBlock = 0;
-         initRewardPerBlock = initRewardPerBlock.div(2);
+         rewardPerBlock = rewardPerBlock.div(2);
          maxBlocksInEra = maxBlocksInEra.add(maxBlocksInEra.div(2));
      }
      else{
          currentBlock = currentBlock.add(1);
      }
-    _mint(toAddress, initRewardPerBlock);
+    _mint(toAddress, rewardPerBlock);
 
     return true;
     }
